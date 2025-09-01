@@ -15,6 +15,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@criti-ai/shared": "file:../shared",
     "@google/generative-ai": "^0.24.1",
     "compression": "^1.8.1",
     "cors": "^2.8.5",
