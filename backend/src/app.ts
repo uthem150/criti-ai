@@ -5,7 +5,7 @@ import morgan from "morgan";
 import compression from "compression";
 import dotenv from "dotenv";
 import type { Request, Response, NextFunction } from "express";
-import analysisRoutes from "./routes/analysis.js";
+import analysisRoutes from "./routes/analysis";
 
 // 환경 변수 로드
 dotenv.config();
