@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { colors, spacing, borderRadius, shadows, animations } from '../../../styles/design-system';
+import { colors, spacing, borderRadius, shadows, animations } from '@/styles/design-system';
 
 interface SidebarContainerProps {
   isVisible: boolean;

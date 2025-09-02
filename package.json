@@ -1,0 +1,37 @@
+{
+  "name": "criti-ai-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "AI 기반 뉴스 신뢰도 분석 및 비판적 사고 훈련 플랫폼",
+  "scripts": {
+    "install:all": "cd backend && npm install && cd ../frontend && npm install && cd ../shared && npm install",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "build": "cd shared && npm run build && cd ../frontend && npm run build && cd ../backend && npm run build",
+    "build:frontend": "cd frontend && npm run build",
+    "build:backend": "cd backend && npm run build",
+    "start": "cd backend && npm start",
+    "lint": "cd frontend && npm run lint && cd ../backend && npm run lint",
+    "clean": "rimraf **/dist **/node_modules/.cache"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "rimraf": "^5.0.5"
+  },
+  "workspaces": [
+    "frontend",
+    "backend", 
+    "shared"
+  ],
+  "keywords": [
+    "ai",
+    "news-analysis",
+    "critical-thinking",
+    "chrome-extension",
+    "gemini-api",
+    "fact-checking"
+  ],
+  "author": "크리티 AI 팀",
+  "license": "MIT"
+}

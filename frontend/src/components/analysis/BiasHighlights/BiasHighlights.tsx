@@ -1,5 +1,5 @@
 import React from 'react';
-import type { HighlightedText } from '@criti-ai/shared';
+import type { HighlightedText } from '@shared/types';
 import {
   HighlightsContainer,
   SectionTitle,

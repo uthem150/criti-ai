@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { colors, spacing, borderRadius, typography, animations } from '../../../styles/design-system';
+import { colors, spacing, borderRadius, typography, animations } from '@/styles/design-system';
 
 export const HighlightsContainer = styled.div`
   margin-bottom: ${spacing[4]};

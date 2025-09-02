@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { colors, spacing, borderRadius, typography, shadows, animations } from '../../../styles/design-system';
+import { colors, spacing, borderRadius, typography, shadows, animations } from '@/styles/design-system';
 
 export const PopupContainer = styled.div`
   padding: ${spacing[5]};

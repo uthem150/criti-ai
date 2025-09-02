@@ -7,7 +7,7 @@ import {
   borderRadius,
   shadows,
   animations,
-} from "../../../styles/design-system";
+} from "@/styles/design-system";
 
 interface ButtonStyleProps {
   variant?: "primary" | "secondary" | "outline" | "ghost" | "danger";

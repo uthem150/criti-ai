@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { colors, borderRadius, shadows, animations } from '../../../styles/design-system';
+import { colors, borderRadius, shadows, animations } from '@/styles/design-system';
 
 interface ScoreCircleProps {
   score: number;

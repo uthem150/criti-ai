@@ -2,6 +2,7 @@
 export const colors = {
   // Primary Colors (브랜드 컬러)
   primary: {
+    25: "#f8fafc",
     50: "#f0f9ff",
     100: "#e0f2fe",
     200: "#bae6fd",

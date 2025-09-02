@@ -1,5 +1,5 @@
 import React from 'react';
-import type { LogicalFallacy } from '@criti-ai/shared';
+import type { LogicalFallacy } from '@shared/types';
 import {
   FallaciesContainer,
   SectionTitle,
