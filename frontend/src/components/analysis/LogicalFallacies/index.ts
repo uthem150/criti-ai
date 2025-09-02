@@ -1,0 +1,1 @@
+export { LogicalFallacies } from './LogicalFallacies';
