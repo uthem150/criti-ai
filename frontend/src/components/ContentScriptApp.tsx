@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import type { TrustAnalysis } from '@criti-ai/shared';
 import { AnalysisSidebar } from './analysis/Sidebar';
 import { TextHighlighter } from './analysis/TextHighlighter';
+import { apiService } from '../services/api';
 
 interface ContentScriptAppProps {
   url: string;
@@ -25,28 +26,16 @@ export const ContentScriptApp: React.FC<ContentScriptAppProps> = ({
     try {
       console.log('🔍 분석 시작:', { url, title, contentLength: content.length });
       
-      // Backend API 호출
-      const response = await fetch('http://localhost:3001/api/analysis/analyze', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          url,
-          title,
-          content: content.substring(0, 1000) // API 호출 비용 절약을 위해 앞부분만
-        })
+      // API 서비스를 통한 Backend API 호출
+      const analysis = await apiService.analyzeContent({
+        url,
+        title,
+        content: content.substring(0, 1000) // API 호출 비용 절약을 위해 앞부분만
       });
 
-      const result = await response.json();
-      console.log('📊 API 응답:', result);
-
-      if (result.success) {
-        setAnalysis(result.data);
-        console.log('✅ 분석 완료:', result.data);
-      } else {
-        throw new Error(result.error || '분석 실패');
-      }
+      console.log('✅ 분석 성공:', analysis);
+      setAnalysis(analysis);
+      
     } catch (error) {
       console.error('❌ 분석 에러:', error);
       
@@ -109,7 +98,7 @@ export const ContentScriptApp: React.FC<ContentScriptAppProps> = ({
     }
   };
 
-  const handleHighlightClick = (highlight: any) => {
+  const handleHighlightClick = (highlight: { text: string; explanation: string }) => {
     console.log('💡 하이라이트 클릭:', highlight);
     alert(`편향 분석: ${highlight.explanation}`);
   };

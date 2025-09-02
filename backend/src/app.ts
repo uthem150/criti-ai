@@ -44,7 +44,7 @@ app.use("/api/challenge", (req: Request, res: Response) => {
 });
 
 // 에러 핸들링
-app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   console.error(err.stack);
   res.status(500).json({
     success: false,

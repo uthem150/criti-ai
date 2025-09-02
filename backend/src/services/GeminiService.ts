@@ -3,7 +3,7 @@ import type { TrustAnalysis, AnalysisRequest } from "@criti-ai/shared";
 
 export class GeminiService {
   private genAI: GoogleGenerativeAI;
-  private model: any;
+  private model: ReturnType<GoogleGenerativeAI['getGenerativeModel']>;
 
   constructor() {
     console.log('🔍 환경변수 디버그:');
@@ -131,7 +131,7 @@ URL: ${request.url}
     }
   }
 
-  async generateChallenge(type: string, difficulty: string): Promise<any> {
+  async generateChallenge(type: string, difficulty: string): Promise<Record<string, unknown>> {
     return {};
   }
 }
