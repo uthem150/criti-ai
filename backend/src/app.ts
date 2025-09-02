@@ -1,14 +1,11 @@
+import 'dotenv/config'; // 최우선으로 환경변수 로드
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
 import compression from "compression";
-import dotenv from "dotenv";
 import type { Request, Response, NextFunction } from "express";
 import analysisRoutes from "./routes/analysis";
-
-// 환경 변수 로드
-dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -17,7 +14,11 @@ const PORT = process.env.PORT || 3001;
 app.use(helmet());
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "chrome-extension://*",
+    origin: [
+      "http://localhost:5173", // Frontend 개발 서버
+      "http://localhost:3000", // 추가 개발 포트
+      "chrome-extension://*"    // 크롬 확장 프로그램
+    ],
     credentials: true,
   })
 );

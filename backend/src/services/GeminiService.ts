@@ -6,10 +6,21 @@ export class GeminiService {
   private model: any;
 
   constructor() {
+    console.log('🔍 환경변수 디버그:');
+    console.log('- NODE_ENV:', process.env.NODE_ENV);
+    console.log('- GEMINI_API_KEY 존재:', !!process.env.GEMINI_API_KEY);
+    console.log('- 현재 작업 디렉토리:', process.cwd());
+    console.log('- 모든 환경변수 키:', Object.keys(process.env).filter(key => key.includes('GEMINI')));
+    
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
+      console.error('❌ GEMINI_API_KEY가 설정되지 않았습니다.');
+      console.error('현재 작업 디렉토리:', process.cwd());
+      console.error('.env 파일 경로 확인 필요');
       throw new Error("GEMINI_API_KEY 환경 변수가 설정되지 않았습니다.");
     }
+    
+    console.log('✅ GEMINI_API_KEY 로드 성공');
 
     this.genAI = new GoogleGenerativeAI(apiKey);
     this.model = this.genAI.getGenerativeModel({
