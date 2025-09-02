@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { colors, borderRadius, shadows } from '../../../styles/design-system';
+import { colors, borderRadius, shadows, animations } from '../../../styles/design-system';
 
 interface ScoreCircleProps {
   score: number;
@@ -11,6 +11,12 @@ export const MeterContainer = styled.div`
   border-radius: ${borderRadius.lg};
   box-shadow: ${shadows.md};
   text-align: center;
+  transition: all ${animations.transition.normal};
+  
+  &:hover {
+    box-shadow: ${shadows.xl};
+    transform: translateY(-2px);
+  }
 `;
 
 export const ScoreCircle = styled.div<ScoreCircleProps>`
@@ -42,10 +48,35 @@ export const ScoreCircle = styled.div<ScoreCircleProps>`
   }
 `;
 
-export const ScoreText = styled.div`
+export const ScoreText = styled.div<{ score: number }>`
   position: relative;
   z-index: 2;
   font-size: 2rem;
   font-weight: 700;
-  color: ${colors.text.primary};
+  color: ${({ score }) => 
+    score >= 80 ? colors.trust.trusted : 
+    score >= 60 ? colors.trust.neutral :
+    score >= 40 ? colors.trust.caution : colors.trust.dangerous
+  };
+`;
+
+export const LevelContainer = styled.div`
+  text-align: center;
+`;
+
+export const TrustLabel = styled.h4<{ score: number }>`
+  margin: 0 0 4px 0;
+  color: ${({ score }) => 
+    score >= 80 ? colors.trust.trusted : 
+    score >= 60 ? colors.trust.neutral :
+    score >= 40 ? colors.trust.caution : colors.trust.dangerous
+  };
+  font-size: 1.125rem;
+  font-weight: 600;
+`;
+
+export const TrustDescription = styled.p`
+  margin: 0;
+  font-size: 0.875rem;
+  color: ${colors.text.secondary};
 `;

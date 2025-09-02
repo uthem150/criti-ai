@@ -1,5 +1,14 @@
 import React from 'react';
 import type { HighlightedText } from '@criti-ai/shared';
+import {
+  HighlightsContainer,
+  SectionTitle,
+  EmptyState,
+  HighlightsList,
+  HighlightItem,
+  HighlightText,
+  HighlightExplanation
+} from './BiasHighlights.style';
 
 interface BiasHighlightsProps {
   highlights: HighlightedText[];
@@ -7,23 +16,29 @@ interface BiasHighlightsProps {
 
 export const BiasHighlights: React.FC<BiasHighlightsProps> = ({ highlights }) => {
   return (
-    <div style={{ marginBottom: '1rem' }}>
-      <h4>🎯 편향 표현</h4>
+    <HighlightsContainer>
+      <SectionTitle>
+        🎯 편향 표현
+      </SectionTitle>
+      
       {highlights.length === 0 ? (
-        <p style={{ color: '#6b7280', fontSize: '0.875rem' }}>
+        <EmptyState>
           편향된 표현이 발견되지 않았습니다.
-        </p>
+        </EmptyState>
       ) : (
-        <ul style={{ margin: 0, paddingLeft: '1rem' }}>
+        <HighlightsList>
           {highlights.map((highlight, index) => (
-            <li key={index} style={{ marginBottom: '0.5rem' }}>
-              <strong>"{highlight.text}"</strong>
-              <br />
-              <small style={{ color: '#6b7280' }}>{highlight.explanation}</small>
-            </li>
+            <HighlightItem key={index}>
+              <HighlightText>
+                "{highlight.text}"
+              </HighlightText>
+              <HighlightExplanation>
+                {highlight.explanation}
+              </HighlightExplanation>
+            </HighlightItem>
           ))}
-        </ul>
+        </HighlightsList>
       )}
-    </div>
+    </HighlightsContainer>
   );
 };

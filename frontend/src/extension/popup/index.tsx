@@ -1,62 +1,87 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
+import {
+  PopupContainer,
+  Header,
+  GuideSection,
+  GuideCard,
+  StatusText,
+  ActionButton,
+  FeaturesList,
+  FeatureItem
+} from './popup.style';
 import './popup.css';
 
 export const PopupApp: React.FC = () => {
+  const handleOpenChallenge = () => {
+    chrome.tabs.create({ url: 'http://localhost:3001/challenge' });
+  };
+
+  const handleGoToNewsPage = () => {
+    chrome.tabs.create({ url: 'https://news.naver.com' });
+  };
+
   return (
-    <div style={{ padding: '20px', textAlign: 'center' }}>
-      <div style={{ marginBottom: '20px' }}>
-        <h2 style={{ margin: '0 0 10px 0', color: '#0ea5e9' }}>🔍 크리티 AI</h2>
-        <p style={{ margin: 0, color: '#6b7280', fontSize: '14px' }}>
-          뉴스 신뢰도 분석기
-        </p>
-      </div>
+    <PopupContainer>
+      <Header>
+        <h2>
+          🔍 크리티 AI
+        </h2>
+        <p>뉴스 신뢰도 분석기</p>
+      </Header>
       
-      <div style={{ marginBottom: '20px' }}>
-        <div style={{ 
-          backgroundColor: '#f3f4f6', 
-          padding: '16px', 
-          borderRadius: '8px',
-          marginBottom: '16px'
-        }}>
-          <h3 style={{ margin: '0 0 8px 0', fontSize: '16px' }}>📊 사용법</h3>
-          <ol style={{ 
-            textAlign: 'left', 
-            fontSize: '14px', 
-            color: '#374151',
-            paddingLeft: '20px',
-            margin: 0
-          }}>
+      <GuideSection>
+        <GuideCard>
+          <h3>📊 사용법</h3>
+          <ol>
             <li>뉴스 기사 페이지로 이동</li>
             <li>우측에 나타나는 사이드바 확인</li>
             <li>"이 기사 분석하기" 클릭</li>
             <li>AI 분석 결과 확인</li>
           </ol>
-        </div>
-      </div>
+        </GuideCard>
 
-      <div style={{ fontSize: '12px', color: '#9ca3af' }}>
+        <FeaturesList>
+          <FeatureItem>
+            <div className="icon">🎯</div>
+            <div className="content">
+              <div className="title">편향 탐지</div>
+              <p className="description">감정적 유도나 선동적 표현을 찾아냅니다</p>
+            </div>
+          </FeatureItem>
+
+          <FeatureItem>
+            <div className="icon">🧠</div>
+            <div className="content">
+              <div className="title">논리적 오류</div>
+              <p className="description">성급한 일반화, 허수아비 공격 등을 분석합니다</p>
+            </div>
+          </FeatureItem>
+
+          <FeatureItem>
+            <div className="icon">🔗</div>
+            <div className="content">
+              <div className="title">출처 검증</div>
+              <p className="description">언론사 신뢰도와 도메인을 확인합니다</p>
+            </div>
+          </FeatureItem>
+        </FeaturesList>
+      </GuideSection>
+
+      <StatusText>
         현재 페이지에서 분석을 시작하려면<br />
         뉴스 기사로 이동해주세요
-      </div>
+      </StatusText>
 
-      <div style={{ marginTop: '20px' }}>
-        <button 
-          onClick={() => window.close()}
-          style={{
-            background: '#0ea5e9',
-            color: 'white',
-            border: 'none',
-            padding: '8px 16px',
-            borderRadius: '6px',
-            cursor: 'pointer',
-            fontSize: '14px'
-          }}
-        >
-          닫기
-        </button>
+      <div style={{ display: 'flex', gap: '8px' }}>
+        <ActionButton onClick={handleGoToNewsPage}>
+          뉴스 보러가기
+        </ActionButton>
+        <ActionButton onClick={handleOpenChallenge}>
+          챌린지 게임
+        </ActionButton>
       </div>
-    </div>
+    </PopupContainer>
   );
 };
 

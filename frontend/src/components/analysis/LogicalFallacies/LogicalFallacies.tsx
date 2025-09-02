@@ -1,5 +1,16 @@
 import React from 'react';
 import type { LogicalFallacy } from '@criti-ai/shared';
+import {
+  FallaciesContainer,
+  SectionTitle,
+  EmptyState,
+  FallaciesList,
+  FallacyItem,
+  FallacyType,
+  FallacyDescription,
+  SeverityBadge,
+  AffectedText
+} from './LogicalFallacies.style';
 
 interface LogicalFallaciesProps {
   fallacies: LogicalFallacy[];
@@ -7,23 +18,38 @@ interface LogicalFallaciesProps {
 
 export const LogicalFallacies: React.FC<LogicalFallaciesProps> = ({ fallacies }) => {
   return (
-    <div style={{ marginBottom: '1rem' }}>
-      <h4>🧠 논리적 오류</h4>
+    <FallaciesContainer>
+      <SectionTitle>
+        🧠 논리적 오류
+      </SectionTitle>
+      
       {fallacies.length === 0 ? (
-        <p style={{ color: '#6b7280', fontSize: '0.875rem' }}>
+        <EmptyState>
           논리적 오류가 발견되지 않았습니다.
-        </p>
+        </EmptyState>
       ) : (
-        <ul style={{ margin: 0, paddingLeft: '1rem' }}>
+        <FallaciesList>
           {fallacies.map((fallacy, index) => (
-            <li key={index} style={{ marginBottom: '0.5rem' }}>
-              <strong>{fallacy.type}</strong>
-              <br />
-              <small style={{ color: '#6b7280' }}>{fallacy.description}</small>
-            </li>
+            <FallacyItem key={index} severity={fallacy.severity}>
+              <FallacyType>
+                {fallacy.type}
+                <SeverityBadge severity={fallacy.severity}>
+                  {fallacy.severity === 'high' ? '높음' : 
+                   fallacy.severity === 'medium' ? '보통' : '낮음'}
+                </SeverityBadge>
+              </FallacyType>
+              <FallacyDescription>
+                {fallacy.description}
+              </FallacyDescription>
+              {fallacy.affectedText && (
+                <AffectedText>
+                  💬 "{fallacy.affectedText}"
+                </AffectedText>
+              )}
+            </FallacyItem>
           ))}
-        </ul>
+        </FallaciesList>
       )}
-    </div>
+    </FallaciesContainer>
   );
 };
