@@ -10,13 +10,4 @@ export default defineConfig({
     }),
     crx({ manifest }),
   ],
-  build: {
-    rollupOptions: {
-      input: {
-        popup: "src/extension/popup/popup.html",
-        content: "src/extension/content/index.tsx",
-        background: "src/extension/background/index.ts",
-      },
-    },
-  },
 });
