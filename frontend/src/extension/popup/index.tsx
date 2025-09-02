@@ -14,7 +14,7 @@ import './popup.css';
 
 export const PopupApp: React.FC = () => {
   const handleOpenChallenge = () => {
-    chrome.tabs.create({ url: 'http://localhost:3001/challenge' });
+    chrome.tabs.create({ url: 'http://localhost:5173/challenge.html' });
   };
 
   const handleGoToNewsPage = () => {

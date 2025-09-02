@@ -1,5 +1,5 @@
 import React, { useEffect, useCallback } from "react";
-import type { HighlightedText } from "@criti-ai/shared";
+import type { HighlightedText } from "@shared/types";
 
 interface TextHighlighterProps {
   highlights: HighlightedText[];
@@ -11,11 +11,14 @@ export const TextHighlighter: React.FC<TextHighlighterProps> = ({
   onHighlightClick,
 }) => {
   const removeExistingHighlights = useCallback(() => {
+    // 안전하게 기존 하이라이트 제거
     const existingHighlights = document.querySelectorAll(".criti-ai-highlight");
     existingHighlights.forEach((el) => {
       const parent = el.parentNode;
-      if (parent) {
-        parent.replaceChild(document.createTextNode(el.textContent || ""), el);
+      if (parent && el.textContent) {
+        const textNode = document.createTextNode(el.textContent);
+        parent.replaceChild(textNode, el);
+        // 인접한 텍스트 노드들을 병합
         parent.normalize();
       }
     });
