@@ -13,9 +13,9 @@ export default defineConfig({
   build: {
     rollupOptions: {
       input: {
-        popup: "popup.html",
-        content: "src/content.tsx",
-        background: "src/background.ts",
+        popup: "src/extension/popup/popup.html",
+        content: "src/extension/content/index.tsx",
+        background: "src/extension/background/index.ts",
       },
     },
   },
