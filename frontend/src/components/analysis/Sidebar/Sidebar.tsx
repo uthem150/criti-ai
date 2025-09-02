@@ -30,7 +30,7 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
   return (
     <SidebarContainer isVisible={isVisible}>
       <div className="header">
-        <h3>��� 크리티 AI</h3>
+        <h3>🔍 크리티 AI</h3>
         <p>뉴스 신뢰도 분석</p>
       </div>
 
@@ -61,7 +61,7 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
           </ScoreDisplay>
 
           <AnalysisSection>
-            <h4>��� 상세 분석</h4>
+            <h4>📋 상세 분석</h4>
 
             <div className="metric">
               <span className="label">출처 신뢰도</span>

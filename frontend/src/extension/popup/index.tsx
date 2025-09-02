@@ -6,7 +6,7 @@ export const PopupApp: React.FC = () => {
   return (
     <div style={{ padding: '20px', textAlign: 'center' }}>
       <div style={{ marginBottom: '20px' }}>
-        <h2 style={{ margin: '0 0 10px 0', color: '#0ea5e9' }}>��� 크리티 AI</h2>
+        <h2 style={{ margin: '0 0 10px 0', color: '#0ea5e9' }}>🔍 크리티 AI</h2>
         <p style={{ margin: 0, color: '#6b7280', fontSize: '14px' }}>
           뉴스 신뢰도 분석기
         </p>
@@ -19,7 +19,7 @@ export const PopupApp: React.FC = () => {
           borderRadius: '8px',
           marginBottom: '16px'
         }}>
-          <h3 style={{ margin: '0 0 8px 0', fontSize: '16px' }}>��� 사용법</h3>
+          <h3 style={{ margin: '0 0 8px 0', fontSize: '16px' }}>📊 사용법</h3>
           <ol style={{ 
             textAlign: 'left', 
             fontSize: '14px', 
