@@ -31,21 +31,65 @@ export const HighlightsList = styled.ul`
   list-style: none;
 `;
 
-export const HighlightItem = styled.li`
+interface HighlightItemProps {
+  type?: string;
+}
+
+export const HighlightItem = styled.li<HighlightItemProps>`
   margin-bottom: ${spacing[3]};
   padding: ${spacing[3]};
   background: ${colors.background.secondary};
   border-radius: ${borderRadius.md};
-  border-left: 3px solid ${colors.status.warning};
+  border-left: 3px solid ${
+    props => 
+      props.type === 'bias' ? colors.status.warning :
+      props.type === 'fallacy' ? colors.status.error :
+      props.type === 'manipulation' ? colors.status.error :
+      colors.status.warning
+  };
   transition: all ${animations.transition.fast};
   
   &:hover {
     background: ${colors.background.tertiary};
     transform: translateX(2px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   }
   
   &:last-child {
     margin-bottom: 0;
+  }
+  
+  .highlight-header {
+    margin-bottom: ${spacing[2]};
+    
+    .highlight-type {
+      display: inline-block;
+      background: ${
+        props => 
+          props.type === 'bias' ? 'rgba(251, 191, 36, 0.1)' :
+          props.type === 'fallacy' ? 'rgba(239, 68, 68, 0.1)' :
+          props.type === 'manipulation' ? 'rgba(239, 68, 68, 0.15)' :
+          'rgba(107, 114, 128, 0.1)'
+      };
+      color: ${
+        props => 
+          props.type === 'bias' ? '#d97706' :
+          props.type === 'fallacy' ? '#dc2626' :
+          props.type === 'manipulation' ? '#dc2626' :
+          '#6b7280'
+      };
+      padding: 2px 8px;
+      border-radius: ${borderRadius.sm};
+      font-size: ${typography.fontSize.xs};
+      font-weight: ${typography.fontWeight.medium};
+    }
+  }
+  
+  .position-info {
+    margin-top: ${spacing[2]};
+    font-size: ${typography.fontSize.xs};
+    color: ${colors.text.disabled};
+    opacity: 0.7;
   }
 `;
 
