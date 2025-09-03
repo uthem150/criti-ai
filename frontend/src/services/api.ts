@@ -1,6 +1,15 @@
 // Backend API 호출 서비스 - Background Script 프록시 방식
 import type { TrustAnalysis, AnalysisRequest } from '@shared/types';
 
+// 환경변수 설정
+const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
+const API_ENDPOINTS = {
+  ANALYZE: import.meta.env.VITE_API_ANALYSIS_ENDPOINT || '/api/analysis/analyze',
+  HEALTH: import.meta.env.VITE_API_HEALTH_ENDPOINT || '/health',
+  QUICK_CHECK: import.meta.env.VITE_API_QUICK_CHECK_ENDPOINT || '/api/analysis/quick-check',
+  ANALYTICS: import.meta.env.VITE_API_ANALYTICS_ENDPOINT || '/api/analytics/track'
+};
+
 class ApiService {
   // Background Script를 통한 API 프록시 호출
   private async sendToBackground(message: any): Promise<any> {
@@ -58,7 +67,7 @@ class ApiService {
       const response = await this.sendToBackground({
         type: 'API_PROXY',
         endpoint: 'analyze',
-        url: 'http://localhost:3001/api/analysis/analyze',
+        url: `${API_BASE_URL}${API_ENDPOINTS.ANALYZE}`,
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -89,7 +98,7 @@ class ApiService {
       const response = await this.sendToBackground({
         type: 'API_PROXY',
         endpoint: 'quick-check',
-        url: 'http://localhost:3001/api/analysis/quick-check',
+        url: `${API_BASE_URL}${API_ENDPOINTS.QUICK_CHECK}`,
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -110,7 +119,7 @@ class ApiService {
       await this.sendToBackground({
         type: 'API_PROXY',
         endpoint: 'track',
-        url: 'http://localhost:3001/api/analytics/track',
+        url: `${API_BASE_URL}${API_ENDPOINTS.ANALYTICS}`,
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

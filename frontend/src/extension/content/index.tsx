@@ -4,70 +4,101 @@ import { ContentScriptApp } from '../../components/ContentScriptApp';
 // CSS 스타일을 직접 주입
 const injectCSS = () => {
   const css = `
-    /* 크리티 AI 사이드바 기본 스타일 */
+    /* 크리티 AI 전역 스타일 리셋 및 기본 설정 */
     #criti-ai-sidebar {
       all: initial;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif !important;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif !important;
+      font-size: 16px !important;
+      line-height: 1.6 !important;
+      color: #111827 !important;
+      letter-spacing: -0.01em !important;
+      box-sizing: border-box !important;
     }
-
-    /* 플로팅 버튼 스타일 */
-    #criti-ai-toggle-button {
-      position: fixed;
-      top: 50%;
-      right: 20px;
-      transform: translateY(-50%);
-      width: 60px;
-      height: 60px;
-      background: linear-gradient(135deg, #0ea5e9, #0284c7);
-      border: none;
-      border-radius: 50%;
-      color: white;
-      font-size: 24px;
-      cursor: pointer;
-      z-index: 999999;
-      box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
-      transition: all 0.3s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+    
+    #criti-ai-sidebar *, 
+    #criti-ai-sidebar *::before, 
+    #criti-ai-sidebar *::after {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif !important;
+      font-size: inherit !important;
+      line-height: inherit !important;
+      box-sizing: border-box !important;
     }
-
-    #criti-ai-toggle-button:hover {
-      transform: translateY(-50%) scale(1.1);
-      box-shadow: 0 6px 20px rgba(14, 165, 233, 0.4);
+    
+    /* 네이버 뉴스에서 적절한 글씨 크기 적용 */
+    body[data-domain*="naver.com"] #criti-ai-sidebar,
+    body[class*="naver"] #criti-ai-sidebar,
+    #criti-ai-sidebar[data-enhanced="true"] {
+      font-size: 17px !important;
+    }
+    
+    /* 네이버 뉴스 특별 처리 */
+    body[data-domain*="n.news.naver.com"] #criti-ai-sidebar,
+    body[data-domain*="news.naver.com"] #criti-ai-sidebar {
+      font-size: 17px !important;
     }
 
     /* 하이라이트 스타일 */
     .criti-ai-highlight {
       position: relative;
+      cursor: pointer !important;
+      padding: 1px 3px !important;
+      border-radius: 3px !important;
+      transition: all 0.2s ease !important;
+    }
+    
+    .criti-ai-highlight:hover {
+      transform: scale(1.02) !important;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
     }
 
     .criti-ai-highlight-bias {
-      background-color: rgba(245, 158, 11, 0.2) !important;
+      background-color: rgba(245, 158, 11, 0.3) !important;
       border-bottom: 2px solid #f59e0b !important;
+      color: #92400e !important;
+      font-weight: 600 !important;
     }
 
     .criti-ai-highlight-fallacy {
-      background-color: rgba(239, 68, 68, 0.2) !important;
+      background-color: rgba(239, 68, 68, 0.3) !important;
       border-bottom: 2px solid #ef4444 !important;
+      color: #991b1b !important;
+      font-weight: 600 !important;
     }
 
     .criti-ai-highlight-manipulation {
-      background-color: rgba(168, 85, 247, 0.2) !important;
+      background-color: rgba(168, 85, 247, 0.3) !important;
       border-bottom: 2px solid #a855f7 !important;
+      color: #7c2d12 !important;
+      font-weight: 600 !important;
     }
 
-    /* 툴팁 스타일 */
+    /* 툴팁 스타일 개선 */
     .criti-ai-tooltip {
-      position: absolute !important;
-      background: #1f2937 !important;
+      position: fixed !important;
+      background: linear-gradient(135deg, #1f2937, #374151) !important;
       color: white !important;
-      padding: 8px 12px !important;
-      border-radius: 6px !important;
+      padding: 12px 16px !important;
+      border-radius: 12px !important;
       font-size: 14px !important;
-      max-width: 300px !important;
+      font-weight: 500 !important;
+      line-height: 1.5 !important;
+      max-width: 320px !important;
       z-index: 1000000 !important;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3) !important;
+      border: 1px solid rgba(255, 255, 255, 0.1) !important;
+      backdrop-filter: blur(20px) !important;
+      animation: tooltipFadeIn 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    }
+    
+    @keyframes tooltipFadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(-10px) scale(0.95);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
     }
   `;
   
@@ -79,159 +110,204 @@ const injectCSS = () => {
 // Content Script 진입점
 console.log('🔍 크리티 AI Content Script 로드됨');
 
-// 뉴스 사이트 감지
-const isNewsArticle = (): boolean => {
-  const indicators = [
-    'article',
-    '[role="main"]',
-    '.article-content',
-    '.news-content',
-    '.post-content'
+// 컨텐츠 감지
+const isAnalyzableContent = (): boolean => {
+  const excludedDomains = [
+    'chrome://',
+    'chrome-extension://',
+    'about:',
+    'file://'
   ];
   
-  return indicators.some(selector => document.querySelector(selector) !== null);
+  const currentUrl = window.location.href;
+  if (excludedDomains.some(domain => currentUrl.startsWith(domain))) {
+    return false;
+  }
+  
+  const textContent = document.body.textContent?.trim() || '';
+  return textContent.length > 100;
 };
 
-// 기사 내용 추출
-const extractArticleContent = (): { title: string; content: string } => {
-  const title = document.querySelector('h1')?.textContent?.trim() || 
-                document.title;
+// 기사/컨텐츠 추출
+const extractPageContent = (): { title: string; content: string } => {
+  const titleSelectors = [
+    'h1',
+    '.article-title',
+    '.news-title',
+    '.post-title',
+    '[data-testid="headline"]',
+    '.title'
+  ];
+  
+  let title = document.title;
+  for (const selector of titleSelectors) {
+    const element = document.querySelector(selector);
+    if (element?.textContent?.trim()) {
+      title = element.textContent.trim();
+      break;
+    }
+  }
   
   const contentSelectors = [
     'article',
     '.article-content',
     '.news-content', 
     '.post-content',
-    '[role="main"]'
+    '.entry-content',
+    '.content',
+    '[role="main"]',
+    'main',
+    '.main-content'
   ];
   
   let content = '';
   for (const selector of contentSelectors) {
     const element = document.querySelector(selector);
-    if (element) {
-      content = element.textContent?.trim() || '';
+    if (element?.textContent?.trim()) {
+      content = element.textContent.trim();
       break;
     }
   }
   
-  return { title, content };
-};
-
-// 플로팅 토글 버튼 생성
-const createToggleButton = (onToggle: () => void) => {
-  const button = document.createElement('button');
-  button.id = 'criti-ai-toggle-button';
-  button.innerHTML = '🔍';
-  button.title = '크리티 AI - 뉴스 분석 (클릭하여 열기/닫기)';
+  if (content.length < 200) {
+    content = document.body.textContent?.trim() || '';
+  }
   
-  // 클릭 이벤트 추가 - 명시적으로 바인딩
-  button.addEventListener('click', (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    console.log('🔍 플로팅 버튼 클릭!');
-    onToggle();
-  });
-  
-  document.body.appendChild(button);
-  console.log('✅ 플로팅 버튼 생성 완료');
-  return button;
+  return { title, content: content.substring(0, 2000) };
 };
 
 // 사이드바 마운트
-const mountSidebar = () => {
-  // CSS 주입
+const mountApp = () => {
   injectCSS();
   
   let sidebarVisible = false;
   let sidebarContainer: HTMLElement | null = null;
-  let toggleButton: HTMLElement | null = null;
 
   const toggleSidebar = () => {
     console.log('🔄 사이드바 토글 시도, 현재 상태:', sidebarVisible);
     
     if (!sidebarContainer) {
       console.log('🏠 사이드바 최초 생성');
-      // 사이드바 생성
       sidebarContainer = document.createElement('div');
       sidebarContainer.id = 'criti-ai-sidebar';
+      
+      const hostname = window.location.hostname.toLowerCase();
+      const isNaverDomain = hostname.includes('naver.com');
+      const isNaverNews = hostname.includes('n.news.naver.com') || hostname.includes('news.naver.com');
+      
+      if (isNaverDomain || isNaverNews) {
+        sidebarContainer.setAttribute('data-enhanced', 'true');
+        document.body.setAttribute('data-domain', hostname);
+        console.log('📰 네이버 사이트 감지:', hostname);
+      }
+      
+      const fontSize = (isNaverNews || isNaverDomain) ? '17px' : '16px';
+      
       sidebarContainer.style.cssText = `
-        position: fixed;
-        top: 0;
-        right: -420px;
-        width: 400px;
-        height: 100vh;
-        z-index: 1000000;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-        transition: right 0.3s ease-in-out;
-        background: white;
-        border-left: 1px solid #e5e7eb;
-        box-shadow: -4px 0 6px rgba(0, 0, 0, 0.1);
-        overflow-y: auto;
+        position: fixed !important;
+        top: 0 !important;
+        right: -420px !important;
+        width: 400px !important;
+        height: 100vh !important;
+        z-index: 999998 !important;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif !important;
+        font-size: ${fontSize} !important;
+        line-height: 1.6 !important;
+        transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        background: white !important;
+        border-left: 1px solid #e5e7eb !important;
+        box-shadow: -8px 0 25px rgba(0, 0, 0, 0.15) !important;
+        overflow-y: auto !important;
+        transform: translateZ(0) !important;
       `;
       
       document.body.appendChild(sidebarContainer);
       
-      // React 컴포넌트 렌더링
       const root = createRoot(sidebarContainer);
-      const articleData = extractArticleContent();
+      const pageData = extractPageContent();
       
-      console.log('📋 기사 데이터 추출:', {
-        title: articleData.title,
-        contentLength: articleData.content.length
+      console.log('📋 페이지 데이터 추출:', {
+        title: pageData.title,
+        contentLength: pageData.content.length,
+        domain: hostname
       });
       
       root.render(
         <ContentScriptApp 
           url={window.location.href}
-          title={articleData.title}
-          content={articleData.content}
+          title={pageData.title}
+          content={pageData.content}
           onClose={() => {
             console.log('✖️ 사이드바 닫기 요청');
-            toggleSidebar();
+            closeSidebar();
           }}
         />
       );
     }
 
-    // 사이드바 토글
-    sidebarVisible = !sidebarVisible;
-    if (sidebarContainer) {
-      sidebarContainer.style.right = sidebarVisible ? '0px' : '-420px';
-      console.log('🔄 사이드바 상태 변경:', sidebarVisible ? '열림' : '닫힘');
+    if (!sidebarVisible) {
+      openSidebar();
+    } else {
+      closeSidebar();
     }
-    
-    // 버튼 아이콘 및 툴팁 변경
-    if (toggleButton) {
-      toggleButton.innerHTML = sidebarVisible ? '✕' : '🔍';
-      toggleButton.title = sidebarVisible ? 
-        '크리티 AI - 닫기' : 
-        '크리티 AI - 뉴스 분석 (클릭하여 열기)';
-      
-      // 버튼 색상 변경
-      if (sidebarVisible) {
-        toggleButton.style.background = 'linear-gradient(135deg, #ef4444, #dc2626)';
-        toggleButton.style.boxShadow = '0 4px 12px rgba(239, 68, 68, 0.3)';
-      } else {
-        toggleButton.style.background = 'linear-gradient(135deg, #0ea5e9, #0284c7)';
-        toggleButton.style.boxShadow = '0 4px 12px rgba(14, 165, 233, 0.3)';
-      }
+  };
+  
+  const openSidebar = () => {
+    console.log('🔓 사이드바 열기 시작');
+    sidebarVisible = true;
+    if (sidebarContainer) {
+      requestAnimationFrame(() => {
+        sidebarContainer!.style.right = '0px';
+        console.log('🔄 사이드바 열림 상태: 열림');
+      });
+    }
+  };
+  
+  const closeSidebar = () => {
+    console.log('🔒 사이드바 닫기 시작');
+    sidebarVisible = false;
+    if (sidebarContainer) {
+      requestAnimationFrame(() => {
+        sidebarContainer!.style.right = '-420px';
+        console.log('🔄 사이드바 닫힘 상태: 닫힘');
+      });
     }
   };
 
-  // 토글 버튼 생성
-  toggleButton = createToggleButton(toggleSidebar);
-  console.log('🔄 전체 사이드바 시스템 초기화 완료');
+  // 전역 범위에서 toggleSidebar 접근 가능하도록 설정
+  interface CritiAIGlobal {
+    critiAI: {
+      toggleSidebar: () => void;
+    };
+  }
+  
+  // TypeScript 안전한 방식으로 window 객체 확장
+  (window as unknown as CritiAIGlobal).critiAI = {
+    toggleSidebar
+  };
+
+  // popup에서의 메시지 리스너 추가
+  chrome.runtime.onMessage.addListener((request: { action: string }, _sender, sendResponse: (response: { success: boolean }) => void) => {
+    if (request.action === 'toggleSidebar') {
+      console.log('📨 popup에서 사이드바 토글 요청 수신');
+      toggleSidebar();
+      sendResponse({ success: true });
+      return true;
+    }
+  });
+
+  console.log('🔄 크리티 AI 시스템 초기화 완료 - popup에서 사용 가능');
 };
 
 // 페이지 로드 완료 후 실행
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => {
-    if (isNewsArticle()) {
-      mountSidebar();
+    if (isAnalyzableContent()) {
+      mountApp();
     }
   });
 } else {
-  if (isNewsArticle()) {
-    mountSidebar();
+  if (isAnalyzableContent()) {
+    mountApp();
   }
 }

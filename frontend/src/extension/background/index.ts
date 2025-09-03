@@ -1,6 +1,51 @@
 // Background Script - API 프록시 및 확장 프로그램 관리
 console.log('🚀 크리티 AI Background Script 시작');
 
+// 타입 정의
+interface LegacyAnalyzeRequest {
+  action: 'analyze';
+  url: string;
+  content: string;
+  title: string;
+}
+
+interface ApiProxyRequest {
+  type: 'API_PROXY';
+  url: string;
+  endpoint: string;
+  method?: string;
+  headers?: Record<string, string>;
+  body?: Record<string, unknown>;
+}
+
+interface HealthCheckRequest {
+  type: 'HEALTH_CHECK';
+}
+
+type BackgroundRequest = LegacyAnalyzeRequest | ApiProxyRequest | HealthCheckRequest;
+
+interface BackgroundResponse {
+  success: boolean;
+  data?: unknown;
+  error?: string;
+  status?: number;
+}
+
+type SendResponseFunction = (response: BackgroundResponse) => void;
+
+// 타입 가드 함수들
+const isLegacyAnalyzeRequest = (request: BackgroundRequest): request is LegacyAnalyzeRequest => {
+  return 'action' in request && request.action === 'analyze';
+};
+
+const isApiProxyRequest = (request: BackgroundRequest): request is ApiProxyRequest => {
+  return 'type' in request && request.type === 'API_PROXY';
+};
+
+const isHealthCheckRequest = (request: BackgroundRequest): request is HealthCheckRequest => {
+  return 'type' in request && request.type === 'HEALTH_CHECK';
+};
+
 // 설치 시 실행
 chrome.runtime.onInstalled.addListener(() => {
   console.log('📦 크리티 AI 확장 프로그램 설치 완료');
@@ -18,30 +63,30 @@ chrome.action.onClicked.addListener((tab) => {
 });
 
 // Content Script와의 메시지 통신 처리
-chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
-  console.log('📨 메시지 수신:', request.action || request.type);
+chrome.runtime.onMessage.addListener((request: BackgroundRequest, _sender, sendResponse) => {
+  console.log('📨 메시지 수신:', isLegacyAnalyzeRequest(request) ? request.action : (request as ApiProxyRequest | HealthCheckRequest).type);
 
   // 기존 analyze 방식 유지
-  if (request.action === 'analyze') {
+  if (isLegacyAnalyzeRequest(request)) {
     handleLegacyAnalyze(request, sendResponse);
     return true;
   }
 
   // 새로운 API 프록시 방식
-  if (request.type === 'API_PROXY') {
+  if (isApiProxyRequest(request)) {
     handleApiProxy(request, sendResponse);
     return true;
   }
 
   // 헬스 체크
-  if (request.type === 'HEALTH_CHECK') {
+  if (isHealthCheckRequest(request)) {
     handleHealthCheck(sendResponse);
     return true;
   }
 });
 
 // 기존 analyze 핸들러 (역호환성)
-async function handleLegacyAnalyze(request: any, sendResponse: Function) {
+async function handleLegacyAnalyze(request: LegacyAnalyzeRequest, sendResponse: SendResponseFunction): Promise<void> {
   try {
     console.log('🔄 레거시 분석 요청 처리');
     
@@ -71,7 +116,7 @@ async function handleLegacyAnalyze(request: any, sendResponse: Function) {
 }
 
 // 새로운 API 프록시 핸들러
-async function handleApiProxy(request: any, sendResponse: Function) {
+async function handleApiProxy(request: ApiProxyRequest, sendResponse: SendResponseFunction): Promise<void> {
   try {
     console.log('🔄 API 프록시 요청 처리:', request.endpoint);
     
@@ -107,7 +152,7 @@ async function handleApiProxy(request: any, sendResponse: Function) {
 }
 
 // 헬스 체크 핸들러
-async function handleHealthCheck(sendResponse: Function) {
+async function handleHealthCheck(sendResponse: SendResponseFunction): Promise<void> {
   try {
     console.log('🚑 헬스 체크 시작');
     const response = await fetch('http://localhost:3001/health');
