@@ -1,8 +1,8 @@
 @echo off
 chcp 65001 >nul
-title 크리티 AI 개발 환경 설정 및 실행
+title Criti AI 개발 환경 설정 및 실행
 
-echo 🔍 크리티 AI 개발 환경 설정 중...
+echo 🔍 Criti AI 개발 환경 설정 중...
 echo.
 
 rem 1. 루트 패키지 설치

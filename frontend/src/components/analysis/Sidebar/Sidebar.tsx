@@ -9,7 +9,7 @@ import {
   HeaderSection,
   WelcomeSection,
   LoadingSection,
-  ResultsSection
+  ResultsSection,
 } from "./Sidebar.style";
 import { TrustMeter } from "../TrustMeter";
 import { BiasHighlights } from "../BiasHighlights";
@@ -42,11 +42,11 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
-            console.log('🔴 사이드바 닫기 버튼 클릭!');
-            if (onClose && typeof onClose === 'function') {
+            console.log("🔴 사이드바 닫기 버튼 클릭!");
+            if (onClose && typeof onClose === "function") {
               onClose();
             } else {
-              console.error('❌ onClose 함수가 없거나 잘못되었습니다');
+              console.error("❌ onClose 함수가 없거나 잘못되었습니다");
             }
           }}
           type="button"
@@ -57,17 +57,16 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
       </CloseButtonContainer>
 
       <HeaderSection>
-        <h3>🔍 크리티 AI</h3>
+        <h3>🔍 Criti AI</h3>
         <p>뉴스 신뢰도 분석</p>
       </HeaderSection>
 
       {!analysis && !isAnalyzing && (
         <WelcomeSection>
-          <button onClick={onAnalyze}>
-            이 기사 분석하기
-          </button>
+          <button onClick={onAnalyze}>이 기사 분석하기</button>
           <p>
-            AI가 이 기사의 신뢰도와<br />
+            AI가 이 기사의 신뢰도와
+            <br />
             편향성을 분석해드립니다
           </p>
         </WelcomeSection>
@@ -93,21 +92,34 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
             <div className="detailed-metric">
               <div className="metric-header">
                 <span className="label">🏛️ 출처 신뢰도</span>
-                <span className="score">{analysis.sourceCredibility.score}/100</span>
+                <span className="score">
+                  {analysis.sourceCredibility.score}/100
+                </span>
               </div>
               <div className="metric-details">
-                <div className="level-badge" data-level={analysis.sourceCredibility.level}>
-                  {analysis.sourceCredibility.level === 'trusted' ? '✅ 신뢰함' :
-                   analysis.sourceCredibility.level === 'neutral' ? '⚖️ 중립적' :
-                   analysis.sourceCredibility.level === 'caution' ? '⚠️ 주의' : '🚨 위험'}
+                <div
+                  className="level-badge"
+                  data-level={analysis.sourceCredibility.level}
+                >
+                  {analysis.sourceCredibility.level === "trusted"
+                    ? "✅ 신뢰함"
+                    : analysis.sourceCredibility.level === "neutral"
+                      ? "⚖️ 중립적"
+                      : analysis.sourceCredibility.level === "caution"
+                        ? "⚠️ 주의"
+                        : "🚨 위험"}
                 </div>
                 <p className="reputation-desc">
                   {analysis.sourceCredibility.reputation.description}
                 </p>
                 <div className="reputation-factors">
-                  {analysis.sourceCredibility.reputation.factors.map((factor, idx) => (
-                    <span key={idx} className="factor-tag">• {factor}</span>
-                  ))}
+                  {analysis.sourceCredibility.reputation.factors.map(
+                    (factor, idx) => (
+                      <span key={idx} className="factor-tag">
+                        • {factor}
+                      </span>
+                    )
+                  )}
                 </div>
               </div>
             </div>
@@ -116,20 +128,33 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
             <div className="detailed-metric">
               <div className="metric-header">
                 <span className="label">🎭 감정적 편향</span>
-                <span className="score">{analysis.biasAnalysis.emotionalBias.score}/100</span>
+                <span className="score">
+                  {analysis.biasAnalysis.emotionalBias.score}/100
+                </span>
               </div>
               <div className="metric-details">
-                <div className="intensity-badge" data-intensity={analysis.biasAnalysis.emotionalBias.intensity}>
-                  {analysis.biasAnalysis.emotionalBias.intensity === 'high' ? '🔥 높음' :
-                   analysis.biasAnalysis.emotionalBias.intensity === 'medium' ? '🟡 보통' : '🟢 낮음'}
+                <div
+                  className="intensity-badge"
+                  data-intensity={analysis.biasAnalysis.emotionalBias.intensity}
+                >
+                  {analysis.biasAnalysis.emotionalBias.intensity === "high"
+                    ? "🔥 높음"
+                    : analysis.biasAnalysis.emotionalBias.intensity === "medium"
+                      ? "🟡 보통"
+                      : "🟢 낮음"}
                 </div>
-                {analysis.biasAnalysis.emotionalBias.manipulativeWords?.length > 0 && (
+                {analysis.biasAnalysis.emotionalBias.manipulativeWords?.length >
+                  0 && (
                   <div className="manipulative-words">
                     <p className="words-label">감정적 표현 감지:</p>
                     <div className="words-list">
-                      {analysis.biasAnalysis.emotionalBias.manipulativeWords.map((word, idx) => (
-                        <span key={idx} className="word-tag">"{word}"</span>
-                      ))}
+                      {analysis.biasAnalysis.emotionalBias.manipulativeWords.map(
+                        (word, idx) => (
+                          <span key={idx} className="word-tag">
+                            "{word}"
+                          </span>
+                        )
+                      )}
                     </div>
                   </div>
                 )}
@@ -140,36 +165,52 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
             <div className="detailed-metric">
               <div className="metric-header">
                 <span className="label">🗳️ 정치적 편향</span>
-                <span className="confidence">{analysis.biasAnalysis.politicalBias.confidence}% 확신</span>
+                <span className="confidence">
+                  {analysis.biasAnalysis.politicalBias.confidence}% 확신
+                </span>
               </div>
               <div className="metric-details">
-                <div className="political-badge" data-direction={analysis.biasAnalysis.politicalBias.direction}>
-                  {analysis.biasAnalysis.politicalBias.direction === 'left' ? '⬅️ 진보적' :
-                   analysis.biasAnalysis.politicalBias.direction === 'right' ? '➡️ 보수적' :
-                   analysis.biasAnalysis.politicalBias.direction === 'center' ? '🎯 중도' : '⚖️ 중립적'}
+                <div
+                  className="political-badge"
+                  data-direction={analysis.biasAnalysis.politicalBias.direction}
+                >
+                  {analysis.biasAnalysis.politicalBias.direction === "left"
+                    ? "⬅️ 진보적"
+                    : analysis.biasAnalysis.politicalBias.direction === "right"
+                      ? "➡️ 보수적"
+                      : analysis.biasAnalysis.politicalBias.direction ===
+                          "center"
+                        ? "🎯 중도"
+                        : "⚖️ 중립적"}
                 </div>
               </div>
             </div>
 
             {/* 논리적 오류 요약 */}
-            {analysis.logicalFallacies && analysis.logicalFallacies.length > 0 && (
-              <div className="detailed-metric warning">
-                <div className="metric-header">
-                  <span className="label">🧠 논리적 오류</span>
-                  <span className="count">{analysis.logicalFallacies.length}개 발견</span>
-                </div>
-                <div className="metric-details">
-                  <div className="fallacy-summary">
-                    {analysis.logicalFallacies.map((fallacy, idx) => (
-                      <div key={idx} className="fallacy-preview">
-                        <span className="fallacy-type">{fallacy.type}</span>
-                        <span className={`severity-dot ${fallacy.severity}`} title={`심각도: ${fallacy.severity}`} />
-                      </div>
-                    ))}
+            {analysis.logicalFallacies &&
+              analysis.logicalFallacies.length > 0 && (
+                <div className="detailed-metric warning">
+                  <div className="metric-header">
+                    <span className="label">🧠 논리적 오류</span>
+                    <span className="count">
+                      {analysis.logicalFallacies.length}개 발견
+                    </span>
+                  </div>
+                  <div className="metric-details">
+                    <div className="fallacy-summary">
+                      {analysis.logicalFallacies.map((fallacy, idx) => (
+                        <div key={idx} className="fallacy-preview">
+                          <span className="fallacy-type">{fallacy.type}</span>
+                          <span
+                            className={`severity-dot ${fallacy.severity}`}
+                            title={`심각도: ${fallacy.severity}`}
+                          />
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
+              )}
           </AnalysisSection>
 
           <BiasHighlights highlights={analysis.biasAnalysis.highlightedTexts} />

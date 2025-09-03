@@ -1,10 +1,10 @@
-import { createRoot } from 'react-dom/client';
-import { ContentScriptApp } from '../../components/ContentScriptApp';
+import { createRoot } from "react-dom/client";
+import { ContentScriptApp } from "../../components/ContentScriptApp";
 
 // CSS 스타일을 직접 주입
 const injectCSS = () => {
   const css = `
-    /* 크리티 AI 전역 스타일 리셋 및 기본 설정 */
+    /* Criti AI 전역 스타일 리셋 및 기본 설정 */
     #criti-ai-sidebar {
       all: initial;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif !important;
@@ -101,44 +101,44 @@ const injectCSS = () => {
       }
     }
   `;
-  
-  const style = document.createElement('style');
+
+  const style = document.createElement("style");
   style.textContent = css;
   document.head.appendChild(style);
 };
 
 // Content Script 진입점
-console.log('🔍 크리티 AI Content Script 로드됨');
+console.log("🔍 Criti AI Content Script 로드됨");
 
 // 컨텐츠 감지
 const isAnalyzableContent = (): boolean => {
   const excludedDomains = [
-    'chrome://',
-    'chrome-extension://',
-    'about:',
-    'file://'
+    "chrome://",
+    "chrome-extension://",
+    "about:",
+    "file://",
   ];
-  
+
   const currentUrl = window.location.href;
-  if (excludedDomains.some(domain => currentUrl.startsWith(domain))) {
+  if (excludedDomains.some((domain) => currentUrl.startsWith(domain))) {
     return false;
   }
-  
-  const textContent = document.body.textContent?.trim() || '';
+
+  const textContent = document.body.textContent?.trim() || "";
   return textContent.length > 100;
 };
 
 // 기사/컨텐츠 추출
 const extractPageContent = (): { title: string; content: string } => {
   const titleSelectors = [
-    'h1',
-    '.article-title',
-    '.news-title',
-    '.post-title',
+    "h1",
+    ".article-title",
+    ".news-title",
+    ".post-title",
     '[data-testid="headline"]',
-    '.title'
+    ".title",
   ];
-  
+
   let title = document.title;
   for (const selector of titleSelectors) {
     const element = document.querySelector(selector);
@@ -147,20 +147,20 @@ const extractPageContent = (): { title: string; content: string } => {
       break;
     }
   }
-  
+
   const contentSelectors = [
-    'article',
-    '.article-content',
-    '.news-content', 
-    '.post-content',
-    '.entry-content',
-    '.content',
+    "article",
+    ".article-content",
+    ".news-content",
+    ".post-content",
+    ".entry-content",
+    ".content",
     '[role="main"]',
-    'main',
-    '.main-content'
+    "main",
+    ".main-content",
   ];
-  
-  let content = '';
+
+  let content = "";
   for (const selector of contentSelectors) {
     const element = document.querySelector(selector);
     if (element?.textContent?.trim()) {
@@ -168,41 +168,43 @@ const extractPageContent = (): { title: string; content: string } => {
       break;
     }
   }
-  
+
   if (content.length < 200) {
-    content = document.body.textContent?.trim() || '';
+    content = document.body.textContent?.trim() || "";
   }
-  
+
   return { title, content: content.substring(0, 2000) };
 };
 
 // 사이드바 마운트
 const mountApp = () => {
   injectCSS();
-  
+
   let sidebarVisible = false;
   let sidebarContainer: HTMLElement | null = null;
 
   const toggleSidebar = () => {
-    console.log('🔄 사이드바 토글 시도, 현재 상태:', sidebarVisible);
-    
+    console.log("🔄 사이드바 토글 시도, 현재 상태:", sidebarVisible);
+
     if (!sidebarContainer) {
-      console.log('🏠 사이드바 최초 생성');
-      sidebarContainer = document.createElement('div');
-      sidebarContainer.id = 'criti-ai-sidebar';
-      
+      console.log("🏠 사이드바 최초 생성");
+      sidebarContainer = document.createElement("div");
+      sidebarContainer.id = "criti-ai-sidebar";
+
       const hostname = window.location.hostname.toLowerCase();
-      const isNaverDomain = hostname.includes('naver.com');
-      const isNaverNews = hostname.includes('n.news.naver.com') || hostname.includes('news.naver.com');
-      
+      const isNaverDomain = hostname.includes("naver.com");
+      const isNaverNews =
+        hostname.includes("n.news.naver.com") ||
+        hostname.includes("news.naver.com");
+
       if (isNaverDomain || isNaverNews) {
-        sidebarContainer.setAttribute('data-enhanced', 'true');
-        document.body.setAttribute('data-domain', hostname);
-        console.log('📰 네이버 사이트 감지:', hostname);
+        sidebarContainer.setAttribute("data-enhanced", "true");
+        document.body.setAttribute("data-domain", hostname);
+        console.log("📰 네이버 사이트 감지:", hostname);
       }
-      
-      const fontSize = (isNaverNews || isNaverDomain) ? '17px' : '16px';
-      
+
+      const fontSize = isNaverNews || isNaverDomain ? "17px" : "16px";
+
       sidebarContainer.style.cssText = `
         position: fixed !important;
         top: 0 !important;
@@ -220,25 +222,25 @@ const mountApp = () => {
         overflow-y: auto !important;
         transform: translateZ(0) !important;
       `;
-      
+
       document.body.appendChild(sidebarContainer);
-      
+
       const root = createRoot(sidebarContainer);
       const pageData = extractPageContent();
-      
-      console.log('📋 페이지 데이터 추출:', {
+
+      console.log("📋 페이지 데이터 추출:", {
         title: pageData.title,
         contentLength: pageData.content.length,
-        domain: hostname
+        domain: hostname,
       });
-      
+
       root.render(
-        <ContentScriptApp 
+        <ContentScriptApp
           url={window.location.href}
           title={pageData.title}
           content={pageData.content}
           onClose={() => {
-            console.log('✖️ 사이드바 닫기 요청');
+            console.log("✖️ 사이드바 닫기 요청");
             closeSidebar();
           }}
         />
@@ -251,25 +253,25 @@ const mountApp = () => {
       closeSidebar();
     }
   };
-  
+
   const openSidebar = () => {
-    console.log('🔓 사이드바 열기 시작');
+    console.log("🔓 사이드바 열기 시작");
     sidebarVisible = true;
     if (sidebarContainer) {
       requestAnimationFrame(() => {
-        sidebarContainer!.style.right = '0px';
-        console.log('🔄 사이드바 열림 상태: 열림');
+        sidebarContainer!.style.right = "0px";
+        console.log("🔄 사이드바 열림 상태: 열림");
       });
     }
   };
-  
+
   const closeSidebar = () => {
-    console.log('🔒 사이드바 닫기 시작');
+    console.log("🔒 사이드바 닫기 시작");
     sidebarVisible = false;
     if (sidebarContainer) {
       requestAnimationFrame(() => {
-        sidebarContainer!.style.right = '-420px';
-        console.log('🔄 사이드바 닫힘 상태: 닫힘');
+        sidebarContainer!.style.right = "-420px";
+        console.log("🔄 사이드바 닫힘 상태: 닫힘");
       });
     }
   };
@@ -280,28 +282,34 @@ const mountApp = () => {
       toggleSidebar: () => void;
     };
   }
-  
+
   // TypeScript 안전한 방식으로 window 객체 확장
   (window as unknown as CritiAIGlobal).critiAI = {
-    toggleSidebar
+    toggleSidebar,
   };
 
   // popup에서의 메시지 리스너 추가
-  chrome.runtime.onMessage.addListener((request: { action: string }, _sender, sendResponse: (response: { success: boolean }) => void) => {
-    if (request.action === 'toggleSidebar') {
-      console.log('📨 popup에서 사이드바 토글 요청 수신');
-      toggleSidebar();
-      sendResponse({ success: true });
-      return true;
+  chrome.runtime.onMessage.addListener(
+    (
+      request: { action: string },
+      _sender,
+      sendResponse: (response: { success: boolean }) => void
+    ) => {
+      if (request.action === "toggleSidebar") {
+        console.log("📨 popup에서 사이드바 토글 요청 수신");
+        toggleSidebar();
+        sendResponse({ success: true });
+        return true;
+      }
     }
-  });
+  );
 
-  console.log('🔄 크리티 AI 시스템 초기화 완료 - popup에서 사용 가능');
+  console.log("🔄 Criti AI 시스템 초기화 완료 - popup에서 사용 가능");
 };
 
 // 페이지 로드 완료 후 실행
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => {
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", () => {
     if (isAnalyzableContent()) {
       mountApp();
     }

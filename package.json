@@ -21,7 +21,7 @@
   },
   "workspaces": [
     "frontend",
-    "backend", 
+    "backend",
     "shared"
   ],
   "keywords": [
@@ -32,6 +32,6 @@
     "gemini-api",
     "fact-checking"
   ],
-  "author": "크리티 AI 팀",
+  "author": "Criti AI 팀",
   "license": "MIT"
 }

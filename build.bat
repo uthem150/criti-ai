@@ -1,8 +1,8 @@
 @echo off
 chcp 65001 >nul
-title 크리티 AI 빌드 스크립트
+title Criti AI 빌드 스크립트
 
-echo 🔍 크리티 AI 빌드 시작...
+echo 🔍 Criti AI 빌드 시작...
 echo.
 
 rem 1. Shared 패키지 빌드

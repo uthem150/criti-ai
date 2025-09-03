@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# 크리티 AI 빌드 및 실행 스크립트
+# Criti AI 빌드 및 실행 스크립트
 
-echo "🔍 크리티 AI 빌드 시작..."
+echo "🔍 Criti AI 빌드 시작..."
 
 # 1. Shared 패키지 빌드
 echo "📦 1단계: Shared 패키지 빌드 중..."
