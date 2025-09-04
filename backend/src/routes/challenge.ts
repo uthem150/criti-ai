@@ -61,8 +61,8 @@ const DUMMY_USER_PROGRESS: UserProgress = {
   totalPoints: 280,
   level: 2,
   badges: [
-    { id: '1', name: '첫 걸음', description: '첫 번째 챌린지 완료', icon: '🎯', earnedAt: '2024-03-01' },
-    { id: '2', name: '탐정', description: '편향 표현 5개 찾기', icon: '🔍', earnedAt: '2024-03-02' }
+    { id: '1', name: '첫 걸음', description: '첫 번째 챌린지 완료', icon: '🎯', earnedAt: '2024-03-01', category: 'milestone' },
+    { id: '2', name: '탐정', description: '편향 표현 5개 찾기', icon: '🔍', earnedAt: '2024-03-02', category: 'analysis' }
   ],
   completedChallenges: ['1', '2'],
   analyticsUsed: 15

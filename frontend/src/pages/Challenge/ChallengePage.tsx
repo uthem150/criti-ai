@@ -92,6 +92,7 @@ export const ChallengePage: React.FC<ChallengePageProps> = ({
         description: "첫 번째 챌린지 완료",
         icon: "🎯",
         earnedAt: "2024-03-01",
+        category: "milestone",
       },
       {
         id: "2",
@@ -99,6 +100,7 @@ export const ChallengePage: React.FC<ChallengePageProps> = ({
         description: "편향 표현 5개 찾기",
         icon: "🔍",
         earnedAt: "2024-03-02",
+        category: "analysis",
       },
     ],
     completedChallenges: ["1", "2"],
