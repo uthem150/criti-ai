@@ -1,4 +1,5 @@
 import type { TrustAnalysis, HighlightedText } from '@shared/types';
+import { collectAllHighlights } from './highlightUtils';
 
 /**
  * 개발 환경에서 하이라이트 시스템을 테스트하기 위한 유틸리티
@@ -86,9 +87,7 @@ export function createTestAnalysisData(): TrustAnalysis {
           severity: "medium",
           category: "과장 표현"
         }
-      ],
-      
-      advertisementScore: 88
+      ]
     },
 
     advertisementAnalysis: {
@@ -209,7 +208,6 @@ export function testHighlightSystem() {
   const testData = createTestAnalysisData();
   
   // collectAllHighlights 함수 테스트
-  const { collectAllHighlights } = require('./highlightUtils');
   const allHighlights = collectAllHighlights(testData);
   
   console.log('📊 수집된 하이라이트 통계:');

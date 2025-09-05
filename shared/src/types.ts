@@ -46,7 +46,6 @@ export interface BiasAnalysis {
   politicalBias: PoliticalBias;
   highlightedTexts: HighlightedText[];
   clickbaitElements: ClickbaitElement[]; // 클릭베이트 요소
-  advertisementScore: number; // BiasAnalysis에 advertisementScore 추가
 }
 
 export interface EmotionalBias {
