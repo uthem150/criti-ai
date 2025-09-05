@@ -1479,6 +1479,28 @@ const getShadowCSS = () => `
     font-weight: 600 !important;
   }
 
+  /* 포커스 효과 - 클릭시 임시 강조 */
+  .criti-ai-highlight-focused {
+    animation: highlightPulse 2s ease-in-out !important;
+    transform: scale(1.05) !important;
+    z-index: 999999 !important;
+    position: relative !important;
+  }
+  
+  @keyframes highlightPulse {
+    0% {
+      box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.8);
+      background-color: rgba(59, 130, 246, 0.5);
+    }
+    50% {
+      box-shadow: 0 0 0 10px rgba(59, 130, 246, 0.3);
+      background-color: rgba(59, 130, 246, 0.7);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+    }
+  }
+
   /* 툴팁 스타일 */
   .criti-ai-tooltip {
     position: fixed !important;
@@ -1868,17 +1890,129 @@ const mountApp = () => {
     }
   };
 
+  // 전역 하이라이트 관리 시스템
+  const highlightElements = new Map<string, HTMLElement>();
+  
+  const scrollToHighlight = (highlightId: string): void => {
+    console.log('🎯 스크롤 요청:', highlightId);
+    const element = highlightElements.get(highlightId);
+    if (element) {
+      // 부드러운 스크롤
+      element.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'center',
+        inline: 'nearest'
+      });
+      
+      // 임시 강조 효과
+      element.classList.add('criti-ai-highlight-focused');
+      setTimeout(() => {
+        element.classList.remove('criti-ai-highlight-focused');
+      }, 2000);
+      
+      console.log('✅ 스크롤 완료:', highlightId);
+    } else {
+      console.log('❌ 하이라이트 요소를 찾을 수 없음:', highlightId);
+    }
+  };
+  
+  const clearAllHighlights = (): void => {
+    console.log('🗑️ 모든 하이라이트 제거 시작');
+    
+    // 툴팁 제거
+    const tooltips = document.querySelectorAll('.criti-ai-tooltip');
+    tooltips.forEach(tooltip => tooltip.remove());
+    
+    // 하이라이트 요소 제거
+    const highlights = document.querySelectorAll('.criti-ai-highlight');
+    highlights.forEach(element => {
+      const parent = element.parentNode;
+      if (parent) {
+        parent.replaceChild(document.createTextNode(element.textContent || ''), element);
+        parent.normalize(); // 텍스트 노드 정리
+      }
+    });
+    
+    // 네이버 블로그 iframe 내부 하이라이트도 제거
+    if (window.location.href.includes('blog.naver.com')) {
+      const mainFrame = document.querySelector('#mainFrame') as HTMLIFrameElement;
+      if (mainFrame && mainFrame.contentDocument) {
+        try {
+          const frameHighlights = mainFrame.contentDocument.querySelectorAll('.criti-ai-highlight');
+          frameHighlights.forEach(element => {
+            const parent = element.parentNode;
+            if (parent) {
+              parent.replaceChild(mainFrame.contentDocument!.createTextNode(element.textContent || ''), element);
+              parent.normalize();
+            }
+          });
+        } catch (error) {
+          console.log('⚠️ iframe 하이라이트 제거 실패 (보안 제한)');
+        }
+      }
+    }
+    
+    // Map 초기화
+    highlightElements.clear();
+    console.log('✅ 모든 하이라이트 제거 완료');
+  };
+  
+  const scrollToHighlightByText = (text: string, type?: string): boolean => {
+    console.log('🔍 텍스트로 하이라이트 찾기:', text, type);
+    
+    // Map에서 텍스트 매칭하여 찾기
+    for (const [id, element] of highlightElements) {
+      const elementText = element.textContent?.trim() || '';
+      const isTextMatch = elementText.includes(text) || text.includes(elementText);
+      const isTypeMatch = !type || id.includes(type);
+      
+      if (isTextMatch && isTypeMatch) {
+        scrollToHighlight(id);
+        return true;
+      }
+    }
+    
+    // 직접 DOM에서 찾기 (fallback)
+    const allHighlights = document.querySelectorAll('.criti-ai-highlight');
+    for (const highlight of allHighlights) {
+      const highlightText = highlight.textContent?.trim() || '';
+      const isTextMatch = highlightText.includes(text) || text.includes(highlightText);
+      const isTypeMatch = !type || highlight.className.includes(`criti-ai-highlight-${type}`);
+      
+      if (isTextMatch && isTypeMatch) {
+        highlight.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        highlight.classList.add('criti-ai-highlight-focused');
+        setTimeout(() => {
+          highlight.classList.remove('criti-ai-highlight-focused');
+        }, 2000);
+        console.log('✅ Fallback 스크롤 성공');
+        return true;
+      }
+    }
+    
+    console.log('❌ 해당 텍스트의 하이라이트를 찾을 수 없음');
+    return false;
+  };
+
   // 전역 접근용 인터페이스
   interface CritiAIGlobal {
     critiAI: {
       toggleSidebar: () => void;
       isReady: boolean;
+      highlightElements: Map<string, HTMLElement>;
+      scrollToHighlight: (highlightId: string) => void;
+      clearAllHighlights: () => void;
+      scrollToHighlightByText: (text: string, type?: string) => boolean;
     };
   }
 
   (window as unknown as CritiAIGlobal).critiAI = {
     toggleSidebar,
-    isReady: true
+    isReady: true,
+    highlightElements,
+    scrollToHighlight,
+    clearAllHighlights,
+    scrollToHighlightByText
   };
 
   // 개선된 메시지 리스너

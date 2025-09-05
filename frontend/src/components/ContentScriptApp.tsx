@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
-import type { TrustAnalysis } from '@shared/types';
+import type { TrustAnalysis, HighlightedText } from '@shared/types';
 import { AnalysisSidebar } from './analysis/Sidebar';
 import { TextHighlighter } from './analysis/TextHighlighter';
+import { collectAllHighlights, getHighlightStats } from '../utils/highlightUtils';
 import { apiService } from '../services/api';
+// 전역 타입 import
+import '@/types/global.d.ts';
 
 interface ContentScriptAppProps {
   url: string;
@@ -11,17 +14,39 @@ interface ContentScriptAppProps {
   onClose?: () => void;
 }
 
+interface HighlightClickData {
+  text: string; 
+  explanation: string; 
+  type?: string; 
+  category?: string;
+}
+
 export const ContentScriptApp: React.FC<ContentScriptAppProps> = ({
   url,
   title,
   content,
   onClose
 }) => {
+  
+  // 향상된 닫기 함수
+  const handleClose = () => {
+    console.log('📝 사이드바 닫기 및 하이라이트 제거');
+    
+    // 모든 하이라이트 제거
+    if (window.critiAI?.clearAllHighlights) {
+      window.critiAI.clearAllHighlights();
+    }
+    
+    // 기존 닫기 콜백 호출
+    if (onClose) {
+      onClose();
+    }
+  };
   const [analysis, setAnalysis] = useState<TrustAnalysis | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleAnalyze = async () => {
+  const handleAnalyze = async (): Promise<void> => {
     setIsAnalyzing(true);
     setError(null);
     
@@ -35,7 +60,7 @@ export const ContentScriptApp: React.FC<ContentScriptAppProps> = ({
                          domain.includes('cafe') ? 'social' : 
                          undefined;
       
-      // 실제 API 서비스를 통한 분석 (더미데이터 fallback 제거)
+      // 실제 API 서비스를 통한 분석
       const analysisResult = await apiService.analyzeContent({
         url,
         title,
@@ -46,6 +71,11 @@ export const ContentScriptApp: React.FC<ContentScriptAppProps> = ({
 
       console.log('✅ 분석 완료:', analysisResult);
       setAnalysis(analysisResult);
+      
+      // 하이라이트 통계 로깅
+      const allHighlights = collectAllHighlights(analysisResult);
+      const stats = getHighlightStats(allHighlights);
+      console.log('📊 하이라이트 통계:', stats);
       
     } catch (error) {
       console.error('❌ 분석 실패:', error);
@@ -71,84 +101,92 @@ export const ContentScriptApp: React.FC<ContentScriptAppProps> = ({
     }
   };
 
-  const handleHighlightClick = (highlight: { text: string; explanation: string }) => {
+  const handleHighlightClick = (highlight: HighlightClickData): void => {
     console.log('💡 하이라이트 클릭:', highlight);
     
-    // 본문에서 해당 텍스트 찾아서 스크롤 이동
-    const targetText = highlight.text;
+    // 사이드바에서 해당 섹션으로 스크롤
+    const sidebarContainer = document.querySelector('.criti-ai-sidebar-container');
+    if (!sidebarContainer) return;
+
+    // 타입에 따른 섹션 ID 매핑
+    const sectionMap: Record<string, string> = {
+      'bias': 'bias',
+      'manipulation': 'bias', // 감정 조작도 편향성 섹션에 포함
+      'fallacy': 'logic',
+      'advertisement': 'advertisement', 
+      'claim': 'crossref'
+    };
+
+    const sectionId = highlight.type ? sectionMap[highlight.type] : null;
     
-    // 포괄적인 선택자로 본문 영역 찾기
-    const contentSelectors = [
-      'article',
-      '.article-content', '.news-content', '.post-content', '.entry-content',
-      '.content', '.main-content', '[role="main"]', 'main',
-      '.article-body', '.story-body', '.post-body', '.content-body',
-      '.article-text', '.news-body', '.detail-content', '.view-content',
-      '.read-content', '.txt_content', '.se-main-container'
-    ];
-    
-    let found = false;
-    
-    for (const selector of contentSelectors) {
-      const contentElement = document.querySelector(selector);
-      if (!contentElement) continue;
-      
-      // 텍스트 노드 워커로 정확한 텍스트 위치 찾기
-      const walker = document.createTreeWalker(
-        contentElement,
-        NodeFilter.SHOW_TEXT,
-        {
-          acceptNode: (node) => {
-            const text = node.textContent?.trim() || '';
-            return text.includes(targetText) && text.length > 10
-              ? NodeFilter.FILTER_ACCEPT 
-              : NodeFilter.FILTER_REJECT;
-          }
-        }
-      );
-      
-      const textNode = walker.nextNode();
-      if (textNode && textNode.parentElement) {
-        const element = textNode.parentElement;
-        
-        // 부드럽게 스크롤
-        element.scrollIntoView({ 
-          behavior: 'smooth', 
-          block: 'center',
-          inline: 'center'
-        });
-        
-        // 임시 하이라이트 효과
-        const originalStyle = {
-          background: element.style.backgroundColor,
-          transition: element.style.transition,
-          border: element.style.border
-        };
-        
-        element.style.transition = 'all 0.3s ease';
-        element.style.backgroundColor = 'rgba(14, 165, 233, 0.2)';
-        element.style.border = '2px solid rgba(14, 165, 233, 0.5)';
-        
-        setTimeout(() => {
-          element.style.backgroundColor = originalStyle.background;
-          element.style.border = originalStyle.border;
-          setTimeout(() => {
-            element.style.transition = originalStyle.transition;
-          }, 300);
-        }, 2000);
-        
-        console.log('✨ 텍스트 위치로 스크롤 및 하이라이트 완료:', targetText);
-        found = true;
-        break;
+    if (sectionId) {
+      // 해당 섹션 펼치기
+      const sectionHeader = sidebarContainer.querySelector(`[data-section="${sectionId}"] .section-header`) as HTMLElement;
+      if (sectionHeader && !sectionHeader.parentElement?.classList.contains('expanded')) {
+        sectionHeader.click();
       }
+      
+      // 섹션으로 스크롤
+      setTimeout(() => {
+        const sectionElement = sidebarContainer.querySelector(`[data-section="${sectionId}"]`);
+        if (sectionElement) {
+          sectionElement.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'start' 
+          });
+          
+          // 임시 강조 효과
+          sectionElement.classList.add('highlighted-section');
+          setTimeout(() => {
+            sectionElement.classList.remove('highlighted-section');
+          }, 2000);
+        }
+      }, 300);
     }
-    
-    if (!found) {
-      // 찾지 못한 경우 상세 설명 표시
-      const alertMessage = `📋 분석 상세 정보\n\n🔍 발견된 요소: "${highlight.text}"\n💡 분석: ${highlight.explanation}`;
-      alert(alertMessage);
+
+    // 상세 정보 표시 (fallback)
+    if (highlight.explanation) {
+      const alertMessage = [
+        `🎯 ${highlight.type === 'bias' ? '편향성' :
+              highlight.type === 'manipulation' ? '감정 조작' :
+              highlight.type === 'fallacy' ? '논리적 오류' :
+              highlight.type === 'advertisement' ? '광고성' :
+              highlight.type === 'claim' ? '핵심 주장' : '분석'} 분석`,
+        ``,
+        `📋 발견된 텍스트: "${highlight.text}"`,
+        `💡 분석 결과: ${highlight.explanation}`,
+        ``,
+        `💭 해당 섹션에서 더 자세한 정보를 확인하세요.`
+      ].join('\n');
+      
+      // 브라우저의 기본 alert 대신 더 나은 사용자 경험을 위해 로깅
+      console.log('📋 하이라이트 상세 정보:', alertMessage);
     }
   };
+
+  // 사이드바 섹션 클릭 핸들러
+  const handleSectionClick = (_sectionType: string, itemText?: string): void => {
+    // 사이드바에서 항목 클릭 시 본문 하이라이트로 스크롤
+    if (itemText && analysis) {
+      const allHighlights = collectAllHighlights(analysis);
+      const matchingHighlight = allHighlights.find(h => 
+        h.text.includes(itemText) || itemText.includes(h.text)
+      );
+      
+      if (matchingHighlight) {
+        // TextHighlighter 컴포넌트의 스크롤 함수 호출
+        const highlightId = `highlight-${allHighlights.indexOf(matchingHighlight)}-${matchingHighlight.type}-${matchingHighlight.text.substring(0, 10)}`;
+        
+        // 타입 안전한 window 접근
+        if (window.critiAI?.scrollToHighlight) {
+          window.critiAI.scrollToHighlight(highlightId);
+        }
+      }
+    }
+  };
+
+  // 모든 하이라이트 데이터를 통합하여 전달
+  const allHighlights: HighlightedText[] = analysis ? collectAllHighlights(analysis) : [];
 
   return (
     <>
@@ -157,12 +195,13 @@ export const ContentScriptApp: React.FC<ContentScriptAppProps> = ({
         isAnalyzing={isAnalyzing}
         error={error}
         onAnalyze={handleAnalyze}
-        onClose={onClose}
+        onClose={handleClose}
+        onSectionClick={handleSectionClick}
       />
       
-      {analysis && (
+      {analysis && allHighlights.length > 0 && (
         <TextHighlighter
-          highlights={analysis.biasAnalysis.highlightedTexts}
+          highlights={allHighlights}
           onHighlightClick={handleHighlightClick}
         />
       )}
