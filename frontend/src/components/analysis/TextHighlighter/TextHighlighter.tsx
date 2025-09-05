@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useCallback } from 'react';
 import type { HighlightedText } from '@shared/types';
-import { highlightStyles } from './TextHighlighter.style';
 
 interface TextHighlighterProps {
   highlights: HighlightedText[];
@@ -45,25 +44,13 @@ export const TextHighlighter: React.FC<TextHighlighterProps> = ({
       }
     });
     
-    // 기존 스타일 제거
-    const existingStyle = document.querySelector('#criti-ai-highlight-styles');
-    if (existingStyle) {
-      existingStyle.remove();
-    }
+    
     
     appliedHighlights.current.clear();
     highlightElements.current.clear();
   }, []);
 
-  // 하이라이트 스타일 주입
-  const injectStyles = useCallback(() => {
-    if (document.querySelector('#criti-ai-highlight-styles')) return;
-    
-    const style = document.createElement('style');
-    style.id = 'criti-ai-highlight-styles';
-    style.textContent = highlightStyles.styles;
-    document.head.appendChild(style);
-  }, []);
+  
 
   // 본문 영역 선택자들
   const getContentSelectors = () => [
@@ -380,7 +367,6 @@ export const TextHighlighter: React.FC<TextHighlighterProps> = ({
 
     console.log('🎨 하이라이트 적용 시작:', safeHighlights.length, '개');
     
-    injectStyles();
     removeExistingHighlights();
     
     // 약간의 지연 후 적용 (DOM 안정화)
@@ -403,7 +389,7 @@ export const TextHighlighter: React.FC<TextHighlighterProps> = ({
       clearTimeout(timer);
       removeExistingHighlights();
     };
-  }, [safeHighlights, injectStyles, removeExistingHighlights, applyAllHighlights]);
+  }, [safeHighlights, removeExistingHighlights, applyAllHighlights]);
 
   // 컴포넌트 언마운트 시 정리
   useEffect(() => {

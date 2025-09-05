@@ -150,7 +150,6 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
   onClose,
   onSectionClick,
 }) => {
-  const [isVisible, setIsVisible] = useState(false);
   const [expandedSections, setExpandedSections] = useState<{ [key: string]: boolean }>({
     overview: true,
     source: false,
@@ -159,11 +158,6 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
     advertisement: false,
     crossref: false
   });
-
-  useEffect(() => {
-    const timer = setTimeout(() => setIsVisible(true), 100);
-    return () => clearTimeout(timer);
-  }, []);
 
   useEffect(() => {
     // 스타일 주입
@@ -188,7 +182,7 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
   };
 
   return (
-    <div className={`criti-ai-sidebar-container ${isVisible ? 'open' : ''}`}>
+    <>
       <div className="close-button-container">
         <button
           className="close-button"
@@ -816,6 +810,6 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 };

@@ -1947,7 +1947,7 @@ const mountApp = () => {
             }
           });
         } catch (error) {
-          console.log('⚠️ iframe 하이라이트 제거 실패 (보안 제한)');
+          console.log('⚠️ iframe 하이라이트 제거 실패 (보안 제한):', error);
         }
       }
     }
@@ -2052,11 +2052,7 @@ const mountApp = () => {
 
 // 하이라이트용 CSS를 문서 전체에 주입 (Shadow DOM 밖에서 필요)
 const injectHighlightCSS = () => {
-  if (document.getElementById('criti-ai-highlight-styles')) return;
-  
-  const style = document.createElement('style');
-  style.id = 'criti-ai-highlight-styles';
-  style.textContent = `
+  const cssText = `
     .criti-ai-highlight {
       position: relative !important;
       cursor: pointer !important;
@@ -2099,6 +2095,12 @@ const injectHighlightCSS = () => {
       font-weight: 600 !important;
     }
 
+    .criti-ai-highlight-claim {
+      background-color: rgba(16, 185, 129, 0.3) !important;
+      border-bottom: 2px solid #10b981 !important;
+      color: #065f46 !important;
+    }
+
     .criti-ai-tooltip {
       position: fixed !important;
       background: linear-gradient(135deg, #1f2937, #374151) !important;
@@ -2127,7 +2129,35 @@ const injectHighlightCSS = () => {
       }
     }
   `;
-  document.head.appendChild(style);
+
+  // 1. 메인 문서에 스타일 주입
+  if (!document.getElementById('criti-ai-highlight-styles')) {
+    const style = document.createElement('style');
+    style.id = 'criti-ai-highlight-styles';
+    style.textContent = cssText;
+    document.head.appendChild(style);
+  }
+
+  // 2. 네이버 블로그 iframe에 스타일 주입
+  if (window.location.href.includes('blog.naver.com')) {
+    const iframe = document.querySelector('#mainFrame') as HTMLIFrameElement;
+    if (iframe) {
+      iframe.addEventListener('load', () => {
+        try {
+          const frameDocument = iframe.contentDocument;
+          if (frameDocument && !frameDocument.getElementById('criti-ai-highlight-styles')) {
+            const frameStyle = frameDocument.createElement('style');
+            frameStyle.id = 'criti-ai-highlight-styles';
+            frameStyle.textContent = cssText;
+            frameDocument.head.appendChild(frameStyle);
+            console.log('✅ 네이버 블로그 iframe에 스타일 주입 성공');
+          }
+        } catch (e) {
+          console.error('❌ 네이버 블로그 iframe 스타일 주입 실패:', e);
+        }
+      });
+    }
+  }
 };
 
 // 페이지 로드 완료 후 실행
@@ -2185,8 +2215,8 @@ const observer = new MutationObserver(async () => {
           childList: true,
           subtree: true
         });
-      } catch {
-        console.log("⚠️ iframe 관찰 설정 실패 (보안 제한)");
+      } catch (error) {
+        console.log("⚠️ iframe 관찰 설정 실패 (보안 제한):", error);
       }
     }
   }
