@@ -85,7 +85,13 @@ export interface AdvertisementAnalysis {
 }
 
 export interface AdvertisementIndicator {
-  type: "product_mention" | "affiliate_link" | "sponsored_content" | "promotional_language" | "call_to_action" | "brand_focus";
+  type:
+    | "product_mention"
+    | "affiliate_link"
+    | "sponsored_content"
+    | "promotional_language"
+    | "call_to_action"
+    | "brand_focus";
   evidence: string; // 근거가 된 텍스트
   explanation: string;
   weight: number; // 가중치
@@ -145,7 +151,11 @@ export interface TextPosition {
 // 챌린지 게임 타입
 export interface Challenge {
   id: string;
-  type: "article-analysis" | "image-detection" | "data-visualization" | "ad-detection";
+  type:
+    | "article-analysis"
+    | "image-detection"
+    | "data-visualization"
+    | "ad-detection";
   title: string;
   content: string;
   correctAnswers: string[];
@@ -227,7 +237,12 @@ export interface AnalysisStats {
 
 // 알림/경고 타입
 export interface AnalysisWarning {
-  type: "high_bias" | "multiple_fallacies" | "unreliable_source" | "heavy_advertising" | "misleading_data";
+  type:
+    | "high_bias"
+    | "multiple_fallacies"
+    | "unreliable_source"
+    | "heavy_advertising"
+    | "misleading_data";
   severity: "low" | "medium" | "high" | "critical";
   message: string;
   actionRecommendation?: string;

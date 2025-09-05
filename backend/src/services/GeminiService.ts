@@ -1,5 +1,5 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import type { TrustAnalysis, AnalysisRequest } from "@criti-ai/shared";
+import type { TrustAnalysis, AnalysisRequest, HighlightedText, LogicalFallacy, AdvertisementIndicator } from "@criti-ai/shared";
 
 export class GeminiService {
   private genAI: GoogleGenerativeAI;
@@ -64,6 +64,33 @@ export class GeminiService {
 **분석 대상**: ${contentType} 콘텐츠
 **분석 수준**: 종합적 분석 (신뢰도, 편향성, 논리성, 광고성, 근거성)
 
+# ⭐ 중요: 하이라이트 텍스트 추출 지침 ⭐
+
+분석 과정에서 다음과 같은 텍스트들을 반드시 찾아내어 하이라이트 대상으로 포함시켜주세요:
+
+## 편향성 관련 하이라이트
+- 감정을 자극하는 단어: "충격적인", "놀라운", "끔찍한", "최악의" 등
+- 과장 표현: "반드시", "절대", "완벽한", "최고의", "유일한" 등  
+- 클릭베이트 문구: "이것만 알면", "절대 놓치면 안 될", "지금 당장" 등
+- 선동적 표현: 특정 집단을 비하하거나 갈등을 조장하는 표현
+
+## 논리적 오류 관련 하이라이트
+- 성급한 일반화: "모든 ~는", "항상 ~다", 일부 사례로 전체를 단정하는 표현
+- 흑백논리: "~이거나 ~이다", 중간 지대를 배제하는 이분법적 표현
+- 허수아비 공격: 상대방 주장을 왜곡하여 반박하는 부분
+- 인신공격: 주장의 내용이 아닌 사람을 비판하는 표현
+
+## 광고성 관련 하이라이트
+- 제품/서비스 언급: 브랜드명, 제품명이 언급된 부분
+- 홍보성 표현: "추천", "후기", "체험", "협찬" 등
+- 행동 유도: "구매하세요", "클릭하세요", "방문하세요" 등
+- 혜택 강조: "할인", "무료", "특가", "이벤트" 등
+
+## 핵심 주장 관련 하이라이트  
+- 기사의 핵심 메시지를 담은 문장
+- 팩트체크가 필요한 주요 주장
+- 통계나 수치를 제시하는 부분
+
 # ANALYSIS INSTRUCTIONS (Step-by-Step Thinking)
 
 ## 1단계: 콘텐츠 전체 정독 및 맥락 파악
@@ -81,20 +108,28 @@ export class GeminiService {
 - 제휴 링크, 광고성 표현, 브랜드 언급, 구매 유도 등을 찾습니다  
 - 네이티브 광고, 협찬 콘텐츠, 인플루언서 마케팅 여부를 판단합니다
 - 객관적 정보 제공 vs 상업적 목적의 균형을 평가합니다
+- **중요**: 광고성 지표로 발견된 텍스트를 정확히 기록합니다
 
-## 4단계: 편향성 및 감성 분석
+## 4단계: 편향성 및 감성 분석  
 - 감정을 자극하는 단어, 선동적인 문구를 모두 찾아냅니다
 - "충격", "반드시", "절대", "최고", "완벽" 등 과장 표현을 탐지합니다
 - 특정 이념이나 집단에 치우친 표현을 식별합니다
 - 클릭베이트 요소(호기심 갭, 감정 트리거, 긴급성, 최상급 표현)를 분석합니다
+- **중요**: 편향적 표현의 정확한 텍스트를 기록합니다
 
 ## 5단계: 논리적 오류 및 근거 분석
 - 성급한 일반화, 흑백논리, 허수아비 공격, 인신공격 등의 오류를 찾습니다
 - 주장에 대한 근거와 출처의 적절성을 평가합니다
 - 통계나 데이터의 오용, 인과관계의 오류를 탐지합니다
 - 사실과 의견을 구분하여 분석합니다
+- **중요**: 논리적 오류가 포함된 정확한 문장을 affectedText에 기록합니다
 
-## 6단계: 종합 점수 산정 및 근거 제시
+## 6단계: 핵심 주장 및 교차 검증 필요 사항 식별
+- 기사의 핵심 주장과 메시지를 추출합니다
+- 팩트체크가 필요한 중요한 주장들을 식별합니다
+- **중요**: 핵심 주장의 정확한 텍스트를 keyClaims에 기록합니다
+
+## 7단계: 종합 점수 산정 및 근거 제시
 - 각 분석 항목별 점수와 그 근거를 명확히 제시합니다
 - 발견된 문제점들이 전체 신뢰도에 미치는 영향을 계산합니다
 - 사용자가 이해하기 쉬운 구체적인 예시와 함께 설명합니다
@@ -132,7 +167,7 @@ ${request.content}
       "score": "0-100 사이의 정수. 감정적 중립성 점수 (높을수록 중립적)",
       "manipulativeWords": [
         {
-          "word": "감지된 조작적 단어",
+          "word": "감지된 조작적 단어 (원문에서 정확히 추출한 텍스트)",
           "category": "'emotional' | 'exaggeration' | 'urgency' | 'authority' | 'fear'",
           "impact": "'low' | 'medium' | 'high'",
           "explanation": "왜 이 단어가 조작적인지 설명"
@@ -148,18 +183,23 @@ ${request.content}
     "clickbaitElements": [
       {
         "type": "'curiosity_gap' | 'emotional_trigger' | 'urgency' | 'superlative'",
-        "text": "클릭베이트 요소에 해당하는 실제 텍스트",
+        "text": "클릭베이트 요소에 해당하는 실제 텍스트 (원문에서 정확히 추출)",
         "explanation": "왜 이것이 클릭베이트인지 설명",
         "severity": "'low' | 'medium' | 'high'"
       }
     ],
     "highlightedTexts": [
       {
-        "text": "본문에서 하이라이트할 정확한 텍스트",
-        "type": "'bias' | 'fallacy' | 'manipulation' | 'advertisement' | 'claim'",
+        "text": "본문에서 하이라이트할 정확한 텍스트 (원문과 정확히 일치해야 함)",
+        "type": "'bias' | 'manipulation'",
         "explanation": "이 텍스트를 하이라이트한 구체적 이유",
         "severity": "'low' | 'medium' | 'high'",
-        "category": "세부 카테고리 (예: 과장 표현, 감정 호소 등)"
+        "category": "세부 카테고리 (예: 과장 표현, 감정 호소, 클릭베이트 등)",
+        "position": {
+          "start": 0,
+          "end": 0,
+          "selector": ""
+        }
       }
     ],
     "advertisementScore": "0-100 사이의 정수. 광고성 점수 (높을수록 덜 광고적)"
@@ -173,7 +213,7 @@ ${request.content}
     "indicators": [
       {
         "type": "'product_mention' | 'affiliate_link' | 'sponsored_content' | 'promotional_language' | 'call_to_action' | 'brand_focus'",
-        "evidence": "광고성을 나타내는 실제 텍스트 증거",
+        "evidence": "광고성을 나타내는 실제 텍스트 증거 (원문에서 정확히 추출)",
         "explanation": "왜 이것이 광고성 지표인지 설명",
         "weight": "1-10 사이의 정수. 가중치"
       }
@@ -183,15 +223,24 @@ ${request.content}
   "logicalFallacies": [
     {
       "type": "논리적 오류의 구체적 유형 (예: 성급한 일반화, 흑백논리, 인신공격)",
-      "affectedText": "오류가 포함된 원문의 정확한 텍스트",
+      "description": "이 논리적 오류에 대한 간단한 설명",
+      "affectedText": "오류가 포함된 원문의 정확한 텍스트 (원문과 정확히 일치해야 함)",
       "explanation": "왜 이것이 논리적 오류인지 초등학생도 이해할 수 있게 설명",
       "severity": "'low' | 'medium' | 'high'",
-      "examples": ["유사한 논리적 오류의 간단한 예시들"]
+      "examples": ["유사한 논리적 오류의 간단한 예시들"],
+      "position": {
+        "start": 0,
+        "end": 0,
+        "selector": ""
+      }
     }
   ],
   
   "crossReference": {
-    "keyClaims": ["이 콘텐츠의 핵심 주장 2-3가지를 간결하게 요약"],
+    "keyClaims": [
+      "이 콘텐츠의 핵심 주장들을 원문에서 정확히 추출한 텍스트",
+      "팩트체크가 필요한 중요한 주장들"
+    ],
     "relatedArticleKeywords": "교차 검증을 위한 추천 검색 키워드",
     "relatedArticles": [],
     "consensus": "'agree' | 'disagree' | 'mixed' | 'insufficient'",
@@ -220,17 +269,28 @@ ${request.content}
 
 1. **JSON ONLY**: 응답은 반드시 위의 형식을 완전히 준수하는 JSON 객체여야 합니다. JSON 앞뒤로 \`\`\`json 마크다운이나 다른 설명을 붙이지 마세요.
 
-2. **정확한 텍스트 매칭**: "affectedText", "highlightedTexts"의 "text" 필드는 반드시 원문에 존재하는 내용과 정확히 일치해야 합니다.
+2. **정확한 텍스트 매칭**: 모든 텍스트 필드("affectedText", "text", "evidence", "keyClaims" 등)는 반드시 원문에 존재하는 내용과 정확히 일치해야 합니다. 단 한 글자도 다르면 안 됩니다.
 
-3. **구체적 근거 제시**: 모든 점수와 판단에 대해 구체적이고 납득할 만한 근거를 제시하세요.
+3. **하이라이트 텍스트 필수 포함**: 
+   - biasAnalysis.highlightedTexts에는 편향적/조작적 표현들을 포함
+   - logicalFallacies[].affectedText에는 오류가 포함된 문장들을 포함
+   - advertisementAnalysis.indicators[].evidence에는 광고성 표현들을 포함
+   - crossReference.keyClaims에는 핵심 주장들을 포함
 
-4. **한국어 응답**: 모든 설명과 분석은 자연스러운 한국어로 작성하세요.
+4. **구체적 근거 제시**: 모든 점수와 판단에 대해 구체적이고 납득할 만한 근거를 제시하세요.
 
-5. **광고성 분석 중시**: 현대 디지털 환경에서 광고성 콘텐츠 탐지는 매우 중요합니다. 세심하게 분석하세요.
+5. **한국어 응답**: 모든 설명과 분석은 자연스러운 한국어로 작성하세요.
 
-6. **분석 불가능 시**: 콘텐츠가 너무 짧거나 분석 불가능할 경우, "overallScore"를 -1로 설정하고 "analysisSummary"에 분석 불가 사유를 작성하세요.
+6. **광고성 분석 중시**: 현대 디지털 환경에서 광고성 콘텐츠 탐지는 매우 중요합니다. 세심하게 분석하세요.
 
-7. **균형 잡힌 판단**: 지나치게 관대하거나 엄격하지 말고, 균형 잡힌 기준으로 분석하세요.
+7. **분석 불가능 시**: 콘텐츠가 너무 짧거나 분석 불가능할 경우, "overallScore"를 -1로 설정하고 "analysisSummary"에 분석 불가 사유를 작성하세요.
+
+8. **균형 잡힌 판단**: 지나치게 관대하거나 엄격하지 말고, 균형 잡힌 기준으로 분석하세요.
+
+9. **텍스트 추출 우선순위**: 
+   - 가장 명확하고 문제가 되는 표현들 우선 선택
+   - 너무 짧은 텍스트(3글자 미만)보다는 의미 있는 구문 단위로 추출
+   - 하이라이트할 가치가 있는 텍스트만 선별하여 포함
 
 `;
   }
@@ -283,6 +343,9 @@ ${request.content}
       // 분석 결과 검증
       this.validateAnalysisResult(parsed);
       
+      // 하이라이트 텍스트 후처리 (중복 제거 및 정리)
+      this.postProcessHighlights(parsed);
+      
       return parsed;
     } catch (error) {
       console.error("Analysis parsing error:", error);
@@ -293,7 +356,7 @@ ${request.content}
 
   private validateAnalysisResult(analysis: TrustAnalysis): void {
     // 필수 필드 검증
-    if (typeof analysis.overallScore !== 'number' || analysis.overallScore < 0 || analysis.overallScore > 100) {
+    if (typeof analysis.overallScore !== 'number' || analysis.overallScore < -1 || analysis.overallScore > 100) {
       throw new Error("overallScore가 유효하지 않습니다");
     }
     
@@ -305,16 +368,79 @@ ${request.content}
       throw new Error("sourceCredibility.score가 유효하지 않습니다");
     }
     
-    // 배열 필드 검증
+    // 배열 필드 검증 및 초기화
     if (!Array.isArray(analysis.logicalFallacies)) {
-      throw new Error("logicalFallacies가 배열이 아닙니다");
+      analysis.logicalFallacies = [];
     }
     
-    if (!Array.isArray(analysis.biasAnalysis.highlightedTexts)) {
-      throw new Error("highlightedTexts가 배열이 아닙니다");
+    if (!analysis.biasAnalysis) {
+      throw new Error("biasAnalysis가 누락되었습니다");
+    }
+    
+    if (!analysis.biasAnalysis.highlightedTexts || !Array.isArray(analysis.biasAnalysis.highlightedTexts)) {
+      analysis.biasAnalysis.highlightedTexts = [];
+    }
+    
+    if (!analysis.advertisementAnalysis) {
+      throw new Error("advertisementAnalysis가 누락되었습니다");
+    }
+    
+    if (!analysis.advertisementAnalysis.indicators || !Array.isArray(analysis.advertisementAnalysis.indicators)) {
+      analysis.advertisementAnalysis.indicators = [];
+    }
+    
+    if (!analysis.crossReference) {
+      throw new Error("crossReference가 누락되었습니다");
+    }
+    
+    if (!Array.isArray(analysis.crossReference.keyClaims)) {
+      analysis.crossReference.keyClaims = [];
     }
     
     console.log("✅ 분석 결과 검증 완료");
+  }
+
+  private postProcessHighlights(analysis: TrustAnalysis): void {
+    // 하이라이트 텍스트 정리 및 검증
+    if (analysis.biasAnalysis.highlightedTexts) {
+      analysis.biasAnalysis.highlightedTexts = analysis.biasAnalysis.highlightedTexts
+        .filter((highlight: HighlightedText) => highlight.text && highlight.text.trim().length >= 3)
+        .map((highlight: HighlightedText) => ({
+          ...highlight,
+          text: highlight.text.trim(),
+          position: highlight.position || { start: 0, end: highlight.text.length, selector: '' }
+        }));
+    }
+
+    // 논리적 오류의 affectedText 정리
+    if (analysis.logicalFallacies) {
+      analysis.logicalFallacies = analysis.logicalFallacies
+        .filter((fallacy: LogicalFallacy) => fallacy.affectedText && fallacy.affectedText.trim().length >= 3)
+        .map((fallacy: LogicalFallacy) => ({
+          ...fallacy,
+          affectedText: fallacy.affectedText.trim(),
+          position: fallacy.position || { start: 0, end: fallacy.affectedText.length, selector: '' }
+        }));
+    }
+
+    // 광고성 지표의 evidence 정리
+    if (analysis.advertisementAnalysis?.indicators) {
+      analysis.advertisementAnalysis.indicators = analysis.advertisementAnalysis.indicators
+        .filter((indicator: AdvertisementIndicator) => indicator.evidence && indicator.evidence.trim().length >= 3)
+        .map((indicator: AdvertisementIndicator) => ({
+          ...indicator,
+          evidence: indicator.evidence.trim()
+        }));
+    }
+
+    // keyClaims 정리
+    if (analysis.crossReference?.keyClaims) {
+      analysis.crossReference.keyClaims = analysis.crossReference.keyClaims
+        .filter((claim: string) => claim && claim.trim().length >= 3)
+        .map((claim: string) => claim.trim());
+    }
+
+    console.log("✅ 하이라이트 텍스트 후처리 완료");
   }
 
   async generateChallenge(type: string, difficulty: string): Promise<Record<string, unknown>> {
