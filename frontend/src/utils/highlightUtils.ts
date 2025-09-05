@@ -11,11 +11,6 @@ export function collectAllHighlights(analysis: TrustAnalysis): HighlightedText[]
 
   // 1. 편향성 분석에서 하이라이트 수집
   if (analysis.biasAnalysis) {
-    // 기존 highlightedTexts
-    if (analysis.biasAnalysis.highlightedTexts) {
-      highlights.push(...analysis.biasAnalysis.highlightedTexts);
-    }
-
     // 감정적 편향 - 조작적 표현들
     if (analysis.biasAnalysis.emotionalBias?.manipulativeWords) {
       analysis.biasAnalysis.emotionalBias.manipulativeWords.forEach((wordObj) => {

@@ -44,7 +44,6 @@ export interface SourceCredibility {
 export interface BiasAnalysis {
   emotionalBias: EmotionalBias;
   politicalBias: PoliticalBias;
-  highlightedTexts: HighlightedText[];
   clickbaitElements: ClickbaitElement[]; // 클릭베이트 요소
 }
 
