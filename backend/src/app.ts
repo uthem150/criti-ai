@@ -7,21 +7,39 @@ import compression from "compression";
 import type { Request, Response, NextFunction } from "express";
 import analysisRoutes from "./routes/analysis";
 import challengeRoutes from "./routes/challenge";
+import { GeminiService } from './services/GeminiService'; // 정적 import로 변경
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
+
+// CORS 설정
+const allowedOrigins = [
+  // 주요 프로덕션/개발 프론트엔드 URL
+  FRONTEND_URL,
+  // TODO: 여기에 실제 프로덕션 빌드된 크롬 확장 프로그램 ID 추가필요
+  // 예: 'chrome-extension://abcdefghijklmnopqrstuvwxyz123456'
+  `chrome-extension://${process.env.CHROME_EXTENSION_ID || 'your-extension-id-here'}`,
+  /^moz-extension:\/\/.*/, // Firefox 확장 (정규식)
+];
+
+if (process.env.NODE_ENV === 'development') {
+  // 개발 환경에서는 localhost를 추가로 허용
+  allowedOrigins.push('http://localhost:5173', 'http://localhost:3000');
+}
 
 // 미들웨어 설정
 app.use(helmet());
 app.use(
   cors({
-    origin: [
-      "http://localhost:5173", // Frontend 개발 서버
-      "http://localhost:3000", // 추가 개발 포트
-      "chrome-extension://*",    // 크롬 확장 프로그램
-      /^chrome-extension:\/\/.*/, // 크롬 확장 정규식
-      "moz-extension://*",       // 파이어펭스 확장
-    ],
+    origin: (origin, callback) => {
+      // origin이 없거나 (서버 간 요청 등) 허용 목록에 있는 경우 허용
+      if (!origin || allowedOrigins.some(allowed => new RegExp(allowed).test(origin))) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
@@ -45,7 +63,7 @@ app.get("/health", (req: Request, res: Response) => {
 // Gemini API 테스트 엔드포인트
 app.get("/test-gemini", async (req: Request, res: Response) => {
   try {
-    const geminiService = new (await import('./services/GeminiService.js')).GeminiService();
+    const geminiService = new GeminiService(); // 직접 인스턴스화
     const testResult = await geminiService.analyzeContent({
       url: 'https://example.com',
       title: '테스트 기사',
@@ -68,7 +86,7 @@ app.get("/test-gemini", async (req: Request, res: Response) => {
 
 // 챌린지 웹 페이지 라우팅 (프론트엔드로 리다이렉트)
 app.get("/challenge", (req: Request, res: Response) => {
-  res.redirect("http://localhost:5173/challenge.html");
+  res.redirect(`${FRONTEND_URL}/challenge.html`); // 환경 변수 사용
 });
 
 // API 라우터 연결
@@ -78,11 +96,19 @@ app.use("/api/challenge", challengeRoutes);
 // 에러 핸들링
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   console.error(err.stack);
-  res.status(500).json({
-    success: false,
-    error: "Internal Server Error",
-    timestamp: new Date().toISOString(),
-  });
+  // CORS 에러인 경우 더 친절한 메시지 제공
+  if (err.message === 'Not allowed by CORS') {
+    res.status(403).json({
+      success: false,
+      error: 'CORS policy does not allow access from this origin.',
+    });
+  } else {
+    res.status(500).json({
+      success: false,
+      error: "Internal Server Error",
+      timestamp: new Date().toISOString(),
+    });
+  }
 });
 
 // 404 핸들링
