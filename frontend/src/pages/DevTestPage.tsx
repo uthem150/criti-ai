@@ -5,6 +5,7 @@ import { ContentScriptApp } from "../components/ContentScriptApp";
 const mockProps = {
   url: "https://example.com/news/shocking-discovery",
   title: "충격적인 사실이 밝혀졌다! 전문가들도 놀란 새로운 발견",
+  sidebarVisible: true, // 개발 테스트에서는 사이드바 항상 표시
   content: `
 이번 연구에서 충격적인 사실이 밝혀졌습니다. 
 전문가들은 이 결과에 대해 "반드시 주의해야 할 문제"라고 말했습니다.

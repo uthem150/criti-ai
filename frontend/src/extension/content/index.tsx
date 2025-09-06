@@ -1,5 +1,6 @@
 import { createRoot } from "react-dom/client";
 import { ContentScriptApp } from "../../components/ContentScriptApp";
+import { debugCommands } from "../../utils/debugUtils";
 
 // Shadow DOM용 완전히 격리된 CSS - 전면 재설계
 const getShadowCSS = () => `
@@ -1808,6 +1809,7 @@ const mountApp = () => {
   let sidebarVisible = false;
   let shadowHost: HTMLElement | null = null;
   let shadowRoot: ShadowRoot | null = null;
+  let reactRoot: import('react-dom/client').Root | null = null;
 
   const toggleSidebar = () => {
     console.log("🔄 사이드바 토글, 현재 상태:", sidebarVisible);
@@ -1843,21 +1845,24 @@ const mountApp = () => {
       shadowRoot.appendChild(sidebarContainer);
       
       // React 앱 마운트
-      const root = createRoot(sidebarContainer);
+      reactRoot = createRoot(sidebarContainer);
       
       // 페이지 데이터 추출 (네이버 블로그 지원)
       extractPageContent().then(pageData => {
-        root.render(
-          <ContentScriptApp
-            url={window.location.href}
-            title={pageData.title}
-            content={pageData.content}
-            onClose={() => {
-              console.log("✖️ 사이드바 닫기 요청");
-              closeSidebar();
-            }}
-          />
-        );
+        if (reactRoot) {
+          reactRoot.render(
+            <ContentScriptApp
+              url={window.location.href}
+              title={pageData.title}
+              content={pageData.content}
+              sidebarVisible={sidebarVisible}
+              onClose={() => {
+                console.log("✖️ 사이드바 닫기 요청");
+                closeSidebar();
+              }}
+            />
+          );
+        }
       });
     }
 
@@ -1877,21 +1882,84 @@ const mountApp = () => {
         container.classList.add('open');
       }
     }
+    
+    // React 상태 업데이트
+    updateReactAppState();
   };
 
   const closeSidebar = () => {
-    console.log("🔒 사이드바 닫기");
+    console.log("🔒 사이드바 닫기 및 하이라이트 제거");
     sidebarVisible = false;
+    
+    // 사이드바 닫기 애니메이션
     if (shadowRoot) {
       const container = shadowRoot.querySelector('.criti-ai-sidebar-container');
       if (container) {
         container.classList.remove('open');
       }
     }
+    
+    // 모든 하이라이트 제거
+    clearAllHighlights();
+    
+    // React 상태 업데이트
+    updateReactAppState();
+  };
+  
+  // React 앱 상태 업데이트 함수
+  const updateReactAppState = () => {
+    if (reactRoot && shadowRoot) {
+      extractPageContent().then(pageData => {
+        if (reactRoot) {
+          reactRoot.render(
+            <ContentScriptApp
+              url={window.location.href}
+              title={pageData.title}
+              content={pageData.content}
+              sidebarVisible={sidebarVisible}
+              onClose={() => {
+                console.log("✖️ 사이드바 닫기 요청");
+                closeSidebar();
+              }}
+            />
+          );
+        }
+      });
+    }
   };
 
-  // 전역 하이라이트 관리 시스템
+  // 전역 하이라이트 관리 시스템 (강화된 버전)
   const highlightElements = new Map<string, HTMLElement>();
+  const activeTooltips = new Set<HTMLElement>();
+  const eventListeners = new Set<() => void>();
+  
+  // 메모리 누수 방지를 위한 정리 함수
+  const cleanupResources = () => {
+    console.log('🧹 리소스 정리 시작');
+    
+    // 모든 이벤트 리스너 제거
+    eventListeners.forEach(cleanup => {
+      try {
+        cleanup();
+      } catch (error) {
+        console.warn('⚠️ 이벤트 리스너 정리 실패:', error);
+      }
+    });
+    eventListeners.clear();
+    
+    // 모든 툴팁 제거
+    activeTooltips.forEach(tooltip => {
+      if (tooltip.parentNode) {
+        tooltip.remove();
+      }
+    });
+    activeTooltips.clear();
+    
+    // 하이라이트 요소 맵 정리
+    highlightElements.clear();
+    
+    console.log('✅ 리소스 정리 완료');
+  };
   
   const scrollToHighlight = (highlightId: string): void => {
     console.log('🎯 스크롤 요청:', highlightId);
@@ -1919,25 +1987,36 @@ const mountApp = () => {
   const clearAllHighlights = (): void => {
     console.log('🗑️ 모든 하이라이트 제거 시작');
     
-    // 툴팁 제거
+    // 메인 문서 툴팅 제거
     const tooltips = document.querySelectorAll('.criti-ai-tooltip');
-    tooltips.forEach(tooltip => tooltip.remove());
+    tooltips.forEach(tooltip => {
+      activeTooltips.delete(tooltip as HTMLElement);
+      tooltip.remove();
+    });
     
-    // 하이라이트 요소 제거
+    // 메인 문서 하이라이트 제거
     const highlights = document.querySelectorAll('.criti-ai-highlight');
     highlights.forEach(element => {
       const parent = element.parentNode;
       if (parent) {
         parent.replaceChild(document.createTextNode(element.textContent || ''), element);
-        parent.normalize(); // 텍스트 노드 정리
+        parent.normalize();
       }
     });
     
-    // 네이버 블로그 iframe 내부 하이라이트도 제거
+    // 네이버 블로그 iframe 내부 하이라이트 제거
     if (window.location.href.includes('blog.naver.com')) {
       const mainFrame = document.querySelector('#mainFrame') as HTMLIFrameElement;
       if (mainFrame && mainFrame.contentDocument) {
         try {
+          // iframe 툴팅 제거
+          const frameTooltips = mainFrame.contentDocument.querySelectorAll('.criti-ai-tooltip');
+          frameTooltips.forEach(tooltip => {
+            activeTooltips.delete(tooltip as HTMLElement);
+            tooltip.remove();
+          });
+          
+          // iframe 하이라이트 제거
           const frameHighlights = mainFrame.contentDocument.querySelectorAll('.criti-ai-highlight');
           frameHighlights.forEach(element => {
             const parent = element.parentNode;
@@ -1946,14 +2025,18 @@ const mountApp = () => {
               parent.normalize();
             }
           });
+          
+          console.log('✅ iframe 하이라이트 제거 완료');
         } catch (error) {
           console.log('⚠️ iframe 하이라이트 제거 실패 (보안 제한):', error);
         }
       }
     }
     
-    // Map 초기화
+    // 맵 정리
     highlightElements.clear();
+    activeTooltips.clear();
+    
     console.log('✅ 모든 하이라이트 제거 완료');
   };
   
@@ -2003,6 +2086,8 @@ const mountApp = () => {
       scrollToHighlight: (highlightId: string) => void;
       clearAllHighlights: () => void;
       scrollToHighlightByText: (text: string, type?: string) => boolean;
+      cleanupResources: () => void;
+      version: string;
     };
   }
 
@@ -2012,7 +2097,9 @@ const mountApp = () => {
     highlightElements,
     scrollToHighlight,
     clearAllHighlights,
-    scrollToHighlightByText
+    scrollToHighlightByText,
+    cleanupResources,
+    version: '2.0.0'
   };
 
   // 개선된 메시지 리스너
@@ -2050,99 +2137,193 @@ const mountApp = () => {
   console.log("✅ Shadow DOM 기반 Criti AI 시스템 초기화 완료");
 };
 
-// 하이라이트용 CSS를 문서 전체에 주입 (Shadow DOM 밖에서 필요)
-const injectHighlightCSS = () => {
-  const cssText = `
+// 하이라이트 CSS 주입 시스템
+const getOptimizedHighlightCSS = () => `
+  /* 하이라이트 기본 스타일 */
+  .criti-ai-highlight {
+    position: relative !important;
+    cursor: pointer !important;
+    padding: 2px 4px !important;
+    border-radius: 4px !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    z-index: 999990 !important;
+    display: inline !important;
+    line-height: inherit !important;
+    font-family: inherit !important;
+    font-size: inherit !important;
+    text-decoration: none !important;
+    border: none !important;
+    outline: none !important;
+    box-sizing: border-box !important;
+  }
+  
+  .criti-ai-highlight:hover {
+    transform: scale(1.02) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+    filter: brightness(1.1) !important;
+  }
+
+  /* 편향성 하이라이트 */
+  .criti-ai-highlight-bias {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.25), rgba(251, 191, 36, 0.35)) !important;
+    border-bottom: 2px solid #f59e0b !important;
+    color: #92400e !important;
+    font-weight: 600 !important;
+  }
+  
+  .criti-ai-highlight-bias:hover {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.4), rgba(251, 191, 36, 0.5)) !important;
+  }
+
+  /* 논리적 오류 하이라이트 */
+  .criti-ai-highlight-fallacy {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.25), rgba(248, 113, 113, 0.35)) !important;
+    border-bottom: 2px solid #ef4444 !important;
+    color: #991b1b !important;
+    font-weight: 600 !important;
+  }
+  
+  .criti-ai-highlight-fallacy:hover {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.4), rgba(248, 113, 113, 0.5)) !important;
+  }
+
+  /* 감정 조작 하이라이트 */
+  .criti-ai-highlight-manipulation {
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.25), rgba(196, 181, 253, 0.35)) !important;
+    border-bottom: 2px solid #a855f7 !important;
+    color: #6b21a8 !important;
+    font-weight: 600 !important;
+  }
+  
+  .criti-ai-highlight-manipulation:hover {
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.4), rgba(196, 181, 253, 0.5)) !important;
+  }
+
+  /* 광고성 하이라이트 */
+  .criti-ai-highlight-advertisement {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.25), rgba(52, 211, 153, 0.35)) !important;
+    border-bottom: 2px solid #10b981 !important;
+    color: #065f46 !important;
+    font-weight: 600 !important;
+  }
+  
+  .criti-ai-highlight-advertisement:hover {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.4), rgba(52, 211, 153, 0.5)) !important;
+  }
+
+  /* 핵심 주장 하이라이트 */
+  .criti-ai-highlight-claim {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.25), rgba(147, 197, 253, 0.35)) !important;
+    border-bottom: 2px solid #3b82f6 !important;
+    color: #1e40af !important;
+    font-weight: 500 !important;
+  }
+  
+  .criti-ai-highlight-claim:hover {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.4), rgba(147, 197, 253, 0.5)) !important;
+  }
+
+  /* 포커스 효과 */
+  .criti-ai-highlight-focused {
+    animation: critiHighlightPulse 2s ease-in-out !important;
+    transform: scale(1.05) !important;
+    z-index: 999999 !important;
+    position: relative !important;
+  }
+  
+  @keyframes critiHighlightPulse {
+    0% {
+      box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.8);
+      background-color: rgba(59, 130, 246, 0.5);
+    }
+    50% {
+      box-shadow: 0 0 0 15px rgba(59, 130, 246, 0.3);
+      background-color: rgba(59, 130, 246, 0.7);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+    }
+  }
+
+  /* 툴팁 스타일 */
+  .criti-ai-tooltip {
+    position: fixed !important;
+    background: linear-gradient(135deg, #1f2937, #374151) !important;
+    color: white !important;
+    padding: 16px 20px !important;
+    border-radius: 12px !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    line-height: 1.5 !important;
+    max-width: 350px !important;
+    z-index: 1000000 !important;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.35) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    backdrop-filter: blur(20px) !important;
+    animation: critiTooltipFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    pointer-events: none !important;
+    user-select: none !important;
+    word-wrap: break-word !important;
+    white-space: normal !important;
+  }
+  
+  @keyframes critiTooltipFadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-10px) scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+  
+  /* 다크 모드 지원 */
+  @media (prefers-color-scheme: dark) {
     .criti-ai-highlight {
-      position: relative !important;
-      cursor: pointer !important;
-      padding: 1px 3px !important;
-      border-radius: 3px !important;
-      transition: all 0.2s ease !important;
-      z-index: 999990 !important;
+      filter: brightness(1.2) !important;
     }
     
-    .criti-ai-highlight:hover {
-      transform: scale(1.02) !important;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
-    }
-
-    .criti-ai-highlight-bias {
-      background-color: rgba(245, 158, 11, 0.3) !important;
-      border-bottom: 2px solid #f59e0b !important;
-      color: #92400e !important;
-      font-weight: 600 !important;
-    }
-
-    .criti-ai-highlight-fallacy {
-      background-color: rgba(239, 68, 68, 0.3) !important;
-      border-bottom: 2px solid #ef4444 !important;
-      color: #991b1b !important;
-      font-weight: 600 !important;
-    }
-
-    .criti-ai-highlight-manipulation {
-      background-color: rgba(168, 85, 247, 0.3) !important;
-      border-bottom: 2px solid #a855f7 !important;
-      color: #7c2d12 !important;
-      font-weight: 600 !important;
-    }
-
-    .criti-ai-highlight-advertisement {
-      background-color: rgba(16, 185, 129, 0.3) !important;
-      border-bottom: 2px solid #10b981 !important;
-      color: #065f46 !important;
-      font-weight: 600 !important;
-    }
-
-    .criti-ai-highlight-claim {
-      background-color: rgba(16, 185, 129, 0.3) !important;
-      border-bottom: 2px solid #10b981 !important;
-      color: #065f46 !important;
-    }
-
     .criti-ai-tooltip {
-      position: fixed !important;
-      background: linear-gradient(135deg, #1f2937, #374151) !important;
-      color: white !important;
-      padding: 12px 16px !important;
-      border-radius: 12px !important;
-      font-size: 14px !important;
-      font-weight: 500 !important;
-      line-height: 1.5 !important;
-      max-width: 320px !important;
-      z-index: 1000000 !important;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3) !important;
-      border: 1px solid rgba(255, 255, 255, 0.1) !important;
-      backdrop-filter: blur(20px) !important;
-      animation: tooltipFadeIn 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+      background: linear-gradient(135deg, #0f172a, #1e293b) !important;
+      border-color: rgba(255, 255, 255, 0.2) !important;
+    }
+  }
+  
+  /* 모바일 최적화 */
+  @media (max-width: 768px) {
+    .criti-ai-highlight {
+      padding: 1px 2px !important;
     }
     
-    @keyframes tooltipFadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(-10px) scale(0.95);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-      }
+    .criti-ai-tooltip {
+      max-width: 280px !important;
+      font-size: 13px !important;
+      padding: 12px 16px !important;
     }
-  `;
+  }
+`;
 
+// 하이라이트용 CSS를 문서 전체에 주입
+const injectHighlightCSS = () => {
+
+  const cssText = getOptimizedHighlightCSS();
+  
   // 1. 메인 문서에 스타일 주입
   if (!document.getElementById('criti-ai-highlight-styles')) {
     const style = document.createElement('style');
     style.id = 'criti-ai-highlight-styles';
     style.textContent = cssText;
     document.head.appendChild(style);
+    console.log('✅ 메인 문서에 하이라이트 CSS 주입 완료');
   }
 
   // 2. 네이버 블로그 iframe에 스타일 주입
   if (window.location.href.includes('blog.naver.com')) {
     const iframe = document.querySelector('#mainFrame') as HTMLIFrameElement;
     if (iframe) {
-      iframe.addEventListener('load', () => {
+      // 즉시 CSS 주입 시도
+      const injectFrameCSS = () => {
         try {
           const frameDocument = iframe.contentDocument;
           if (frameDocument && !frameDocument.getElementById('criti-ai-highlight-styles')) {
@@ -2150,12 +2331,35 @@ const injectHighlightCSS = () => {
             frameStyle.id = 'criti-ai-highlight-styles';
             frameStyle.textContent = cssText;
             frameDocument.head.appendChild(frameStyle);
-            console.log('✅ 네이버 블로그 iframe에 스타일 주입 성공');
+            console.log('✅ 네이버 블로그 iframe에 CSS 주입 성공');
+            return true;
           }
         } catch (e) {
-          console.error('❌ 네이버 블로그 iframe 스타일 주입 실패:', e);
+          console.log('⚠️ iframe CSS 주입 실패 (보안 제한):', e);
+          return false;
         }
-      });
+        return false;
+      };
+      
+      // 즉시 시도
+      injectFrameCSS();
+      
+      // iframe 로드 이벤트
+      iframe.addEventListener('load', injectFrameCSS);
+      
+      // 동적 로딩 반복 시도
+      let retryCount = 0;
+      const maxRetries = 10;
+      const retryInjection = () => {
+        if (retryCount >= maxRetries) return;
+        
+        if (!injectFrameCSS()) {
+          retryCount++;
+          setTimeout(retryInjection, 500);
+        }
+      };
+      
+      setTimeout(retryInjection, 1000);
     }
   }
 };
@@ -2192,37 +2396,132 @@ if (document.readyState === "loading") {
   initialize();
 }
 
-// 동적 페이지 변화 감지 (SPA 등) + 네이버 블로그 동적 로딩 감지
+// 동적 페이지 변화 감지 + 네이버 블로그 동적 로딩 감지 + 메모리 관리
 let lastUrl = window.location.href;
-const observer = new MutationObserver(async () => {
-  if (lastUrl !== window.location.href) {
-    lastUrl = window.location.href;
-    console.log("🔄 페이지 URL 변화 감지, 재초기화");
-    setTimeout(initialize, 1000);
+let pageObserver: MutationObserver | null = null;
+let frameObserver: MutationObserver | null = null;
+let cleanupTimeout: NodeJS.Timeout | null = null;
+
+const cleanupObservers = () => {
+  console.log('📊 관찰자 정리 시작');
+  
+  if (pageObserver) {
+    pageObserver.disconnect();
+    pageObserver = null;
   }
   
-  // 네이버 블로그 동적 콘텐츠 로딩 감지
-  if (window.location.href.includes('blog.naver.com')) {
-    const mainFrame = document.querySelector('#mainFrame') as HTMLIFrameElement;
-    if (mainFrame && mainFrame.contentDocument) {
-      // iframe 내부의 콘텐츠 변화도 감지
-      const frameObserver = new MutationObserver(() => {
-        console.log("🔄 네이버 블로그 iframe 콘텐츠 변화 감지");
-      });
+  if (frameObserver) {
+    frameObserver.disconnect();
+    frameObserver = null;
+  }
+  
+  if (cleanupTimeout) {
+    clearTimeout(cleanupTimeout);
+    cleanupTimeout = null;
+  }
+  
+  console.log('✅ 관찰자 정리 완료');
+};
+
+const setupObservers = () => {
+  // 기존 관찰자 정리
+  cleanupObservers();
+  
+  pageObserver = new MutationObserver(async (mutations) => {
+    // URL 변화 감지
+    if (lastUrl !== window.location.href) {
+      lastUrl = window.location.href;
+      console.log('🔄 페이지 URL 변화 감지, 재초기화');
       
-      try {
-        frameObserver.observe(mainFrame.contentDocument.body, {
-          childList: true,
-          subtree: true
-        });
-      } catch (error) {
-        console.log("⚠️ iframe 관찰 설정 실패 (보안 제한):", error);
+      // 리소스 정리 후 재초기화
+      if (window.critiAI?.cleanupResources) {
+        window.critiAI.cleanupResources();
+      }
+      
+      // 지연 후 재초기화 (페이지 안정화 대기)
+      cleanupTimeout = setTimeout(initialize, 1000);
+      return;
+    }
+    
+    // 네이버 블로그 동적 컨테이너 변화 감지
+    if (window.location.href.includes('blog.naver.com')) {
+      const hasContentChanges = mutations.some(mutation => 
+        Array.from(mutation.addedNodes).some(node => 
+          node.nodeType === Node.ELEMENT_NODE && 
+          (node as Element).querySelector && (
+            (node as Element).querySelector('.se-main-container') ||
+            (node as Element).querySelector('.se-component-content') ||
+            (node as Element).matches('.se-main-container, .se-component-content')
+          )
+        )
+      );
+      
+      if (hasContentChanges) {
+        console.log('🔄 네이버 블로그 컨테이너 변화 감지');
+        // 하이라이트 재적용 로직은 TextHighlighter에서 처리
       }
     }
+  });
+
+  pageObserver.observe(document.body, { 
+    childList: true, 
+    subtree: true,
+    attributes: false, // 성능 최적화
+    characterData: false
+  });
+
+  // 네이버 블로그 iframe 관찰자 설정
+  if (window.location.href.includes('blog.naver.com')) {
+    const mainFrame = document.querySelector('#mainFrame') as HTMLIFrameElement;
+    if (mainFrame) {
+      const setupFrameObserver = () => {
+        try {
+          if (mainFrame.contentDocument && !frameObserver) {
+            frameObserver = new MutationObserver(() => {
+              console.log('🔄 네이버 블로그 iframe 컨테이너 변화 감지');
+            });
+            
+            frameObserver.observe(mainFrame.contentDocument.body, {
+              childList: true,
+              subtree: true,
+              attributes: false,
+              characterData: false
+            });
+            
+            console.log('✅ iframe 관찰자 설정 완료');
+          }
+        } catch (error) {
+          console.log('⚠️ iframe 관찰 설정 실패 (보안 제한):', error);
+        }
+      };
+      
+      // 즉시 시도 및 load 이벤트
+      setupFrameObserver();
+      mainFrame.addEventListener('load', setupFrameObserver);
+    }
+  }
+};
+
+setupObservers();
+
+// 페이지 언로드 시 정리
+window.addEventListener('beforeunload', () => {
+  console.log('📊 페이지 언로드 - 리소스 정리');
+  cleanupObservers();
+  if (window.critiAI?.cleanupResources) {
+    window.critiAI.cleanupResources();
   }
 });
 
-observer.observe(document.body, { 
-  childList: true, 
-  subtree: true 
-});
+// 개발 디버깅 도구 활성화
+if (typeof process !== 'undefined' && process.env?.NODE_ENV === 'development') {
+  (window as Window & { critiAIDebug?: typeof debugCommands }).critiAIDebug = debugCommands;
+  console.log('🔧 개발자 도구 활성화: window.critiAIDebug');
+} else {
+  // 프로덕션에서도 기본 디버깅 기능 제공
+  (window as Window & { critiAIDebug?: Partial<typeof debugCommands> }).critiAIDebug = {
+    version: debugCommands.version,
+    diagnose: debugCommands.diagnose,
+    checkHighlights: debugCommands.checkHighlights
+  };
+}

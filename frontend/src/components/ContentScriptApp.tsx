@@ -11,6 +11,7 @@ interface ContentScriptAppProps {
   url: string;
   title: string;
   content: string;
+  sidebarVisible: boolean;
   onClose?: () => void;
 }
 
@@ -25,6 +26,7 @@ export const ContentScriptApp: React.FC<ContentScriptAppProps> = ({
   url,
   title,
   content,
+  sidebarVisible,
   onClose
 }) => {
   
@@ -199,7 +201,7 @@ export const ContentScriptApp: React.FC<ContentScriptAppProps> = ({
         onSectionClick={handleSectionClick}
       />
       
-      {analysis && allHighlights.length > 0 && (
+      {analysis && allHighlights.length > 0 && sidebarVisible && (
         <TextHighlighter
           highlights={allHighlights}
           onHighlightClick={handleHighlightClick}
