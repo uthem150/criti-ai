@@ -5,6 +5,7 @@ declare global {
       // 기본 기능
       toggleSidebar: () => void;
       isReady: boolean;
+      version: string;
       
       // 하이라이트 관리
       highlightElements: Map<string, HTMLElement>;
@@ -13,6 +14,9 @@ declare global {
       
       // 하이라이트 텍스트로 스크롤
       scrollToHighlightByText: (text: string, type?: string) => boolean;
+      
+      // 리소스 관리
+      cleanupResources: () => void;
     };
   }
 }
