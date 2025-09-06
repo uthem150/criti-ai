@@ -32,24 +32,6 @@ export const TextHighlighter: React.FC<TextHighlighterProps> = ({
 
   console.log('🎨 TextHighlighter:', safeHighlights.length, '개 하이라이트');
 
-  // 기존 하이라이트 제거
-  const removeExistingHighlights = useCallback(() => {
-    const existingHighlights = document.querySelectorAll('.criti-ai-highlight');
-    existingHighlights.forEach((el) => {
-      const parent = el.parentNode;
-      if (parent && el.textContent) {
-        const textNode = document.createTextNode(el.textContent);
-        parent.replaceChild(textNode, el);
-        parent.normalize();
-      }
-    });
-    
-    
-    
-    appliedHighlights.current.clear();
-    highlightElements.current.clear();
-  }, []);
-
   
 
   // 본문 영역 선택자들
@@ -193,10 +175,163 @@ export const TextHighlighter: React.FC<TextHighlighterProps> = ({
     []
   );
 
+  // 네이버 블로그 iframe 감지 및 접근
+  const getNaverBlogFrame = useCallback((): Document | null => {
+    if (!window.location.href.includes('blog.naver.com')) return null;
+    
+    const mainFrame = document.querySelector('#mainFrame') as HTMLIFrameElement;
+    if (!mainFrame) return null;
+    
+    try {
+      return mainFrame.contentDocument || mainFrame.contentWindow?.document || null;
+    } catch (error) {
+      console.log('⚠️ iframe 접근 실패 (보안 제한):', error);
+      return null;
+    }
+  }, []);
+  
+  // iframe에 하이라이트 CSS 주입
+  const injectIframeCSS = useCallback((frameDocument: Document) => {
+    if (frameDocument.getElementById('criti-ai-highlight-styles')) return;
+    
+    const cssText = `
+      .criti-ai-highlight {
+        position: relative !important;
+        cursor: pointer !important;
+        padding: 1px 3px !important;
+        border-radius: 3px !important;
+        transition: all 0.2s ease !important;
+        z-index: 999990 !important;
+      }
+      
+      .criti-ai-highlight:hover {
+        transform: scale(1.02) !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+      }
+
+      .criti-ai-highlight-bias {
+        background-color: rgba(245, 158, 11, 0.3) !important;
+        border-bottom: 2px solid #f59e0b !important;
+        color: #92400e !important;
+        font-weight: 600 !important;
+      }
+
+      .criti-ai-highlight-fallacy {
+        background-color: rgba(239, 68, 68, 0.3) !important;
+        border-bottom: 2px solid #ef4444 !important;
+        color: #991b1b !important;
+        font-weight: 600 !important;
+      }
+
+      .criti-ai-highlight-manipulation {
+        background-color: rgba(168, 85, 247, 0.3) !important;
+        border-bottom: 2px solid #a855f7 !important;
+        color: #7c2d12 !important;
+        font-weight: 600 !important;
+      }
+
+      .criti-ai-highlight-advertisement {
+        background-color: rgba(16, 185, 129, 0.3) !important;
+        border-bottom: 2px solid #10b981 !important;
+        color: #065f46 !important;
+        font-weight: 600 !important;
+      }
+      
+      .criti-ai-highlight-focused {
+        animation: highlightPulse 2s ease-in-out !important;
+        transform: scale(1.05) !important;
+        z-index: 999999 !important;
+        position: relative !important;
+      }
+      
+      @keyframes highlightPulse {
+        0% {
+          box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.8);
+          background-color: rgba(59, 130, 246, 0.5);
+        }
+        50% {
+          box-shadow: 0 0 0 10px rgba(59, 130, 246, 0.3);
+          background-color: rgba(59, 130, 246, 0.7);
+        }
+        100% {
+          box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+        }
+      }
+    `;
+    
+    const style = frameDocument.createElement('style');
+    style.id = 'criti-ai-highlight-styles';
+    style.textContent = cssText;
+    frameDocument.head.appendChild(style);
+    console.log('✅ iframe CSS 주입 성공');
+  }, []);
+  
+  // iframe용 하이라이트 요소 생성 (먼저 선언)
+  const createIframeHighlightElement = useCallback(
+    (highlight: ExtendedHighlightedText, frameDocument: Document): HTMLElement => {
+      const span = frameDocument.createElement('span');
+      span.className = `criti-ai-highlight criti-ai-highlight-${highlight.type}`;
+      span.textContent = highlight.text;
+      span.dataset.highlightId = highlight.id;
+      span.dataset.explanation = highlight.explanation;
+      span.dataset.type = highlight.type;
+      span.dataset.category = highlight.category || '';
+      span.title = `${highlight.type}: ${highlight.explanation}`;
+
+      // 클릭 이벤트 (iframe용)
+      span.addEventListener('click', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        console.log('🎯 iframe 하이라이트 클릭:', highlight.text);
+        onHighlightClick(highlight);
+      });
+
+      return span;
+    },
+    [onHighlightClick]
+  );
+
+  
+  // 개선된 removeExistingHighlights - getNaverBlogFrame 사용 가능
+  const removeExistingHighlightsWithFrame = useCallback(() => {
+    // 메인 문서에서 하이라이트 제거
+    const existingHighlights = document.querySelectorAll('.criti-ai-highlight');
+    existingHighlights.forEach((el) => {
+      const parent = el.parentNode;
+      if (parent && el.textContent) {
+        const textNode = document.createTextNode(el.textContent);
+        parent.replaceChild(textNode, el);
+        parent.normalize();
+      }
+    });
+    
+    // 네이버 블로그 iframe에서 하이라이트 제거
+    const frameDocument = getNaverBlogFrame();
+    if (frameDocument) {
+      const frameHighlights = frameDocument.querySelectorAll('.criti-ai-highlight');
+      frameHighlights.forEach((el) => {
+        const parent = el.parentNode;
+        if (parent && el.textContent) {
+          const textNode = frameDocument.createTextNode(el.textContent);
+          parent.replaceChild(textNode, el);
+          parent.normalize();
+        }
+      });
+      console.log('✅ iframe 하이라이트 제거 완료');
+    }
+    
+    // 툴팁 제거
+    document.querySelectorAll('.criti-ai-tooltip').forEach(tooltip => tooltip.remove());
+    
+    appliedHighlights.current.clear();
+    highlightElements.current.clear();
+    console.log('✅ 모든 하이라이트 제거 완료');
+  }, [getNaverBlogFrame]);
+
   // 컨테이너에서 텍스트 검색 및 하이라이트
   const highlightTextInContainer = useCallback(
-    (container: Element, highlight: ExtendedHighlightedText): boolean => {
-      const walker = document.createTreeWalker(
+    (container: Element, highlight: ExtendedHighlightedText, documentContext: Document = document): boolean => {
+      const walker = documentContext.createTreeWalker(
         container,
         NodeFilter.SHOW_TEXT,
         {
@@ -221,21 +356,25 @@ export const TextHighlighter: React.FC<TextHighlighterProps> = ({
       const textNode = walker.nextNode() as Text;
       if (!textNode) return false;
 
-      const highlightElement = createHighlightElement(highlight);
+      // iframe 환경에서는 특별한 하이라이트 요소 생성
+      const highlightElement = documentContext === document 
+        ? createHighlightElement(highlight)
+        : createIframeHighlightElement(highlight, documentContext);
+        
       const success = applyHighlightToTextNode(textNode, highlight.text, highlightElement);
       
       if (success) {
         highlightElements.current.set(highlight.id, highlightElement);
         appliedHighlights.current.add(highlight.id);
-        console.log('✅ 하이라이트 적용:', highlight.text);
+        console.log('✅ 하이라이트 적용:', highlight.text, documentContext === document ? '(메인)' : '(iframe)');
       }
       
       return success;
     },
-    [createHighlightElement, applyHighlightToTextNode]
+    [createHighlightElement, applyHighlightToTextNode, createIframeHighlightElement]
   );
 
-  // 모든 하이라이트 적용
+  // 모든 하이라이트 적용 (개선된 버전)
   const applyAllHighlights = useCallback(() => {
     const contentSelectors = getContentSelectors();
     
@@ -249,7 +388,7 @@ export const TextHighlighter: React.FC<TextHighlighterProps> = ({
         const containers = document.querySelectorAll(selector);
         
         for (const container of containers) {
-          if (highlightTextInContainer(container, highlight)) {
+          if (highlightTextInContainer(container, highlight, document)) {
             found = true;
             break;
           }
@@ -259,25 +398,48 @@ export const TextHighlighter: React.FC<TextHighlighterProps> = ({
       }
 
       // 네이버 블로그 iframe 처리
-      if (!found && window.location.href.includes('blog.naver.com')) {
-        const mainFrame = document.querySelector('#mainFrame') as HTMLIFrameElement;
-        if (mainFrame && mainFrame.contentDocument) {
-          try {
-            const frameDocument = mainFrame.contentDocument;
-            for (const selector of contentSelectors) {
+      if (!found) {
+        const frameDocument = getNaverBlogFrame();
+        if (frameDocument) {
+          // iframe에 CSS 주입
+          injectIframeCSS(frameDocument);
+          
+          // iframe 컨테이너들에서 하이라이트 시도
+          for (const selector of contentSelectors) {
+            const containers = frameDocument.querySelectorAll(selector);
+            
+            for (const container of containers) {
+              if (highlightTextInContainer(container, highlight, frameDocument)) {
+                found = true;
+                break;
+              }
+            }
+            
+            if (found) break;
+          }
+          
+          // 네이버 블로그 전용 선택자들도 시도
+          if (!found) {
+            const naverSpecificSelectors = [
+              '.se-main-container',
+              '.se-component-content', 
+              '.se-text-paragraph',
+              '.se-section-text',
+              '#postViewArea',
+              '.post_ct',
+              '.se-viewer .se-main-container'
+            ];
+            
+            for (const selector of naverSpecificSelectors) {
               const containers = frameDocument.querySelectorAll(selector);
-              
               for (const container of containers) {
-                if (highlightTextInContainer(container, highlight)) {
+                if (highlightTextInContainer(container, highlight, frameDocument)) {
                   found = true;
                   break;
                 }
               }
-              
               if (found) break;
             }
-          } catch (error) {
-            console.log('⚠️ iframe 하이라이트 실패 (보안 제한):', error);
           }
         }
       }
@@ -286,7 +448,7 @@ export const TextHighlighter: React.FC<TextHighlighterProps> = ({
         console.log('❌ 하이라이트 텍스트를 찾을 수 없음:', highlight.text);
       }
     });
-  }, [safeHighlights, highlightTextInContainer]);
+  }, [safeHighlights, highlightTextInContainer, getNaverBlogFrame, injectIframeCSS]);
 
   // 특정 하이라이트로 스크롤
   const scrollToHighlight = useCallback((highlightId: string) => {
@@ -317,11 +479,12 @@ export const TextHighlighter: React.FC<TextHighlighterProps> = ({
         // 기본 기능
         toggleSidebar: () => console.log('토글 사이드바 기능 없음'),
         isReady: true,
+        version: '2.0.0',
         
         // 하이라이트 관리
         highlightElements: highlightElements.current,
         scrollToHighlight,
-        clearAllHighlights: () => removeExistingHighlights(),
+        clearAllHighlights: () => removeExistingHighlightsWithFrame(),
         scrollToHighlightByText: (text: string, type?: string) => {
           // 텍스트로 하이라이트 찾기
           for (const [id, element] of highlightElements.current) {
@@ -335,13 +498,18 @@ export const TextHighlighter: React.FC<TextHighlighterProps> = ({
             }
           }
           return false;
-        }
+        },
+        
+        // 리소스 관리
+        cleanupResources: () => removeExistingHighlightsWithFrame()
       };
     } else {
       // 기존 critiAI 객체 업데이트
       window.critiAI.scrollToHighlight = scrollToHighlight;
       window.critiAI.highlightElements = highlightElements.current;
-      window.critiAI.clearAllHighlights = () => removeExistingHighlights();
+      window.critiAI.clearAllHighlights = () => removeExistingHighlightsWithFrame();
+      window.critiAI.cleanupResources = () => removeExistingHighlightsWithFrame();
+      window.critiAI.version = '2.0.0';
       window.critiAI.scrollToHighlightByText = (text: string, type?: string) => {
         for (const [id, element] of highlightElements.current) {
           const elementText = element.textContent?.trim() || '';
@@ -356,28 +524,56 @@ export const TextHighlighter: React.FC<TextHighlighterProps> = ({
         return false;
       };
     }
-  }, [scrollToHighlight, removeExistingHighlights]);
+  }, [scrollToHighlight, removeExistingHighlightsWithFrame]);
 
   // 메인 효과
   useEffect(() => {
     if (safeHighlights.length === 0) {
-      removeExistingHighlights();
+      removeExistingHighlightsWithFrame();
       return;
     }
 
     console.log('🎨 하이라이트 적용 시작:', safeHighlights.length, '개');
     
-    removeExistingHighlights();
+    removeExistingHighlightsWithFrame();
     
     // 약간의 지연 후 적용 (DOM 안정화)
     const timer = setTimeout(() => {
       applyAllHighlights();
       
-      // 네이버 블로그 등 동적 로딩 재시도
-      if (window.location.href.includes('blog.naver.com') || 
-          window.location.href.includes('tistory.com')) {
+      // 네이버 블로그 전용 동적 로딩 처리
+      if (window.location.href.includes('blog.naver.com')) {
+        let retryCount = 0;
+        const maxRetries = 5;
+        
+        const retryHighlighting = () => {
+          if (retryCount >= maxRetries) {
+            console.log('⚠️ 네이버 블로그 하이라이트 재시도 한계 도달');
+            return;
+          }
+          
+          retryCount++;
+          console.log(`🔄 네이버 블로그 하이라이트 재시도 ${retryCount}/${maxRetries}`);
+          
+          const frameDocument = getNaverBlogFrame();
+          if (frameDocument) {
+            injectIframeCSS(frameDocument);
+            
+            const unappliedHighlights = safeHighlights.filter(h => !appliedHighlights.current.has(h.id));
+            if (unappliedHighlights.length > 0) {
+              applyAllHighlights();
+              setTimeout(retryHighlighting, 1500);
+            }
+          } else {
+            setTimeout(retryHighlighting, 1000);
+          }
+        };
+        
+        setTimeout(retryHighlighting, 1000);
+        
+      } else if (window.location.href.includes('tistory.com')) {
         const retryTimer = setTimeout(() => {
-          console.log('🔄 동적 콘텐츠 하이라이트 재시도');
+          console.log('🔄 티스토리 하이라이트 재시도');
           applyAllHighlights();
         }, 2000);
         
@@ -387,17 +583,17 @@ export const TextHighlighter: React.FC<TextHighlighterProps> = ({
 
     return () => {
       clearTimeout(timer);
-      removeExistingHighlights();
+      removeExistingHighlightsWithFrame();
     };
-  }, [safeHighlights, removeExistingHighlights, applyAllHighlights]);
+  }, [safeHighlights, removeExistingHighlightsWithFrame, applyAllHighlights, getNaverBlogFrame, injectIframeCSS]);
 
   // 컴포넌트 언마운트 시 정리
   useEffect(() => {
     return () => {
       document.querySelectorAll('.criti-ai-tooltip').forEach(tooltip => tooltip.remove());
-      removeExistingHighlights();
+      removeExistingHighlightsWithFrame();
     };
-  }, [removeExistingHighlights]);
+  }, [removeExistingHighlightsWithFrame]);
 
   return null;
 };
