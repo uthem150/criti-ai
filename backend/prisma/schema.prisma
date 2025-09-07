@@ -1,0 +1,229 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// 분석 결과 캐시 테이블
+model AnalysisCache {
+  id              String   @id @default(cuid())
+  url             String   @unique
+  urlHash         String   @unique
+  title           String?
+  domain          String
+  contentType     String?
+  
+  // 분석 결과 (JSON으로 저장)
+  analysis        String   // JSON 문자열
+  overallScore    Int
+  
+  // 메타데이터
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  expiresAt       DateTime
+  hitCount        Int      @default(1)
+  lastAccessedAt  DateTime @default(now())
+  
+  // 인덱스
+  @@index([domain])
+  @@index([overallScore])
+  @@index([expiresAt])
+  @@index([lastAccessedAt])
+  @@map("analysis_cache")
+}
+
+// 사용자 테이블
+model User {
+  id            String   @id @default(cuid())
+  email         String?  @unique
+  username      String?  @unique
+  displayName   String?
+  
+  // 진행도
+  totalPoints   Int      @default(0)
+  level         Int      @default(1)
+  analyticsUsed Int      @default(0)
+  
+  // 메타데이터
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  lastActiveAt  DateTime @default(now())
+  
+  // 관계
+  badges        UserBadge[]
+  challengeResults ChallengeResult[]
+  feedback      UserFeedback[]
+  
+  @@map("users")
+}
+
+// 배지 정의 테이블
+model Badge {
+  id          String   @id @default(cuid())
+  name        String
+  description String
+  icon        String
+  category    String   // analysis, training, milestone, special
+  
+  // 획득 조건
+  pointsRequired    Int?
+  challengesRequired Int?
+  conditionType     String? // 특별 조건
+  conditionValue    String? // 조건 값
+  
+  // 메타데이터
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  isActive    Boolean  @default(true)
+  
+  // 관계
+  userBadges  UserBadge[]
+  
+  @@map("badges")
+}
+
+// 사용자 배지 테이블
+model UserBadge {
+  id       String   @id @default(cuid())
+  userId   String
+  badgeId  String
+  earnedAt DateTime @default(now())
+  
+  // 관계
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  badge    Badge    @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, badgeId])
+  @@map("user_badges")
+}
+
+// 챌린지 테이블
+model Challenge {
+  id            String   @id @default(cuid())
+  type          String   // article-analysis, image-detection, etc.
+  title         String
+  content       String   // 챌린지 내용
+  difficulty    String   // beginner, intermediate, advanced
+  points        Int
+  
+  // 정답 및 해설 (JSON으로 저장)
+  correctAnswers String  // JSON 배열
+  explanation    String
+  hints          String? // JSON 배열
+  
+  // 메타데이터
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  isActive      Boolean  @default(true)
+  isGenerated   Boolean  @default(false) // AI 생성 여부
+  
+  // 통계
+  totalAttempts Int      @default(0)
+  successRate   Float    @default(0.0)
+  
+  // 관계
+  results       ChallengeResult[]
+  
+  @@index([type])
+  @@index([difficulty])
+  @@index([isActive])
+  @@map("challenges")
+}
+
+// 챌린지 결과 테이블
+model ChallengeResult {
+  id           String   @id @default(cuid())
+  userId       String
+  challengeId  String
+  
+  // 답안 및 결과
+  userAnswers  String   // JSON 배열
+  isCorrect    Boolean
+  score        Int
+  bonusPoints  Int      @default(0)
+  
+  // 소요 시간 및 힌트
+  timeSpent    Int      // 초 단위
+  hintsUsed    Int      @default(0)
+  
+  // 메타데이터
+  submittedAt  DateTime @default(now())
+  
+  // 관계
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  challenge    Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([challengeId])
+  @@index([submittedAt])
+  @@map("challenge_results")
+}
+
+// 사용자 피드백 테이블
+model UserFeedback {
+  id            String   @id @default(cuid())
+  userId        String
+  analysisUrl   String?  // 분석한 URL (분석 피드백인 경우)
+  challengeId   String?  // 챌린지 ID (챌린지 피드백인 경우)
+  
+  // 피드백 내용
+  rating        Int      // 1-5
+  helpful       Boolean
+  comment       String?
+  suggestions   String?  // JSON 배열
+  
+  // 피드백 타입
+  type          String   // analysis, challenge, general
+  
+  // 메타데이터
+  createdAt     DateTime @default(now())
+  
+  // 관계
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([type])
+  @@index([rating])
+  @@map("user_feedback")
+}
+
+// 시스템 설정 테이블
+model SystemConfig {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  type      String   // string, number, boolean, json
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("system_config")
+}
+
+// 분석 통계 테이블 (일일 집계)
+model AnalysisStats {
+  id              String   @id @default(cuid())
+  date            DateTime @unique
+  
+  // 분석 통계
+  totalAnalyses   Int      @default(0)
+  cacheHits       Int      @default(0)
+  cacheMisses     Int      @default(0)
+  averageScore    Float    @default(0.0)
+  
+  // 도메인별 통계 (JSON)
+  domainStats     String?  // JSON 객체
+  fallacyStats    String?  // JSON 객체
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@index([date])
+  @@map("analysis_stats")
+}
