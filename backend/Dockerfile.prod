@@ -1,0 +1,53 @@
+# 프로덕션용 백엔드 Dockerfile
+FROM node:18-alpine AS builder
+
+WORKDIR /app
+
+# 공유 패키지 먼저 복사 및 빌드
+COPY shared/package*.json ./shared/
+RUN cd shared && npm ci
+
+COPY shared/ ./shared/
+RUN cd shared && npm run build
+
+# 백엔드 의존성 설치
+COPY backend/package*.json ./backend/
+RUN cd backend && npm ci --only=production
+
+# 백엔드 소스 복사
+COPY backend/ ./backend/
+
+# Prisma 생성
+RUN cd backend && npx prisma generate
+
+# TypeScript 빌드
+RUN cd backend && npm run build
+
+# 프로덕션 이미지
+FROM node:18-alpine
+
+WORKDIR /app
+
+# 필요한 패키지 설치
+RUN apk add --no-cache curl
+
+# 빌드된 파일들 복사
+COPY --from=builder /app/shared/dist ./shared/dist
+COPY --from=builder /app/shared/package*.json ./shared/
+COPY --from=builder /app/backend/dist ./backend/dist
+COPY --from=builder /app/backend/node_modules ./backend/node_modules
+COPY --from=builder /app/backend/package*.json ./backend/
+COPY --from=builder /app/backend/prisma ./backend/prisma
+
+# 작업 디렉토리 변경
+WORKDIR /app/backend
+
+# 포트 노출
+EXPOSE 3001
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:3001/health || exit 1
+
+# 프로덕션 실행
+CMD ["npm", "start"]

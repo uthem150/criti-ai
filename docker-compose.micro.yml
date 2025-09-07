@@ -1,0 +1,93 @@
+version: '3.8'
+
+services:
+  # 백엔드 (메모리 최적화)
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile.micro
+    container_name: criti-ai-backend
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - DATABASE_URL=file:/app/data/criti-ai.db
+      - REDIS_URL=redis://redis:6379
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - FRONTEND_URL=${FRONTEND_URL}
+      # Node.js 메모리 제한 (중요!)
+      - NODE_OPTIONS=--max-old-space-size=128
+    ports:
+      - "3001:3001"
+    volumes:
+      - app_data:/app/data
+      - logs_data:/app/logs
+    depends_on:
+      - redis
+    restart: unless-stopped
+    # 메모리 제한 설정
+    mem_limit: 200m
+    mem_reservation: 150m
+    cpus: 0.7
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3001/health"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # Redis (극도로 경량화)
+  redis:
+    image: redis:7-alpine
+    container_name: criti-ai-redis
+    command: >
+      redis-server 
+      --maxmemory 64mb
+      --maxmemory-policy allkeys-lru
+      --save ""
+      --appendonly no
+      --tcp-keepalive 60
+      --timeout 300
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    # 메모리 제한 (중요!)
+    mem_limit: 80m
+    mem_reservation: 50m
+    cpus: 0.2
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  # Nginx (최소 설정)
+  nginx:
+    image: nginx:alpine
+    container_name: criti-ai-nginx  
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.micro.conf:/etc/nginx/nginx.conf:ro
+      - logs_data:/var/log/nginx
+    depends_on:
+      - backend
+    restart: unless-stopped
+    mem_limit: 50m
+    mem_reservation: 30m
+    cpus: 0.1
+
+volumes:
+  app_data:
+    driver: local
+  redis_data:
+    driver: local
+  logs_data:
+    driver: local
+
+networks:
+  default:
+    name: criti-ai-micro
+    driver: bridge
+    driver_opts:
+      com.docker.network.driver.mtu: 1500

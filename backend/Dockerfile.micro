@@ -1,0 +1,64 @@
+# Oracle Micro용 극한 최적화 Dockerfile
+FROM node:18-alpine AS builder
+
+# 빌드 도구 설치 (최소한만)
+RUN apk add --no-cache python3 make g++
+
+WORKDIR /app
+
+# 공유 패키지 빌드
+COPY shared/package*.json ./shared/
+RUN cd shared && npm ci --production --no-audit --no-fund
+COPY shared/ ./shared/
+RUN cd shared && npm run build
+
+# 백엔드 의존성 설치
+COPY backend/package*.json ./backend/
+RUN cd backend && npm ci --production --no-audit --no-fund
+
+# 백엔드 소스 복사 및 빌드
+COPY backend/ ./backend/
+RUN cd backend && npx prisma generate
+RUN cd backend && npm run build
+
+# 프로덕션 이미지 (극도로 경량화)
+FROM node:18-alpine
+
+# 시스템 최적화
+RUN apk add --no-cache \
+    tini \
+    wget \
+    && rm -rf /var/cache/apk/*
+
+# 비 root 사용자 생성
+RUN addgroup -g 1001 -S nodejs
+RUN adduser -S backend -u 1001
+
+WORKDIR /app
+
+# 빌드된 파일만 복사
+COPY --from=builder --chown=backend:nodejs /app/shared/dist ./shared/dist
+COPY --from=builder --chown=backend:nodejs /app/shared/package.json ./shared/
+COPY --from=builder --chown=backend:nodejs /app/backend/dist ./dist
+COPY --from=builder --chown=backend:nodejs /app/backend/node_modules ./node_modules
+COPY --from=builder --chown=backend:nodejs /app/backend/package.json ./
+COPY --from=builder --chown=backend:nodejs /app/backend/prisma ./prisma
+
+# 데이터 디렉토리 생성
+RUN mkdir -p /app/data /app/logs && chown -R backend:nodejs /app
+
+# 사용자 전환
+USER backend
+
+# 포트 노출
+EXPOSE 3001
+
+# Health check
+HEALTHCHECK --interval=60s --timeout=10s --start-period=30s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:3001/health || exit 1
+
+# Tini로 프로세스 관리 (메모리 누수 방지)
+ENTRYPOINT ["/sbin/tini", "--"]
+
+# 메모리 제한된 Node.js 실행
+CMD ["node", "--max-old-space-size=128", "dist/app.js"]
