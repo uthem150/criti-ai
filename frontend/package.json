@@ -6,8 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "build:web": "VITE_BUILD_MODE=web tsc -b && vite build",
-    "build:frontend": "cd ../shared && npm run build && cd ../frontend && npm run build:web",
+    "build:frontend": "cd ../shared && npm run build && cd ../frontend && npm run build",
     "build:extension": "tsc -b && vite build --mode production",
     "lint": "eslint .",
     "preview": "vite preview"
