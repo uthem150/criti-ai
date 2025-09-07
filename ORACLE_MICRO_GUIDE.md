@@ -181,6 +181,8 @@ http://서버IP주소:3001/health
    - Node.js Version: 18.x
 ```
 
+⚠️ **주의사항**: Vite 7.x 버전에서 Rollup 호환성 문제가 있어 Vite 5.4.0으로 다운그레이드했습니다.
+
 #### 6-3. 환경 변수 설정
 ```
 Environment Variables:

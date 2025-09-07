@@ -42,12 +42,22 @@ export default defineConfig(() => {
       emptyOutDir: true,
       assetsDir: 'assets',
       rollupOptions: {
+        // Rollup 네이티브 모듈 문제 해결
+        external: isWebBuild ? [] : undefined,
         input: isWebBuild ? {
           main: path.resolve(__dirname, 'index.html'),
           challenge: path.resolve(__dirname, 'challenge.html')
         } : undefined,
         output: {
           format: 'es' as const,
+          // 네이티브 모듈 사용 비활성화
+          preferConst: true,
+        },
+        // Rollup 플러그인 설정
+        plugins: isWebBuild ? [] : undefined,
+        // 최적화 설정
+        treeshake: {
+          moduleSideEffects: false
         }
       }
     },
