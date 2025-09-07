@@ -173,12 +173,9 @@ http://서버IP주소:3001/health
 2. "criti-ai" 저장소 선택
 3. "Import" 클릭
 4. 설정 확인:
-   - Framework: Other
-   - Root Directory: . (비워두거나 점 하나)
-   - Build Command: npm run build:frontend
-   - Output Directory: frontend/dist
-   - Install Command: npm install
-   - Node.js Version: 18.x
+   - Framework: Vite (자동감지)
+   - Root Directory: frontend
+   - Build Command: npm run build
 ```
 
 #### 6-3. 환경 변수 설정
