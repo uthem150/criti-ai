@@ -13,7 +13,14 @@
     "build:backend": "cd backend && npm run build",
     "start": "cd backend && npm start",
     "lint": "cd frontend && npm run lint && cd ../backend && npm run lint",
-    "clean": "rimraf **/dist **/node_modules/.cache"
+    "clean": "rimraf **/dist **/node_modules/.cache",
+    "setup:dev": "chmod +x setup-dev.sh && ./setup-dev.sh",
+    "setup:windows": "setup-dev.bat",
+    "docker:dev": "docker-compose up -d",
+    "docker:logs": "docker-compose logs -f",
+    "docker:stop": "docker-compose down",
+    "db:studio": "cd backend && npm run db:studio",
+    "test": "echo \"Tests will be added in future versions\" && exit 0"
   },
   "devDependencies": {
     "concurrently": "^8.2.2",

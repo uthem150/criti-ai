@@ -1,235 +1,219 @@
-# 🔍 Criti AI - 스마트 콘텐츠 분석기
+# 🎯 Criti.AI - AI 기반 뉴스 신뢰도 분석 플랫폼
 
-AI 기반 뉴스, 블로그, 커뮤니티 콘텐츠의 신뢰도를 분석하고 비판적 사고 능력을 향상시키는 크롬 확장 프로그램입니다.
+AI 시대의 정보 과잉 속에서 사용자의 비판적 사고 능력을 키우는 혁신적인 크롬 확장 프로그램
 
-## 🚀 **v2.0 업데이트 - 통합 하이라이트 시스템**
+## 📋 프로젝트 개요
 
-### 🎨 **새로운 시각적 하이라이트 기능**
-- **형광펜 효과**: 문제가 되는 텍스트를 형광펜으로 칠한 듯한 시각적 표시
-- **타입별 색상 구분**: 편향성(주황), 논리오류(빨강), 광고성(청록), 감정조작(보라), 핵심주장(초록)
-- **인터랙티브 하이라이트**: 클릭하면 상세 설명 표시 및 관련 섹션으로 이동
+**Criti.AI**는 가짜 뉴스와 딥페이크가 넘쳐나는 시대에 사용자가 스스로 정보를 판별할 수 있는 능력을 기르도록 돕는 AI 기반 교육 도구입니다.
 
-### 🔗 **양방향 상호작용**
-- **사이드바 → 본문**: 분석 결과 클릭 시 해당 본문 위치로 스크롤 이동
-- **본문 → 사이드바**: 하이라이트 클릭 시 관련 분석 섹션으로 이동
-- **스마트 스크롤**: 부드러운 애니메이션과 임시 강조 효과
+### 🎯 주요 기능
 
-## ✨ 주요 기능
+1. **실시간 분석 모듈 (Insight Guardian)**
+   - 뉴스 기사의 신뢰도 다차원 분석
+   - 출처, 편향성, 논리성, 광고성 검증
+   - 실시간 하이라이팅 및 상세 설명
 
-### 🎯 종합 분석
-- **신뢰도 점수**: 출처, 객관성, 논리성, 광고성, 근거 충실도를 종합한 0-100점 점수
-- **막대 차트 기반 시각화**: 각 분석 항목별 상세 점수 표시
-- **실시간 하이라이트**: 분석 결과를 본문에서 즉시 시각적으로 확인
+2. **능동적 훈련 모듈 (Criti Challenge)**
+   - 논리적 오류 찾기 챌린지
+   - 편향 표현 탐지 훈련
+   - 딥페이크/AI 이미지 구별 연습
 
-### 🚫 광고성 콘텐츠 탐지
-- **네이티브 광고 식별**: 홍보성 목적으로 작성된 콘텐츠 탐지
-- **상업적 의도 분석**: 제품 언급, 행동 유도, 브랜드 중심 등 지표 분석
-- **광고성 지표 상세 표시**: 각 지표의 가중치와 근거 제공
-- **🎯 청록색 하이라이트**: 광고성 표현을 본문에서 직접 확인
+### 🏗️ 기술 스택
 
-### 🎭 편향성 분석
-- **감정적 편향 탐지**: '충격적인', '반드시' 등 조작적 표현 식별
-- **정치적 편향 분석**: 진보/보수/중도 성향 및 확신도 표시
-- **클릭베이트 요소**: 호기심 갭, 감정 트리거, 긴급성 등 분석
-- **🎭 주황색 하이라이트**: 편향적 표현을 시각적으로 표시
-- **💥 보라색 하이라이트**: 감정을 조작하는 표현 강조
+**Frontend:**
+- TypeScript + Vite
+- React 19
+- Emotion (styled-components)
+- Chrome Extension APIs
 
-### 🧠 논리적 오류 식별
-- **성급한 일반화**: 제한된 사례로 전체 판단하는 오류
-- **흑백논리**: 중간 지대를 배제하는 이분법적 사고
-- **허수아비 공격**: 상대방 주장을 왜곡하여 반박하는 오류
-- **인신공격**: 주장의 내용이 아닌 사람을 비판하는 오류
-- **🧠 빨간색 하이라이트**: 논리적 오류가 포함된 문장 표시
-- **초등학생도 이해할 수 있는 설명** 제공
+**Backend:**
+- Node.js + Express + TypeScript
+- Prisma ORM + SQLite
+- Redis (캐싱)
+- Gemini AI API
 
-### 🏛️ 출처 신뢰도 검증
-- **도메인 평판 분석**: 주요 언론사, 블로그, 개인 사이트 구분
-- **과거 신뢰도**: 해당 출처의 역사적 신뢰도 점수
-- **전문 분야**: 해당 출처가 전문성을 갖는 분야 표시
-
-### 🔍 교차 검증 및 팩트체크
-- **핵심 주장 추출**: 검증이 필요한 주요 주장들 식별
-- **📋 초록색 하이라이트**: 팩트체크가 필요한 핵심 주장 표시
-- **관련 키워드 제공**: 추가 검증을 위한 검색 키워드 제안
-- **팩트체크 소스**: 신뢰할 만한 검증 기관의 정보 제공
-
-## 🎨 하이라이트 시스템 상세
-
-### 색상 체계
-| 타입 | 색상 | 표시 대상 |
-|------|------|-----------|
-| 🎭 편향성 | 주황색 | 편향적 표현, 클릭베이트 |
-| 🧠 논리적 오류 | 빨간색 | 논리적 오류가 포함된 문장 |
-| 💥 감정 조작 | 보라색 | 감정을 자극하는 조작적 표현 |
-| 🎯 광고성 | 청록색 | 광고성, 상업적 표현 |
-| 📋 핵심 주장 | 초록색 | 팩트체크 필요한 주요 주장 |
-
-### 상호작용 기능
-- **Hover 효과**: 하이라이트에 마우스를 올리면 🔍 아이콘과 함께 상세 설명 툴팁 표시
-- **클릭 액션**: 하이라이트 클릭 시 사이드바의 관련 분석 섹션으로 자동 이동
-- **역방향 네비게이션**: 사이드바의 분석 결과 클릭 시 본문의 해당 위치로 스크롤
-
-## 🛠️ 기술 스택
-
-### Frontend
-- **React 18** + **TypeScript**
-- **Vite** - 빠른 개발 환경
-- **Emotion** - CSS-in-JS 스타일링
-- **Chrome Extension Manifest V3**
-
-### Backend  
-- **Node.js** + **Express**
-- **Google Gemini API** - AI 분석 엔진
-- **TypeScript** - 타입 안정성
-
-### 공통
-- **공유 타입 정의** - 프론트엔드/백엔드 간 일관성
-- **모노레포 구조** - 효율적인 개발 환경
+**Infrastructure:**
+- 3단계 캐싱 시스템 (Redis → DB → Memory)
+- 모노레포 구조
 
 ## 🚀 빠른 시작
 
-### 1. 프로젝트 설치
-```bash
-git clone https://github.com/your-username/criti-ai.git
-cd criti-ai
+### 1단계: 저장소 클론 및 설정
 
-# 전체 의존성 설치
+```bash
+git clone <repository-url>
+cd criti-ai
+```
+
+### 2단계: 환경 설정
+
+**백엔드 환경 설정:**
+```bash
+cd backend
+cp .env.example .env
+# .env 파일에서 GEMINI_API_KEY 설정
+```
+
+**프론트엔드 환경 설정:**
+```bash
+cd ../frontend
+# .env 파일은 이미 설정되어 있음
+```
+
+### 3단계: 의존성 설치
+
+```bash
+# 프로젝트 루트에서
 npm run install:all
 ```
 
-### 2. 환경 변수 설정
+### 4단계: 데이터베이스 설정
+
 ```bash
-# backend/.env 파일 생성
-GEMINI_API_KEY=your_gemini_api_key_here
-PORT=3001
-NODE_ENV=development
+cd backend
+npm run db:generate  # Prisma 클라이언트 생성
+npm run db:push      # 데이터베이스 스키마 생성
+npm run db:seed      # 초기 데이터 삽입
 ```
 
-### 3. 개발 환경 실행
+### 5단계: 개발 서버 실행
+
 ```bash
-# 프론트엔드와 백엔드 동시 실행
+# 프로젝트 루트에서
 npm run dev
-
-# 또는 개별 실행
-npm run dev:frontend  # http://localhost:5173
-npm run dev:backend   # http://localhost:3001
 ```
 
-### 4. 크롬 확장 프로그램 설치
-1. Chrome에서 `chrome://extensions/` 접속
-2. "개발자 모드" 활성화
-3. "압축해제된 확장 프로그램을 로드합니다" 클릭
-4. `frontend/dist` 폴더 선택
-
-### 5. 사용 방법
-1. 임의의 뉴스 사이트나 블로그 접속
-2. Criti AI 확장 프로그램 아이콘 클릭
-3. "이 글 분석하기" 버튼 클릭
-4. 분석 결과 확인 및 하이라이트 상호작용 체험
-
-## 🧪 테스트 방법
-
-### 하이라이트 시스템 테스트
-```javascript
-// 브라우저 개발자 도구에서 실행
-import { testHighlightSystem, browserHighlightTest } from '/src/utils/testUtils.ts';
-
-// 전체 시스템 테스트
-testHighlightSystem();
-
-// 시각적 테스트
-browserHighlightTest();
-```
-
-### 추천 테스트 사이트
-- 📰 **뉴스**: 네이버 뉴스, 다음 뉴스
-- 📝 **블로그**: 티스토리, 네이버 블로그
-- 🛒 **상업적**: 쿠팡, 11번가 상품 리뷰
-- 💬 **커뮤니티**: 네이버 카페, Reddit
+이제 다음 주소에서 서비스를 확인할 수 있습니다:
+- 백엔드: http://localhost:3001
+- 프론트엔드: http://localhost:5173
+- Health Check: http://localhost:3001/health
 
 ## 📁 프로젝트 구조
 
 ```
 criti-ai/
-├── 📁 frontend/                 # React + Vite 프론트엔드
-│   ├── 📁 src/
-│   │   ├── 📁 components/
-│   │   │   ├── 📁 analysis/
-│   │   │   │   ├── 📁 TextHighlighter/    # 🎨 하이라이트 시스템
-│   │   │   │   ├── 📁 Sidebar/           # 📊 분석 결과 사이드바  
-│   │   │   │   └── 📁 TrustMeter/        # 📈 신뢰도 미터
-│   │   │   └── ContentScriptApp.tsx     # 🔗 메인 앱 컴포넌트
-│   │   ├── 📁 utils/
-│   │   │   ├── highlightUtils.ts         # 🎯 하이라이트 데이터 통합
-│   │   │   └── testUtils.ts              # 🧪 테스트 유틸리티
-│   │   └── 📁 extension/                 # 크롬 확장 프로그램
-│   └── 📁 dist/                          # 빌드 결과물
-├── 📁 backend/                           # Express 백엔드
-│   └── 📁 src/
-│       └── 📁 services/
-│           └── GeminiService.ts          # 🤖 AI 분석 서비스
-├── 📁 shared/                            # 공유 타입 정의
-│   └── 📁 src/
-│       └── types.ts                      # 📝 TypeScript 타입
-└── 📄 HIGHLIGHT_SYSTEM_README.md         # 🎨 하이라이트 시스템 가이드
+├── backend/           # Express.js 백엔드
+│   ├── src/
+│   │   ├── services/  # 비즈니스 로직
+│   │   ├── routes/    # API 라우트
+│   │   └── scripts/   # 유틸리티 스크립트
+│   ├── prisma/        # 데이터베이스 스키마
+│   └── .env           # 환경 변수
+├── frontend/          # React + Vite 프론트엔드
+│   ├── src/
+│   │   ├── components/  # 공통 컴포넌트
+│   │   ├── extension/   # 크롬 확장 프로그램
+│   │   ├── pages/       # 페이지 컴포넌트
+│   │   ├── services/    # API 서비스
+│   │   └── styles/      # 디자인 시스템
+│   └── public/        # 정적 파일
+├── shared/            # 공통 타입 정의
+└── package.json       # 모노레포 설정
 ```
 
-## 🎯 사용 예시
+## 🛠️ 개발 스크립트
 
-### 일반적인 뉴스 기사 분석
-```
-📊 종합 신뢰도: 78/100
+```bash
+# 전체 프로젝트 개발 모드
+npm run dev
 
-🏛️ 출처 신뢰도: 85/100 (✅ 신뢰할 만함)
-🎭 편향성: "충격적인 사건", "반드시 알아야 할" → 🎨 주황색 하이라이트
-🧠 논리적 오류: "모든 전문가가 동의한다" (성급한 일반화) → 🎨 빨간색 하이라이트  
-🎯 광고성: 15/100 (✅ 비광고성)
-📋 핵심 주장: "GDP가 3% 성장했다" → 🎨 초록색 하이라이트
+# 개별 실행
+npm run dev:backend    # 백엔드만
+npm run dev:frontend   # 프론트엔드만
+
+# 빌드
+npm run build         # 전체 빌드
+npm run build:frontend # 크롬 확장 프로그램 빌드
+
+# 데이터베이스
+npm run db:generate   # Prisma 클라이언트 생성
+npm run db:push      # 스키마 푸시
+npm run db:seed      # 시드 데이터 삽입
+npm run db:studio    # Prisma Studio 실행
+
+# 린트 및 포맷팅
+npm run lint         # 전체 린트 검사
+npm run clean        # 빌드 파일 정리
 ```
 
-### 블로그 제품 리뷰 분석
-```
-📊 종합 신뢰도: 45/100
+## 🔧 주요 서비스
 
-🏛️ 출처 신뢰도: 60/100 (⚠️ 주의 필요)
-🎭 편향성: "완벽한 제품", "놓치면 안 될 기회" → 🎨 주황색 하이라이트
-🧠 논리적 오류: 검출되지 않음
-🎯 광고성: 85/100 (🚨 광고성 콘텐츠)
-  - "지금 바로 구매하세요" → 🎨 청록색 하이라이트
-  - "특별 할인가" → 🎨 청록색 하이라이트
-💥 감정 조작: "후회하지 않을 선택" → 🎨 보라색 하이라이트
-```
+### GeminiService
+- Gemini AI API를 활용한 뉴스 분석
+- 신뢰도, 편향성, 논리적 오류 탐지
+- 챌린지 자동 생성
+
+### RedisCacheService
+- Redis 기반 고성능 캐싱
+- 분석 결과 캐싱으로 API 호출 최적화
+- 캐시 통계 및 모니터링
+
+### DatabaseService
+- Prisma ORM 기반 데이터 관리
+- 사용자 진행도, 챌린지 결과 저장
+- 배지 시스템 및 통계 생성
+
+## 📊 캐싱 전략
+
+3단계 캐싱 시스템으로 최적의 성능과 안정성 확보:
+
+1. **Redis** (1순위): 고속 인메모리 캐시
+2. **Database** (2순위): 영구 저장 + 백업
+3. **Memory** (3순위): 최후의 보루
+
+## 🎮 챌린지 시스템
+
+### 난이도별 분류
+- **Beginner**: 기본적인 편향 표현 찾기
+- **Intermediate**: 광고성 콘텐츠 탐지
+- **Advanced**: 복합적인 논리 오류 분석
+
+### 배지 시스템
+- 🎯 첫 걸음: 첫 번째 분석 완료
+- 🔍 탐정: 편향 표현 다수 발견
+- 🧠 논리 마스터: 논리적 오류 전문가
+- 🏆 챌린지 완주자: 다수 챌린지 완료
+
+## 🔒 보안 및 성능
+
+- **API 키 보안**: 백엔드에서만 AI API 키 관리
+- **CORS 정책**: 화이트리스트 기반 접근 제어
+- **Rate Limiting**: API 남용 방지
+- **캐시 최적화**: 중복 분석 요청 최소화
+
+## 🌟 향후 계획
+
+### 2단계: 프론트엔드 완성
+- [ ] 디자인 시스템 구축
+- [ ] 크롬 확장 프로그램 UI 완성
+- [ ] 실시간 하이라이팅 기능
+
+### 3단계: 고급 기능
+- [ ] 다국어 지원
+- [ ] 모바일 앱 버전
+- [ ] 소셜 기능 (커뮤니티)
+
+### 4단계: 프로덕션 배포
+- [ ] 서버 인프라 구축
+- [ ] 크롬 웹 스토어 배포
+- [ ] 모니터링 시스템 구축
 
 ## 🤝 기여하기
 
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feat/amazing-feature`)
-3. 단계별 커밋으로 작업 진행
-4. Push to the Branch (`git push origin feat/amazing-feature`)
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-### 커밋 컨벤션
-```
-feat(highlight): 새로운 하이라이트 타입 추가
-fix(sidebar): 스크롤 이동 버그 수정
-style(ui): 하이라이트 색상 개선
-refactor(utils): 성능 최적화
-test(system): 통합 테스트 추가
-docs(readme): 사용법 업데이트
-```
+## 📄 라이선스
 
-## 📝 라이선스
+MIT License - 자세한 내용은 [LICENSE](LICENSE) 파일을 참조하세요.
 
-이 프로젝트는 MIT 라이선스 하에 배포됩니다. 자세한 내용은 `LICENSE` 파일을 참조하세요.
+## 📞 문의
 
-## 🔗 관련 링크
-
-- **🎨 하이라이트 시스템 상세 가이드**: [HIGHLIGHT_SYSTEM_README.md](./HIGHLIGHT_SYSTEM_README.md)
-- **📚 Google Gemini API**: [https://ai.google.dev/docs](https://ai.google.dev/docs)
-- **🔧 Chrome Extension 개발**: [https://developer.chrome.com/docs/extensions/](https://developer.chrome.com/docs/extensions/)
+프로젝트 관련 문의사항이 있으시면 이슈를 등록해주세요.
 
 ---
 
-**Criti AI와 함께 더 스마트한 미디어 소비를 시작하세요!** 🧠✨
-
-*"AI가 만든 가짜 정보, AI와 함께 이겨내다"* - Criti AI 슬로건
+**🎯 "AI가 만든 가짜 정보, AI와 함께 이겨내다" - Criti.AI**
