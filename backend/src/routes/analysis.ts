@@ -2,6 +2,8 @@ import { Router } from "express";
 import type { Request, Response } from "express";
 import { GeminiService } from "../services/GeminiService.js";
 import { CacheService } from "../services/CacheService.js";
+import { redisCacheService } from "../services/RedisCacheService.js";
+import { databaseService } from "../services/DatabaseService.js";
 import type {
   AnalysisRequest,
   ApiResponse,
@@ -27,16 +29,53 @@ router.post("/analyze", async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    // 캐시 확인
-    const cacheKey = `analysis:${Buffer.from(url).toString("base64")}`;
-    const cachedResult = await cacheService.get(cacheKey);
+    // 3단계 캐시 시스템: Redis -> DB -> 메모리
+    // 1단계: Redis 캐시 확인
+    let cachedResult = await redisCacheService.getAnalysisCache(url);
 
     if (cachedResult) {
-      console.log("Cache hit for URL:", url);
+      console.log("🎯 Redis cache hit for URL:", url);
       res.json({
         success: true,
         data: cachedResult,
         timestamp: new Date().toISOString(),
+        cached: true,
+        cacheSource: 'redis'
+      } as ApiResponse<TrustAnalysis>);
+      return;
+    }
+
+    // 2단계: 데이터베이스 캐시 확인
+    cachedResult = await databaseService.getAnalysisFromCache(url);
+
+    if (cachedResult) {
+      console.log("💾 DB cache hit for URL:", url);
+      
+      // Redis에도 저장 (다음 요청 시 속도 향상)
+      await redisCacheService.setAnalysisCache(url, cachedResult, 24 * 60 * 60);
+      
+      res.json({
+        success: true,
+        data: cachedResult,
+        timestamp: new Date().toISOString(),
+        cached: true,
+        cacheSource: 'database'
+      } as ApiResponse<TrustAnalysis>);
+      return;
+    }
+
+    // 3단계: 메모리 캐시 확인 (마지막 대안)
+    const memoryCacheKey = `analysis:${Buffer.from(url).toString("base64")}`;
+    cachedResult = await cacheService.get(memoryCacheKey);
+
+    if (cachedResult) {
+      console.log("🧠 Memory cache hit for URL:", url);
+      res.json({
+        success: true,
+        data: cachedResult,
+        timestamp: new Date().toISOString(),
+        cached: true,
+        cacheSource: 'memory'
       } as ApiResponse<TrustAnalysis>);
       return;
     }
@@ -49,8 +88,18 @@ router.post("/analyze", async (req: Request, res: Response): Promise<void> => {
       title,
     });
 
-    // 결과 캐싱 (24시간)
-    await cacheService.set(cacheKey, analysis, 24 * 60 * 60);
+    // 3단계 캐시에 결과 저장
+    const ttl = 24 * 60 * 60; // 24시간
+    
+    // 1순위: Redis 저장
+    await redisCacheService.setAnalysisCache(url, analysis, ttl);
+    
+    // 2순위: 데이터베이스 저장 (영구 보관)
+    await databaseService.saveAnalysisToCache(url, analysis, title, 'news'); // contentType 기본값
+    
+    // 3순위: 메모리 캐시 저장 (백업)
+    const memoryKey = `analysis:${Buffer.from(url).toString("base64")}`;
+    await cacheService.set(memoryKey, analysis, ttl);
 
     res.json({
       success: true,

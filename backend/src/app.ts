@@ -8,6 +8,8 @@ import type { Request, Response, NextFunction } from "express";
 import analysisRoutes from "./routes/analysis";
 import challengeRoutes from "./routes/challenge";
 import { GeminiService } from './services/GeminiService'; // 정적 import로 변경
+import { redisCacheService } from './services/RedisCacheService';
+import { databaseService } from './services/DatabaseService';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -51,12 +53,31 @@ app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
 // 기본 라우트
-app.get("/health", (req: Request, res: Response) => {
+app.get("/health", async (req: Request, res: Response) => {
+  const cacheStats = await redisCacheService.getCacheStats();
+  
+  // 데이터베이스 연결 상태 확인
+  let dbStatus = 'disconnected';
+  try {
+    await databaseService.client.$queryRaw`SELECT 1`;
+    dbStatus = 'connected';
+  } catch (error) {
+    dbStatus = 'error';
+  }
+  
   res.json({
     status: "OK",
     timestamp: new Date().toISOString(),
     service: "Criti.AI Backend",
-    geminiApiKey: !!process.env.GEMINI_API_KEY ? "Configured" : "Missing"
+    geminiApiKey: !!process.env.GEMINI_API_KEY ? "Configured" : "Missing",
+    database: {
+      status: dbStatus,
+      url: process.env.DATABASE_URL ? '설정됨' : '미설정'
+    },
+    redis: {
+      connected: redisCacheService.isRedisAvailable(),
+      ...cacheStats
+    }
   });
 });
 
@@ -120,8 +141,37 @@ app.use("*", (req: Request, res: Response) => {
   });
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`🚀 Criti.AI Backend Server running on port ${PORT}`);
+  
+  // 데이터베이스 연결 초기화
+  try {
+    await databaseService.connect();
+  } catch (error) {
+    console.warn('⚠️ 데이터베이스 연결 실패 (개발 모드에서는 계속 진행)');
+  }
+  
+  // 개발 환경에서는 만료된 캐시 정리
+  if (process.env.NODE_ENV === 'development') {
+    await databaseService.cleanExpiredCache();
+  }
+});
+
+// 우아한 종료 처리
+process.on('SIGINT', async () => {
+  console.log('\n🛑 서버 종료 신호 수신...');
+  
+  try {
+    await Promise.all([
+      databaseService.disconnect(),
+      redisCacheService.disconnect()
+    ]);
+    console.log('✅ 모든 연결 정리 완료');
+  } catch (error) {
+    console.error('❌ 연결 정리 실패:', error);
+  }
+  
+  process.exit(0);
 });
 
 export default app;
