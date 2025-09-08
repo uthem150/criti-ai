@@ -69,7 +69,7 @@ app.get("/health", async (req: Request, res: Response) => {
   try {
     await databaseService.client.$queryRaw`SELECT 1`;
     dbStatus = 'connected';
-  } catch (error) {
+  } catch (_error) {
     dbStatus = 'error';
   }
   
@@ -77,7 +77,7 @@ app.get("/health", async (req: Request, res: Response) => {
     status: "OK",
     timestamp: new Date().toISOString(),
     service: "Criti.AI Backend",
-    geminiApiKey: !!process.env.GEMINI_API_KEY ? "Configured" : "Missing",
+    geminiApiKey: process.env.GEMINI_API_KEY ? "Configured" : "Missing",
     database: {
       status: dbStatus,
       url: process.env.DATABASE_URL ? '설정됨' : '미설정'
@@ -104,11 +104,11 @@ app.get("/test-gemini", async (req: Request, res: Response) => {
       message: 'Gemini API 연결 성공',
       testResult: testResult.overallScore
     });
-  } catch (error) {
+  } catch (_error) {
     res.json({
       success: false,
       message: 'Gemini API 연결 실패',
-      error: error instanceof Error ? error.message : '알 수 없는 오류'
+      error: _error instanceof Error ? _error.message : '알 수 없는 오류'
     });
   }
 });
@@ -123,7 +123,7 @@ app.use("/api/analysis", analysisRoutes);
 app.use("/api/challenge", challengeRoutes);
 
 // 에러 핸들링
-app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+app.use((err: Error, req: Request, res: Response, _next: NextFunction) => {
   console.error(err.stack);
   // CORS 에러인 경우 더 친절한 메시지 제공
   if (err.message === 'Not allowed by CORS') {
@@ -155,7 +155,7 @@ app.listen(PORT, async () => {
   // 데이터베이스 연결 초기화
   try {
     await databaseService.connect();
-  } catch (error) {
+  } catch (_error) {
     console.warn('⚠️ 데이터베이스 연결 실패 (개발 모드에서는 계속 진행)');
   }
   

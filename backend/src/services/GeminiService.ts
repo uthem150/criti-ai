@@ -1,5 +1,5 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import type { TrustAnalysis, AnalysisRequest, HighlightedText, LogicalFallacy, AdvertisementIndicator } from "@criti-ai/shared";
+import type { TrustAnalysis, AnalysisRequest, LogicalFallacy, AdvertisementIndicator } from "@criti-ai/shared";
 
 export class GeminiService {
   private genAI: GoogleGenerativeAI;
@@ -325,7 +325,7 @@ ${request.content}
       let jsonString = '';
       
       // 1. 마크다운 코드 블록 제거
-      let cleanText = analysisText.replace(/```json\s*/g, '').replace(/```\s*/g, '');
+      const cleanText = analysisText.replace(/```json\s*/g, '').replace(/```\s*/g, '');
       
       // 2. 첫 번째 { 부터 마지막 } 까지 추출
       const firstBrace = cleanText.indexOf('{');

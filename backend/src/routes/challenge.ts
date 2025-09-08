@@ -1,7 +1,6 @@
 import { Router } from "express";
 import type { Request, Response } from "express";
 import { GeminiService } from "../services/GeminiService.js";
-import { CacheService } from "../services/CacheService.js";
 import { redisCacheService } from "../services/RedisCacheService.js";
 import { databaseService } from "../services/DatabaseService.js";
 import type {
@@ -13,7 +12,6 @@ import type {
 
 const router = Router();
 const geminiService = new GeminiService();
-const cacheService = new CacheService();
 
 // 모든 챌린지 조회
 router.get("/challenges", async (req: Request, res: Response): Promise<void> => {

@@ -145,7 +145,7 @@ router.post(
         data: { quickScore, domain },
         timestamp: new Date().toISOString(),
       });
-    } catch (error) {
+    } catch (_error) {
       res.status(500).json({
         success: false,
         error: "빠른 분석 중 오류가 발생했습니다.",
