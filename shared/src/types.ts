@@ -153,7 +153,9 @@ export interface Challenge {
     | "article-analysis"
     | "image-detection"
     | "data-visualization"
-    | "ad-detection";
+    | "ad-detection"
+    | "fact-check"
+    | "bias-detection";
   title: string;
   content: string;
   correctAnswers: string[];
@@ -185,7 +187,7 @@ export interface Badge {
   description: string;
   icon: string;
   earnedAt: string;
-  category: "analysis" | "training" | "milestone" | "special";
+  category: "analysis" | "training" | "milestone" | "special" | "streak";
 }
 
 // API 요청 타입
