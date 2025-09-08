@@ -66,11 +66,11 @@ pre_check() {
     fi
     
     # 메모리 확인
-    local mem_gb=$(free -g | awk '/^Mem:/ {print $2}')
-    if [ "$mem_gb" -lt 1 ]; then
-        print_error "메모리가 1GB 미만입니다. Micro 인스턴스가 아닐 수 있습니다."
+    local mem_mb=$(free -m | awk '/^Mem:/ {print $2}')
+    if [ "$mem_mb" -lt 800 ]; then
+        print_error "메모리가 800MB 미만입니다. Micro 인스턴스가 아닐 수 있습니다."
     fi
-    print_success "메모리: ${mem_gb}GB (Micro 인스턴스 확인됨)"
+    print_success "메모리: ${mem_mb}MB (Micro 인스턴스 확인됨)"
     
     # 디스크 공간 확인
     local disk_available=$(df / | tail -1 | awk '{print $4}')
@@ -211,39 +211,46 @@ setup_project() {
 setup_environment() {
     print_step 6 10 "환경 변수 설정"
     
-    if [ ! -f .env ]; then
-        cp .env.micro .env 2>/dev/null || touch .env
-        
-        echo -e "${YELLOW}환경 변수를 설정해주세요:${NC}"
-        
-        # Gemini API Key 입력
-        if ! grep -q "GEMINI_API_KEY=" .env || grep -q "your_gemini_api_key_here" .env; then
-            echo ""
-            echo "🔑 Gemini API Key가 필요합니다."
-            echo "   1. https://aistudio.google.com 접속"
-            echo "   2. Google 계정으로 로그인"
-            echo "   3. 'Get API key' → 'Create API key' 클릭"
-            echo "   4. 생성된 키를 복사하여 아래에 입력"
-            echo ""
-            read -p "Gemini API Key: " api_key
-            
-            if [ -n "$api_key" ]; then
-                sed -i "s/GEMINI_API_KEY=.*/GEMINI_API_KEY=$api_key/" .env
-                print_success "Gemini API Key 설정 완료"
-            else
-                print_error "API Key는 필수입니다!"
-            fi
-        fi
-        
-        # 서버 IP 자동 감지 및 설정
-        SERVER_IP=$(curl -s ifconfig.me 2>/dev/null || curl -s ipinfo.io/ip 2>/dev/null || echo "localhost")
-        sed -i "s|FRONTEND_URL=.*|FRONTEND_URL=https://localhost:3000|" .env
-        
-        print_success "환경 변수 설정 완료"
-        print_warning "나중에 Vercel 배포 후 FRONTEND_URL을 업데이트하세요"
-    else
-        print_success "기존 환경 변수 파일 사용"
+    # backend/.env 파일 확인 및 설정
+    if [ ! -f "backend/.env" ]; then
+        print_warning "backend/.env 파일이 없습니다. 생성합니다."
+        cp "backend/.env.example" "backend/.env" 2>/dev/null || touch "backend/.env"
     fi
+    
+    # Gemini API Key 확인 및 설정
+    if ! grep -q "GEMINI_API_KEY=" "backend/.env" || grep -q "your_gemini_api_key_here" "backend/.env"; then
+        echo -e "${YELLOW}Gemini API Key 설정이 필요합니다:${NC}"
+        echo ""
+        echo "🔑 Gemini API Key가 필요합니다."
+        echo "   1. https://aistudio.google.com 접속"
+        echo "   2. Google 계정으로 로그인"
+        echo "   3. 'Get API key' → 'Create API key' 클릭"
+        echo "   4. 생성된 키를 복사하여 아래에 입력"
+        echo ""
+        read -p "Gemini API Key: " api_key
+        
+        if [ -n "$api_key" ]; then
+            # backend/.env에 API 키 설정
+            if grep -q "GEMINI_API_KEY=" "backend/.env"; then
+                sed -i "s/GEMINI_API_KEY=.*/GEMINI_API_KEY=$api_key/" "backend/.env"
+            else
+                echo "GEMINI_API_KEY=$api_key" >> "backend/.env"
+            fi
+            print_success "Gemini API Key 설정 완료 (backend/.env)"
+        else
+            print_error "API Key는 필수입니다!"
+        fi
+    else
+        print_success "Gemini API Key가 이미 설정되어 있습니다 (backend/.env)"
+    fi
+    
+    # 프로덕션 환경에 맞게 backend/.env 업데이트
+    sed -i "s/NODE_ENV=.*/NODE_ENV=production/" "backend/.env"
+    sed -i "s|DATABASE_URL=.*|DATABASE_URL=file:/app/data/criti-ai.db|" "backend/.env"
+    sed -i "s|REDIS_URL=.*|REDIS_URL=redis://redis:6379|" "backend/.env"
+    
+    print_success "백엔드 환경 변수 설정 완료"
+    print_warning "프론트엔드 배포 후 FRONTEND_URL을 backend/.env에서 업데이트하세요"
 }
 
 # 서비스 빌드 및 시작
@@ -375,7 +382,7 @@ show_final_info() {
     echo "   - 환경변수 VITE_BACKEND_URL=http://$SERVER_IP:3001 설정"
     echo ""
     echo "2. 백엔드 환경변수 업데이트"
-    echo "   - nano .env"
+    echo "   - nano backend/.env"
     echo "   - FRONTEND_URL을 Vercel URL로 변경"
     echo "   - docker-compose -f docker-compose.micro.yml restart"
     echo ""
