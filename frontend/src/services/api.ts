@@ -1,6 +1,23 @@
 // Backend API 호출 서비스 - Background Script 프록시 방식
 import type { TrustAnalysis, AnalysisRequest } from '@shared/types';
 
+// Background Script 메시지 타입 정의
+interface BackgroundMessage {
+  type: string;
+  endpoint?: string;
+  url?: string;
+  method?: string;
+  headers?: Record<string, string>;
+  body?: unknown;
+}
+
+interface BackgroundResponse {
+  success: boolean;
+  data?: unknown;
+  error?: string;
+  status?: number;
+}
+
 // 환경변수 설정
 const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
 const API_ENDPOINTS = {
@@ -12,7 +29,7 @@ const API_ENDPOINTS = {
 
 class ApiService {
   // Background Script를 통한 API 프록시 호출
-  private async sendToBackground(message: any): Promise<any> {
+  private async sendToBackground(message: BackgroundMessage): Promise<BackgroundResponse> {
     return new Promise((resolve, reject) => {
       if (typeof chrome === 'undefined' || !chrome.runtime) {
         reject(new Error('크롬 확장 환경이 아닙니다'));
@@ -114,7 +131,7 @@ class ApiService {
   }
 
   // 사용량 통계 전송
-  async trackUsage(event: string, data?: any): Promise<void> {
+  async trackUsage(event: string, data?: Record<string, unknown>): Promise<void> {
     try {
       await this.sendToBackground({
         type: 'API_PROXY',
