@@ -10,10 +10,11 @@
   },
   "permissions": ["activeTab", "storage", "scripting"],
   "host_permissions": [
-    "http://*/*", 
+    "http://*/*",
     "https://*/*",
     "http://localhost:*/*",
-    "https://localhost:*/*"
+    "https://localhost:*/*",
+    "http://144.24.79.13:3001"
   ],
   "background": {
     "service_worker": "src/extension/background/index.ts",
