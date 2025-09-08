@@ -7,13 +7,12 @@ services:
       context: .
       dockerfile: backend/Dockerfile.micro
     container_name: criti-ai-backend
+    env_file:
+      - backend/.env
     environment:
       - NODE_ENV=production
-      - PORT=3001
       - DATABASE_URL=file:/app/data/criti-ai.db
       - REDIS_URL=redis://redis:6379
-      - GEMINI_API_KEY=${GEMINI_API_KEY}
-      - FRONTEND_URL=${FRONTEND_URL}
       # Node.js 메모리 제한 (중요!)
       - NODE_OPTIONS=--max-old-space-size=128
     ports:
