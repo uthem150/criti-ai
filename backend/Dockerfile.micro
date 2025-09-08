@@ -8,13 +8,13 @@ WORKDIR /app
 
 # 공유 패키지 빌드
 COPY shared/package*.json ./shared/
-RUN cd shared && npm ci --production --no-audit --no-fund
+RUN cd shared && npm install --no-audit --no-fund
 COPY shared/ ./shared/
 RUN cd shared && npm run build
 
 # 백엔드 의존성 설치
 COPY backend/package*.json ./backend/
-RUN cd backend && npm ci --production --no-audit --no-fund
+RUN cd backend && npm install --no-audit --no-fund
 
 # 백엔드 소스 복사 및 빌드
 COPY backend/ ./backend/
