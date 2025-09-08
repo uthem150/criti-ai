@@ -5,11 +5,11 @@ import helmet from "helmet";
 import morgan from "morgan";
 import compression from "compression";
 import type { Request, Response, NextFunction } from "express";
-import analysisRoutes from "./routes/analysis";
-import challengeRoutes from "./routes/challenge";
-import { GeminiService } from './services/GeminiService'; // 정적 import로 변경
-import { redisCacheService } from './services/RedisCacheService';
-import { databaseService } from './services/DatabaseService';
+import analysisRoutes from "./routes/analysis.js";
+import challengeRoutes from "./routes/challenge.js";
+import { GeminiService } from './services/GeminiService.js'; // 정적 import로 변경
+import { redisCacheService } from './services/RedisCacheService.js';
+import { databaseService } from './services/DatabaseService.js';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -21,8 +21,16 @@ const allowedOrigins = [
   FRONTEND_URL,
   // TODO: 여기에 실제 프로덕션 빌드된 크롬 확장 프로그램 ID 추가필요
   // 예: 'chrome-extension://abcdefghijklmnopqrstuvwxyz123456'
-  `chrome-extension://${process.env.CHROME_EXTENSION_ID || 'your-extension-id-here'}`,
-  /^moz-extension:\/\/.*/, // Firefox 확장 (정규식)
+  // `chrome-extension://${process.env.CHROME_EXTENSION_ID || 'your-extension-id-here'}`,
+  
+  // 크롬 확장 프로그램 허용
+  /^chrome-extension:\/\/.*/,  // 모든 크롬 확장 허용
+  /^moz-extension:\/\/.*/,     // 파이어폭스 확장 허용
+  // 개발 환경
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'http://127.0.0.1:5173',
+  'http://127.0.0.1:3000',
 ];
 
 if (process.env.NODE_ENV === 'development') {
