@@ -318,13 +318,35 @@ ${request.content}
 
   private parseAnalysisResult(analysisText: string): TrustAnalysis {
     try {
-      // JSON 부분만 추출
-      const jsonMatch = analysisText.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) {
-        throw new Error("유효한 JSON 응답을 찾을 수 없습니다.");
+      console.log('🔍 원본 Gemini 응답 길이:', analysisText.length);
+      console.log('🔍 원본 응답 시작:', analysisText.substring(0, 300));
+      
+      // 다양한 방식으로 JSON 추출 시도
+      let jsonString = '';
+      
+      // 1. 마크다운 코드 블록 제거
+      let cleanText = analysisText.replace(/```json\s*/g, '').replace(/```\s*/g, '');
+      
+      // 2. 첫 번째 { 부터 마지막 } 까지 추출
+      const firstBrace = cleanText.indexOf('{');
+      const lastBrace = cleanText.lastIndexOf('}');
+      
+      if (firstBrace !== -1 && lastBrace !== -1 && firstBrace < lastBrace) {
+        jsonString = cleanText.substring(firstBrace, lastBrace + 1);
+      } else {
+        // 3. 백업: 정규식으로 JSON 바디 얻기
+        const jsonMatch = cleanText.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          jsonString = jsonMatch[0];
+        } else {
+          throw new Error("JSON 형식의 응답을 찾을 수 없습니다.");
+        }
       }
-
-      const parsed = JSON.parse(jsonMatch[0]) as TrustAnalysis;
+      
+      console.log('🔍 추출된 JSON 길이:', jsonString.length);
+      console.log('🔍 JSON 시작:', jsonString.substring(0, 300));
+      
+      const parsed = JSON.parse(jsonString) as TrustAnalysis;
       
       // 분석 결과 검증
       this.validateAnalysisResult(parsed);
@@ -334,9 +356,13 @@ ${request.content}
       
       return parsed;
     } catch (error) {
-      console.error("Analysis parsing error:", error);
-      console.error("Raw response:", analysisText);
-      throw new Error("AI 분석 결과를 파싱할 수 없습니다: " + (error instanceof Error ? error.message : '알 수 없는 오류'));
+      console.error("❌ JSON 파싱 오류:", error);
+      console.error("📄 원본 응답 전체:", analysisText);
+      
+      // 비상 방식: 기본 구조 반환
+      console.log("⚙️ 비상 대응: 기본 분석 결과 생성");
+      throw new Error(`AI 분석 결과 파싱 실패 - 원인: ${error instanceof Error ? error.message : '알 수 없는 오류'}. 전체 응답: ${analysisText.substring(0, 500)}...`);
+    
     }
   }
 
