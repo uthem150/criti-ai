@@ -1,6 +1,10 @@
 // Background Script - API 프록시 및 확장 프로그램 관리
 console.log("🚀 Criti AI Background Script 시작");
 
+// 환경변수에서 백엔드 URL 가져오기
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
+console.log('🔗 Backend URL:', BACKEND_URL);
+
 // 타입 정의
 interface LegacyAnalyzeRequest {
   action: "analyze";
@@ -109,17 +113,18 @@ async function handleLegacyAnalyze(
   try {
     console.log("🔄 레거시 분석 요청 처리");
 
-    const response = await fetch("http://localhost:3001/api/analysis/analyze", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        url: request.url,
-        content: request.content,
-        title: request.title,
-      }),
-    });
+    const response = await fetch(`${BACKEND_URL}/api/analysis/analyze`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          url: request.url,
+          content: request.content,
+          title: request.title,
+        }),
+      }
+    );
 
     const data = await response.json();
 
@@ -182,7 +187,7 @@ async function handleHealthCheck(
 ): Promise<void> {
   try {
     console.log("🚑 헬스 체크 시작");
-    const response = await fetch("http://localhost:3001/health");
+    const response = await fetch(`${BACKEND_URL}/health`);
     const data = await response.json();
 
     console.log("✅ 헬스 체크 성공:", data);
