@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 
-const PopupApp: React.FC = () => {
+export const PopupApp: React.FC = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [currentTab, setCurrentTab] = useState<chrome.tabs.Tab | null>(null);
   const [connectionStatus, setConnectionStatus] = useState<'checking' | 'ready' | 'not_ready' | 'error'>('checking');
@@ -131,6 +131,16 @@ const PopupApp: React.FC = () => {
     }
   };
 
+  const handleChallengeClick = () => {
+    // Challenge 웹 페이지로 이동 (개발 환경)
+    const challengeUrl = process.env.NODE_ENV === 'production' 
+      ? 'https://criti-ai-challenge.vercel.app' 
+      : 'http://localhost:3000/challenge';
+    
+    chrome.tabs.create({ url: challengeUrl });
+    console.log('🎮 Challenge 페이지로 이동:', challengeUrl);
+  };
+
   const renderConnectionStatus = () => {
     switch (connectionStatus) {
       case 'checking':
@@ -235,6 +245,22 @@ const PopupApp: React.FC = () => {
       
       <main className="popup-main">
         {renderConnectionStatus()}
+        
+        {/* Challenge 버튼 섹션 - 연결 상태와 무관하게 항상 표시 */}
+        <div className="challenge-section">
+          <div className="divider">
+            <span>또는</span>
+          </div>
+          <button 
+            onClick={handleChallengeClick}
+            className="challenge-button"
+          >
+            🎮 비판적 사고 훈련하기
+          </button>
+          <p className="challenge-description">
+            AI가 생성한 챌린지를 통해 가짜 뉴스를 판별하는 능력을 기르세요!
+          </p>
+        </div>
       </main>
       
       <footer className="popup-footer">
@@ -265,7 +291,7 @@ const styles = `
   body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Malgun Gothic', sans-serif;
     width: 380px;
-    min-height: 500px;
+    min-height: 550px;
     background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
     color: #1e293b;
     line-height: 1.5;
@@ -274,7 +300,7 @@ const styles = `
   .popup-container {
     display: flex;
     flex-direction: column;
-    min-height: 500px;
+    min-height: 550px;
   }
 
   .popup-header {
@@ -309,6 +335,7 @@ const styles = `
   .status-not-ready,
   .status-error {
     text-align: center;
+    margin-bottom: 24px;
     
     .icon {
       font-size: 48px;
@@ -316,7 +343,7 @@ const styles = `
     }
     
     h3 {
-      font-size: 20px;
+      font-size: 18px;
       font-weight: 600;
       margin-bottom: 12px;
       color: #1e293b;
@@ -399,6 +426,71 @@ const styles = `
     &:hover:not(:disabled) {
       box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
     }
+  }
+
+  /* Challenge 섹션 스타일 */
+  .challenge-section {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #e2e8f0;
+  }
+
+  .divider {
+    text-align: center;
+    margin-bottom: 20px;
+    position: relative;
+    
+    &::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: #e2e8f0;
+      z-index: 1;
+    }
+    
+    span {
+      background: #f8fafc;
+      padding: 0 16px;
+      color: #64748b;
+      font-size: 14px;
+      position: relative;
+      z-index: 2;
+    }
+  }
+
+  .challenge-button {
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+    color: white;
+    border: none;
+    padding: 14px 24px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 2px 4px rgba(139, 92, 246, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    margin-bottom: 12px;
+    
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(139, 92, 246, 0.3);
+      background: linear-gradient(135deg, #7c3aed, #6d28d9);
+    }
+  }
+
+  .challenge-description {
+    font-size: 13px;
+    color: #64748b;
+    text-align: center;
+    line-height: 1.4;
+    margin-bottom: 8px;
   }
 
   .current-page {
@@ -487,7 +579,7 @@ if (container) {
   document.body.innerHTML = `
     <div style="padding: 20px; text-align: center; color: #dc2626;">
       <h3>오류 발생</h3>
-      <p>Popup 컴탈이너를 찾을 수 없습니다.</p>
+      <p>Popup 컨테이너를 찾을 수 없습니다.</p>
       <small>popup-root 요소가 필요합니다.</small>
     </div>
   `;
