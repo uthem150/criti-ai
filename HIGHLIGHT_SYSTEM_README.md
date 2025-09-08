@@ -1,6 +1,250 @@
 # 🎯 Criti AI - 통합 하이라이트 시스템 개발 가이드
 
-## 🚀 최근 업데이트 (v2.0 - 통합 하이라이트 시스템)
+## 📋 목차
+- [🚀 최근 업데이트](#-최근-업데이트)
+- [🏛️ Oracle Micro 서버 배포 가이드](#️-oracle-micro-서버-배포-가이드)
+- [📋 시스템 아키텍처](#-시스템-아키텍처)
+- [🛠️ 개발 환경 설정](#️-개발-환경-설정)
+- [🧪 테스트 방법](#-테스트-방법)
+
+## 🏛️ Oracle Micro 서버 배포 가이드
+
+> ⚠️ **중요**: 이 가이드는 실제 배포 과정에서 발생한 모든 문제점과 해결책을 포함합니다.
+
+### 📊 Oracle Micro 서버 사양
+- **CPU**: 1 vCPU (x86-64)
+- **RAM**: 1 GB (실제 956MB 사용 가능)
+- **Storage**: 47 GB SSD
+- **Network**: 480 Mbps, 10TB/월
+- **비용**: 완전 무료 (Oracle Always Free)
+
+### 🚨 배포 과정에서 발생하는 주요 문제들
+
+#### 1. Ubuntu Minimal 환경에서 누락된 패키지들
+
+**문제**: Ubuntu Minimal에는 기본 명령어들이 설치되어 있지 않음
+
+```bash
+# 오류 메시지들
+bash: git: command not found
+bash: ping: command not found
+sudo: ufw: command not found
+```
+
+**해결책**: 필수 패키지 설치
+```bash
+# Git 설치
+sudo apt update
+sudo apt install git -y
+
+# Ping 명령어 설치
+sudo apt install iputils-ping -y
+
+# UFW 방화벽 설치
+sudo apt install ufw -y
+```
+
+#### 2. Docker 권한 문제
+
+**문제**: Docker 데몬 소켓 접근 권한 없음
+```
+permission denied while trying to connect to the Docker daemon socket
+```
+
+**해결책**: Docker 그룹 추가 및 세션 갱신
+```bash
+# 사용자를 docker 그룹에 추가
+sudo usermod -aG docker ubuntu
+
+# 현재 세션에 그룹 권한 적용
+newgrp docker
+
+# 또는 SSH 재접속
+exit
+ssh -i "키파일.pem" ubuntu@서버IP
+```
+
+#### 3. npm ci vs npm install 문제
+
+**문제**: `package-lock.json` 없어서 `npm ci` 실패
+```
+npm error The `npm ci` command can only install with an existing package-lock.json
+```
+
+**해결책**: Dockerfile에서 `npm ci`를 `npm install`로 변경
+```dockerfile
+# 기존 (문제)
+RUN cd shared && npm ci --production --no-audit --no-fund
+
+# 수정 (해결)
+RUN cd shared && npm install --no-audit --no-fund
+```
+
+#### 4. TypeScript 컴파일러 없음 문제
+
+**문제**: `--production` 플래그로 인한 devDependencies 미설치
+```
+sh: tsc: not found
+```
+
+**해결책**: 빌드 단계에서 `--production` 플래그 제거
+```dockerfile
+# 기존 (문제)
+RUN cd shared && npm install --production --no-audit --no-fund
+
+# 수정 (해결)
+RUN cd shared && npm install --no-audit --no-fund
+```
+
+#### 5. ES 모듈 import 경로 문제
+
+**문제**: ES 모듈에서 `.js` 확장자 누락
+```
+Error [ERR_MODULE_NOT_FOUND]: Cannot find module '/app/dist/routes/analysis'
+```
+
+**해결책**: import 경로에 `.js` 확장자 추가
+```typescript
+// 기존 (문제)
+import analysisRoutes from "./routes/analysis";
+import { GeminiService } from './services/GeminiService';
+
+// 수정 (해결)
+import analysisRoutes from "./routes/analysis.js";
+import { GeminiService } from './services/GeminiService.js';
+```
+
+#### 6. 환경변수 구조 혼란
+
+**문제**: 루트 `.env`와 `backend/.env` 중복으로 인한 설정 혼란
+
+**해결책**: `docker-compose.micro.yml`에서 `backend/.env` 직접 사용
+```yaml
+# 수정된 docker-compose.micro.yml
+services:
+  backend:
+    env_file:
+      - backend/.env  # 직접 참조
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=file:/app/data/criti-ai.db
+      - REDIS_URL=redis://redis:6379
+      # GEMINI_API_KEY는 backend/.env에서 자동 로드
+```
+
+### ✅ 완전 자동화 배포 스크립트
+
+모든 문제를 해결한 완전 자동화 스크립트가 준비되어 있습니다:
+
+```bash
+# 1. 프로젝트 클론
+git clone https://github.com/your-username/criti-ai.git
+cd criti-ai
+
+# 2. 완전 자동화 배포 실행
+./deploy-micro-auto.sh
+
+# 3. API 키만 입력하면 완료!
+```
+
+### 🔍 배포 후 상태 확인
+
+```bash
+# 서비스 상태 확인
+docker-compose -f docker-compose.micro.yml ps
+
+# API 테스트
+curl http://localhost:3001/health
+curl http://서버IP:3001/health
+
+# 시스템 리소스 모니터링
+./monitor-micro.sh --status
+
+# 로그 확인
+docker-compose -f docker-compose.micro.yml logs -f
+```
+
+### 📊 성능 최적화 설정
+
+#### 메모리 최적화
+```dockerfile
+# Node.js 힙 메모리 제한
+CMD ["node", "--max-old-space-size=128", "dist/app.js"]
+```
+
+#### Docker 리소스 제한
+```yaml
+# docker-compose.micro.yml
+services:
+  backend:
+    mem_limit: 200m
+    mem_reservation: 150m
+    cpus: 0.7
+  redis:
+    mem_limit: 80m
+    mem_reservation: 50m
+    cpus: 0.2
+```
+
+#### 시스템 최적화
+```bash
+# 2GB Swap 파일 생성
+sudo fallocate -l 2G /swapfile
+sudo chmod 600 /swapfile
+sudo mkswap /swapfile
+sudo swapon /swapfile
+
+# 메모리 최적화 설정
+echo 'vm.swappiness=10' | sudo tee -a /etc/sysctl.conf
+echo 'vm.vfs_cache_pressure=50' | sudo tee -a /etc/sysctl.conf
+```
+
+### 🔄 일상 운영 관리
+
+```bash
+# 상태 모니터링
+./monitor-micro.sh --status
+
+# 서비스 재시작
+./monitor-micro.sh --restart
+
+# 코드 업데이트 배포
+git pull origin main
+docker-compose -f docker-compose.micro.yml up -d --build
+
+# 리소스 정리
+docker system prune -f
+```
+
+### 🚨 문제 해결 체크리스트
+
+#### 배포 실패 시
+- [ ] Git 설치 확인: `git --version`
+- [ ] Docker 권한 확인: `docker ps`
+- [ ] 메모리 여유 확인: `free -h`
+- [ ] 디스크 공간 확인: `df -h`
+- [ ] 환경변수 설정 확인: `cat backend/.env`
+
+#### 서비스 오류 시
+- [ ] 컨테이너 상태: `docker-compose -f docker-compose.micro.yml ps`
+- [ ] 백엔드 로그: `docker-compose -f docker-compose.micro.yml logs backend`
+- [ ] 포트 충돌: `sudo netstat -tlnp | grep 3001`
+- [ ] API 응답: `curl http://localhost:3001/health`
+
+#### 성능 문제 시
+- [ ] 메모리 사용률: `free -h`
+- [ ] Docker 리소스: `docker stats --no-stream`
+- [ ] 시스템 로드: `uptime`
+- [ ] 로그 크기: `du -sh /var/log/`
+
+### 💰 비용 최적화
+
+**Oracle Always Free 한도 내에서 운영**
+- ✅ Compute: VM.Standard.E2.1.Micro (사용 중)
+- ✅ Block Volume: 47GB (사용 중)
+- ✅ Object Storage: 20GB (미사용)
+- ✅ Outbound Transfer: 10TB/월
+- 💚 **월 운영비: 0원!**
 
 ### ✨ 주요 개선사항
 
