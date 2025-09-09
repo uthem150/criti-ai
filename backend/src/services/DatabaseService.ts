@@ -118,6 +118,7 @@ class DatabaseService {
   // === 사용자 관련 ===
 
   async createUser(data: {
+    id?: string;
     email?: string;
     username?: string;
     displayName?: string;

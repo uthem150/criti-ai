@@ -163,6 +163,7 @@ router.get("/progress/:userId", async (req: Request, res: Response): Promise<voi
     // 사용자가 없으면 기본 사용자 생성
     if (!progress) {
       await databaseService.createUser({
+        id: userId,
         displayName: `사용자_${userId.slice(-4)}`
       });
       
