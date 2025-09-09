@@ -136,20 +136,22 @@ export const ChallengeContent = styled.div`
   padding: ${spacing[6]};
   border-radius: ${borderRadius.md};
   border-left: 4px solid ${colors.primary[500]};
-  margin-bottom: ${spacing[6]};
+  margin-bottom: ${spacing[8]};
   line-height: ${typography.lineHeight.relaxed};
   font-size: ${typography.fontSize.base};
   color: ${colors.text.primary};
+  white-space: pre-line;
 `;
 
 export const OptionsContainer = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: ${spacing[3]};
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: ${spacing[4]};
   margin-bottom: ${spacing[6]};
 
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
+    gap: ${spacing[3]};
   }
 `;
 
@@ -158,24 +160,32 @@ interface OptionButtonProps {
 }
 
 export const OptionButton = styled.button<OptionButtonProps>`
-  padding: ${spacing[3]} ${spacing[4]};
+  padding: ${spacing[4]} ${spacing[4]};
   border: 2px solid ${props => props.selected ? colors.primary[500] : colors.border.primary};
   background: ${props => props.selected ? colors.primary[50] : colors.background.primary};
   color: ${props => props.selected ? colors.primary[700] : colors.text.primary};
-  border-radius: ${borderRadius.md};
-  font-size: ${typography.fontSize.sm};
-  font-weight: ${props => props.selected ? typography.fontWeight.semibold : typography.fontWeight.normal};
+  border-radius: ${borderRadius.lg};
   cursor: pointer;
   transition: all ${animations.transition.normal};
+  text-align: left;
+  min-height: 80px;
+  display: flex;
+  align-items: center;
 
   &:hover {
     border-color: ${colors.primary[400]};
-    background: ${colors.primary[50]};
-    transform: translateY(-1px);
+    background: ${props => props.selected ? colors.primary[100] : colors.primary[25]};
+    transform: translateY(-2px);
+    box-shadow: ${shadows.md};
   }
 
   &:active {
     transform: translateY(0);
+  }
+
+  /* 내부 텍스트 스타일링 */
+  div {
+    width: 100%;
   }
 `;
 

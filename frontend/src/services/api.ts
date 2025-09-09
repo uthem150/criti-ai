@@ -95,13 +95,18 @@ class ApiService {
       console.log('✅ Background Script API 응답 성공');
       
       // 응답 데이터 처리
-      if (response.data?.success && response.data?.data) {
-        return response.data.data as TrustAnalysis;
-      } else if (response.data && !response.data.success) {
-        throw new Error(response.data.error || '분석 실패');
+      const responseData = response.data as { success?: boolean; data?: TrustAnalysis; error?: string } | TrustAnalysis;
+      
+      // 구조화된 응답인 경우
+      if (responseData && typeof responseData === 'object' && 'success' in responseData) {
+        if (responseData.success && responseData.data) {
+          return responseData.data;
+        } else {
+          throw new Error(responseData.error || '분석 실패');
+        }
       } else {
         // 직접 데이터가 반환된 경우
-        return response.data as TrustAnalysis;
+        return responseData as TrustAnalysis;
       }
     } catch (error) {
       console.error('❌ Background Script API 호출 실패:', error);
@@ -123,7 +128,7 @@ class ApiService {
         body: { url }
       });
       
-      return response.data;
+      return response.data as { quickScore: number; domain: string };
     } catch (error) {
       console.error('❌ 빠른 체크 실패:', error);
       throw error;
