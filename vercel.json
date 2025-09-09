@@ -1,15 +1,10 @@
 {
   "version": 2,
   "name": "criti-ai-challenge",
-  "builds": [
-    {
-      "src": "package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "dist"
-      }
-    }
-  ],
+  "buildCommand": "npm run build:shared && npm run build:challenge",
+  "outputDirectory": "challenge-web/dist",
+  "installCommand": "npm install",
+  "ignoreCommand": "git diff --quiet $VERCEL_GIT_PREVIOUS_SHA $VERCEL_GIT_COMMIT_SHA challenge-web/ shared/",
   "rewrites": [
     {
       "source": "/challenge",
@@ -17,6 +12,10 @@
     },
     {
       "source": "/challenge/(.*)",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/(.*)",
       "destination": "/index.html"
     }
   ],
