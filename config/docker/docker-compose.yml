@@ -23,6 +23,8 @@ services:
       context: ../../backend
       dockerfile: Dockerfile
     container_name: criti-ai-backend
+    env_file:
+      - ../../backend/.env
     ports:
       - "3001:3001"
     environment:

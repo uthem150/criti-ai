@@ -8,7 +8,7 @@ services:
       dockerfile: backend/Dockerfile.micro
     container_name: criti-ai-backend
     env_file:
-      - backend/.env
+      - ../../backend/.env
     environment:
       - NODE_ENV=production
       - DATABASE_URL=file:/app/data/criti-ai.db
