@@ -13,7 +13,9 @@
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio",
-    "db:seed": "tsx src/scripts/seed.ts"
+    "db:seed": "tsx src/scripts/seed.ts",
+    "test:system": "tsx src/scripts/test-system.ts",
+    "challenge:generate": "tsx -e \"import('./src/services/DailyChallengeService.js').then(m => m.dailyChallengeService.generateDailyChallenges())\""
   },
   "keywords": [],
   "author": "",
