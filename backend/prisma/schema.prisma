@@ -112,6 +112,9 @@ model Challenge {
   difficulty    String   // beginner, intermediate, advanced
   points        Int
   
+  // 일일 챌린지 관련
+  dailyKey      String?  // 일일 챌린지 키 (YYYY-MM-DD 형식)
+  
   // 정답 및 해설 (JSON으로 저장)
   correctAnswers String  // JSON 배열
   explanation    String
@@ -133,6 +136,7 @@ model Challenge {
   @@index([type])
   @@index([difficulty])
   @@index([isActive])
+  @@index([dailyKey])  // 일일 챌린지 인덱스
   @@map("challenges")
 }
 
