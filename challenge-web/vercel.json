@@ -10,18 +10,14 @@
       }
     }
   ],
-  "routes": [
+  "rewrites": [
     {
-      "src": "/challenge",
-      "dest": "/index.html"
+      "source": "/challenge",
+      "destination": "/index.html"
     },
     {
-      "src": "/challenge/(.*)",
-      "dest": "/index.html"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/$1"
+      "source": "/challenge/(.*)",
+      "destination": "/index.html"
     }
   ],
   "headers": [
