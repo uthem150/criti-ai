@@ -4,10 +4,44 @@ const API_BASE_URL = (import.meta.env?.VITE_API_BASE_URL as string) || 'http://l
 
 class ChallengeApiService {
   private baseUrl: string;
+  private userId: string;
 
   constructor() {
     this.baseUrl = API_BASE_URL;
-    console.log('🔗 ChallengeApiService 초기화:', this.baseUrl);
+    this.userId = this.getOrCreateUserId();
+    console.log('🔗 ChallengeApiService 초기화:', this.baseUrl, 'UserID:', this.userId);
+  }
+
+  /**
+   * 브라우저별 고유 사용자 ID 생성/조회
+   */
+  private getOrCreateUserId(): string {
+    try {
+      // localStorage에서 기존 ID 확인
+      let userId = localStorage.getItem('criti-ai-user-id');
+      
+      if (!userId) {
+        // 새로운 고유 ID 생성
+        userId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        localStorage.setItem('criti-ai-user-id', userId);
+        console.log('🆕 새로운 사용자 ID 생성:', userId);
+      } else {
+        console.log('👤 기존 사용자 ID 사용:', userId);
+      }
+      
+      return userId;
+    } catch (error) {
+      // localStorage 사용 불가 시 fallback
+      console.warn('⚠️ localStorage 사용 불가, 임시 ID 사용');
+      return 'temp_' + Date.now();
+    }
+  }
+
+  /**
+   * 현재 사용자 ID 반환
+   */
+  getCurrentUserId(): string {
+    return this.userId;
   }
 
   /**
@@ -97,7 +131,7 @@ class ChallengeApiService {
           userAnswers,
           timeSpent,
           hintsUsed,
-          userId: 'guest' // 임시 guest 사용자
+          userId: this.userId // 동적 사용자 ID 사용
         } as ChallengeResponse),
       });
 
@@ -122,9 +156,9 @@ class ChallengeApiService {
   /**
    * 사용자 진행도 조회
    */
-  async getUserProgress(userId: string = 'guest'): Promise<UserProgress | null> {
+  async getUserProgress(): Promise<UserProgress | null> {
     try {
-      const response = await fetch(`${this.baseUrl}/api/challenge/progress/${userId}`, {
+      const response = await fetch(`${this.baseUrl}/api/challenge/progress/${this.userId}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -142,7 +176,7 @@ class ChallengeApiService {
       
       // 기본 진행도 반환
       return {
-        userId: 'guest',
+        userId: this.userId,
         totalPoints: 0,
         level: 1,
         badges: [],
