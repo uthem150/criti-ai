@@ -6,7 +6,7 @@
   "description": "Criti.AI Challenge Web Application - 비판적 사고 훈련 플랫폼",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -p tsconfig.build.json && vite build",
+    "build": "tsc -p tsconfig.build.json --noEmit && vite build",
     "preview": "vite preview",
     "lint": "eslint .",
     "type-check": "tsc --noEmit",
