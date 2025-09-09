@@ -259,16 +259,16 @@ build_and_start() {
     
     # 기존 컨테이너 정리
     show_progress 1 4
-    docker-compose -f docker-compose.micro.yml down >/dev/null 2>&1 || true
+    docker-compose -f ../config/docker/docker-compose.micro.yml down >/dev/null 2>&1 || true
     
     # 이미지 빌드
     show_progress 2 4
     echo -e "\n${BLUE}Docker 이미지 빌드 중... (5-10분 소요)${NC}"
-    docker-compose -f docker-compose.micro.yml build >/dev/null 2>&1
+    docker-compose -f ../config/docker/docker-compose.micro.yml build >/dev/null 2>&1
     
     # 서비스 시작
     show_progress 3 4
-    docker-compose -f docker-compose.micro.yml up -d >/dev/null 2>&1
+    docker-compose -f ../config/docker/docker-compose.micro.yml up -d >/dev/null 2>&1
     
     # 서비스 시작 대기
     show_progress 4 4
@@ -284,7 +284,7 @@ verify_deployment() {
     
     # 컨테이너 상태 확인
     show_progress 1 3
-    local containers_up=$(docker-compose -f docker-compose.micro.yml ps | grep -c "Up" || echo "0")
+    local containers_up=$(docker-compose -f ../config/docker/docker-compose.micro.yml ps | grep -c "Up" || echo "0")
     if [ "$containers_up" -lt 3 ]; then
         print_warning "일부 컨테이너가 실행되지 않았습니다."
     else

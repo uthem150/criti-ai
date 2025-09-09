@@ -5,7 +5,7 @@
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 LOG_FILE="$SCRIPT_DIR/monitor.log"
-COMPOSE_FILE="$SCRIPT_DIR/docker-compose.micro.yml"
+COMPOSE_FILE="$SCRIPT_DIR/../config/docker/docker-compose.micro.yml"
 
 # 로그 함수
 log_message() {
