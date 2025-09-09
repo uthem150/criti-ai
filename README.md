@@ -54,10 +54,17 @@ cp .env.example .env
 # .env 파일에서 GEMINI_API_KEY 설정
 ```
 
-**프론트엔드 환경 설정:**
+**챌린지 웹앱 환경 설정:**
 ```bash
-cd ../frontend
-# .env 파일은 이미 설정되어 있음
+cd challenge-web
+cp .env.example .env
+# .env 파일에서 백엔드 URL 설정
+```
+
+**Docker 환경 설정 (선택사항):**
+```bash
+cp config/docker.env.example .env
+# Docker Compose에서 사용할 환경변수 설정
 ```
 
 ### 3단계: 의존성 설치
@@ -85,7 +92,7 @@ npm run dev
 
 이제 다음 주소에서 서비스를 확인할 수 있습니다:
 - 백엔드: http://localhost:3001
-- 프론트엔드: http://localhost:5173
+- 챌린지 웹앱: http://localhost:3000
 - Health Check: http://localhost:3001/health
 
 ## 📁 프로젝트 구조
@@ -99,7 +106,7 @@ criti-ai/
 │   │   └── scripts/   # 유틸리티 스크립트
 │   ├── prisma/        # 데이터베이스 스키마
 │   └── .env           # 환경 변수
-├── frontend/          # React + Vite 프론트엔드
+├── frontend/          # React + Vite 크롬 확장
 │   ├── src/
 │   │   ├── components/  # 공통 컴포넌트
 │   │   ├── extension/   # 크롬 확장 프로그램
@@ -107,7 +114,26 @@ criti-ai/
 │   │   ├── services/    # API 서비스
 │   │   └── styles/      # 디자인 시스템
 │   └── public/        # 정적 파일
+├── challenge-web/     # React + Vite 챌린지 웹앱
+│   ├── src/
+│   │   ├── components/  # 웹앱 전용 컴포넌트
+│   │   ├── pages/       # 챌린지 페이지들
+│   │   └── services/    # API 서비스
+│   └── vercel.json    # Vercel 배포 설정
 ├── shared/            # 공통 타입 정의
+├── scripts/           # 배포 및 관리 스크립트
+│   ├── deploy-micro-auto.sh  # 자동 배포
+│   ├── monitor-micro.sh      # 모니터링
+│   ├── optimize-micro.sh     # 서버 최적화
+│   └── start-system.bat      # Windows 개발용
+├── config/            # 모든 설정 파일
+│   ├── docker/
+│   │   ├── docker-compose.yml       # 개발용
+│   │   └── docker-compose.micro.yml # 프로덕션용
+│   ├── nginx.conf           # Nginx 기본 설정
+│   ├── nginx.micro.conf     # Micro 최적화 설정
+│   └── docker.env.example   # Docker 환경변수 예시
+├── docs/              # 문서 파일들
 └── package.json       # 모노레포 설정
 ```
 
@@ -120,10 +146,22 @@ npm run dev
 # 개별 실행
 npm run dev:backend    # 백엔드만
 npm run dev:frontend   # 프론트엔드만
+npm run dev:challenge  # 챌린지 웹앱만
 
 # 빌드
 npm run build         # 전체 빌드
 npm run build:frontend # 크롬 확장 프로그램 빌드
+npm run build:challenge # 챌린지 웹앱 빌드
+
+# Docker (개발용)
+npm run docker:dev    # 개발 환경 Docker 실행
+npm run docker:logs   # Docker 로그 확인
+npm run docker:stop   # Docker 중지
+
+# Docker (프로덕션용 - Oracle Micro)
+npm run docker:micro      # Micro 환경 Docker 실행
+npm run docker:micro:logs # Micro Docker 로그 확인
+npm run docker:micro:stop # Micro Docker 중지
 
 # 데이터베이스
 npm run db:generate   # Prisma 클라이언트 생성

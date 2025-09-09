@@ -4,7 +4,7 @@
   "private": true,
   "description": "AI 기반 뉴스 신뢰도 분석 및 비판적 사고 훈련 플랫폼",
   "scripts": {
-    "install:all": "cd backend && npm install && cd ../frontend && npm install && cd ../challenge-web && npm install && cd ../shared && npm install",
+    "install": "cd backend && npm install && cd ../frontend && npm install && cd ../challenge-web && npm install && cd ../shared && npm install",
     "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
     "dev:backend": "cd backend && npm run dev",
     "dev:frontend": "cd frontend && npm run dev",
@@ -17,9 +17,12 @@
     "start": "cd backend && npm start",
     "lint": "cd frontend && npm run lint && cd ../challenge-web && npm run lint && cd ../backend && npm run lint",
     "clean": "rimraf **/dist **/node_modules/.cache",
-    "docker:dev": "docker-compose up -d",
-    "docker:logs": "docker-compose logs -f",
-    "docker:stop": "docker-compose down",
+    "docker:dev": "docker-compose -f config/docker/docker-compose.yml up -d",
+    "docker:logs": "docker-compose -f config/docker/docker-compose.yml logs -f",
+    "docker:stop": "docker-compose -f config/docker/docker-compose.yml down",
+    "docker:micro": "docker-compose -f config/docker/docker-compose.micro.yml up -d",
+    "docker:micro:logs": "docker-compose -f config/docker/docker-compose.micro.yml logs -f",
+    "docker:micro:stop": "docker-compose -f config/docker/docker-compose.micro.yml down",
     "db:studio": "cd backend && npm run db:studio"
   },
   "devDependencies": {
