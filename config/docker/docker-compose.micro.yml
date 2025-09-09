@@ -4,7 +4,7 @@ services:
   # 백엔드 (메모리 최적화)
   backend:
     build:
-      context: .
+      context: ../..
       dockerfile: backend/Dockerfile.micro
     container_name: criti-ai-backend
     env_file:
@@ -67,7 +67,7 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ./nginx.micro.conf:/etc/nginx/nginx.conf:ro
+      - ../nginx.micro.conf:/etc/nginx/nginx.conf:ro
       - logs_data:/var/log/nginx
     depends_on:
       - backend

@@ -20,7 +20,7 @@ services:
   # 백엔드 API 서버
   backend:
     build: 
-      context: ./backend
+      context: ../../backend
       dockerfile: Dockerfile
     container_name: criti-ai-backend
     ports:
@@ -32,7 +32,7 @@ services:
       - GEMINI_API_KEY=${GEMINI_API_KEY}
       - FRONTEND_URL=http://localhost:5173
     volumes:
-      - ./backend/criti-ai.db:/app/criti-ai.db
+      - ../../backend/criti-ai.db:/app/criti-ai.db
       - backend_uploads:/app/uploads
     depends_on:
       redis:
@@ -47,7 +47,7 @@ services:
   # 프론트엔드 (개발용 - 프로덕션에서는 Nginx 사용 권장)
   frontend:
     build:
-      context: ./frontend
+      context: ../../frontend
       dockerfile: Dockerfile
     container_name: criti-ai-frontend
     ports:
