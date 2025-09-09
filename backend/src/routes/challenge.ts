@@ -3,6 +3,7 @@ import type { Request, Response } from "express";
 import { GeminiService } from "../services/GeminiService.js";
 import { redisCacheService } from "../services/RedisCacheService.js";
 import { databaseService } from "../services/DatabaseService.js";
+import { dailyChallengeService } from "../services/DailyChallengeService.js";
 import type {
   Challenge,
   ApiResponse,
@@ -12,6 +13,28 @@ import type {
 
 const router = Router();
 const geminiService = new GeminiService();
+
+// 오늘의 챌린지 조회 (일일 챌린지)
+router.get("/daily", async (req: Request, res: Response): Promise<void> => {
+  try {
+    console.log("🎯 오늘의 챌린지 요청 수신");
+    
+    const todaysChallenges = await dailyChallengeService.getTodaysChallenges();
+    
+    res.json({
+      success: true,
+      data: todaysChallenges,
+      timestamp: new Date().toISOString(),
+    } as ApiResponse<Challenge[]>);
+  } catch (error) {
+    console.error("Daily challenges fetch error:", error);
+    res.status(500).json({
+      success: false,
+      error: "오늘의 챌린지를 불러오는 중 오류가 발생했습니다.",
+      timestamp: new Date().toISOString(),
+    });
+  }
+});
 
 // 모든 챌린지 조회
 router.get("/challenges", async (req: Request, res: Response): Promise<void> => {

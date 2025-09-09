@@ -10,6 +10,7 @@ import challengeRoutes from "./routes/challenge.js";
 import { GeminiService } from './services/GeminiService.js'; // 정적 import로 변경
 import { redisCacheService } from './services/RedisCacheService.js';
 import { databaseService } from './services/DatabaseService.js';
+import { dailyChallengeService } from './services/DailyChallengeService.js';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -163,6 +164,10 @@ app.listen(PORT, async () => {
   if (process.env.NODE_ENV === 'development') {
     await databaseService.cleanExpiredCache();
   }
+  
+  // 일일 챌린지 스케줄러 시작
+  dailyChallengeService.startDailyScheduler();
+  console.log('⏰ 일일 챌린지 시스템 시작');
 });
 
 // 우아한 종료 처리
