@@ -4,7 +4,7 @@
   "private": true,
   "description": "AI 기반 뉴스 신뢰도 분석 및 비판적 사고 훈련 플랫폼",
   "scripts": {
-    "install": "cd backend && npm install && cd ../frontend && npm install && cd ../challenge-web && npm install && cd ../shared && npm install",
+    "install:all": "cd backend && npm install && cd ../frontend && npm install && cd ../challenge-web && npm install && cd ../shared && npm install",
     "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
     "dev:backend": "cd backend && npm run dev",
     "dev:frontend": "cd frontend && npm run dev",
