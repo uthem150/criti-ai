@@ -1,43 +1,9 @@
 {
+  "extends": "./tsconfig.json",
   "compilerOptions": {
-    "target": "ES2020",
-    "useDefineForClassFields": true,
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
-    "module": "ESNext",
-    "skipLibCheck": true,
     "noEmit": true,
-    "declaration": false,
-    
-    /* Bundler mode */
-    "moduleResolution": "bundler",
-    "allowImportingTsExtensions": false,
-    "isolatedModules": true,
-    "jsx": "react-jsx",
-    "jsxImportSource": "@emotion/react",
-
-    /* Linting */
-    "strict": true,
-    "noUnusedLocals": false,
-    "noUnusedParameters": false,
-    "noFallthroughCasesInSwitch": true,
-
-    /* Path mapping */
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["./src/*"],
-      "@criti-ai/shared": ["../shared/src"]
-    },
-
-    /* Additional options */
-    "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true
+    "composite": false
   },
-  "include": [
-    "src/**/*",
-    "../shared/src/**/*"
-  ],
   "exclude": [
     "node_modules",
     "dist",
