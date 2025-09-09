@@ -162,6 +162,7 @@ export interface Challenge {
   explanation: string;
   difficulty: "beginner" | "intermediate" | "advanced";
   points: number;
+  hints?: string[]; // 힌트 배열 추가
 }
 
 export interface UserProgress {
