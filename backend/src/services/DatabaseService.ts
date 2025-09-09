@@ -190,12 +190,12 @@ class DatabaseService {
 
       return challenges.map(c => ({
         id: c.id,
-        type: c.type as any,
+        type: c.type as Challenge['type'],
         title: c.title,
         content: c.content,
         correctAnswers: JSON.parse(c.correctAnswers),
         explanation: c.explanation,
-        difficulty: c.difficulty as any,
+        difficulty: c.difficulty as Challenge['difficulty'],
         points: c.points
       }));
     } catch (error) {
@@ -216,12 +216,12 @@ class DatabaseService {
 
       return {
         id: challenge.id,
-        type: challenge.type as any,
+        type: challenge.type as Challenge['type'],
         title: challenge.title,
         content: challenge.content,
         correctAnswers: JSON.parse(challenge.correctAnswers),
         explanation: challenge.explanation,
-        difficulty: challenge.difficulty as any,
+        difficulty: challenge.difficulty as Challenge['difficulty'],
         points: challenge.points
       };
     } catch (error) {
@@ -272,6 +272,82 @@ class DatabaseService {
       console.log(`✅ 챌린지 결과 저장: ${userId} -> ${challengeId}`);
     } catch (error) {
       console.error('챌린지 결과 저장 실패:', error);
+    }
+  }
+
+  // === 일일 챌린지 관련 ===
+
+  async getDailyChallenges(dateKey: string): Promise<Challenge[]> {
+    try {
+      const challenges = await this.prisma.challenge.findMany({
+        where: {
+          isActive: true,
+          ...(dateKey && { dailyKey: dateKey as any })  // 임시 타입 단언
+        },
+        orderBy: {
+          difficulty: 'asc'
+        }
+      });
+
+      return challenges.map(c => ({
+        id: c.id,
+        type: c.type as any,
+        title: c.title,
+        content: c.content,
+        correctAnswers: JSON.parse(c.correctAnswers),
+        explanation: c.explanation,
+        difficulty: c.difficulty as any,
+        points: c.points
+      }));
+    } catch (error) {
+      console.error('일일 챌린지 조회 실패:', error);
+      return [];
+    }
+  }
+
+  async createChallenge(data: {
+    type: string;
+    title: string;
+    content: string;
+    difficulty: string;
+    points: number;
+    correctAnswers: string;
+    explanation: string;
+    hints?: string | null;
+    isGenerated: boolean;
+    isActive: boolean;
+    dailyKey?: string;
+  }): Promise<Challenge> {
+    try {
+      const challenge = await this.prisma.challenge.create({
+        data: {
+          type: data.type,
+          title: data.title,
+          content: data.content,
+          difficulty: data.difficulty,
+          points: data.points,
+          correctAnswers: data.correctAnswers,
+          explanation: data.explanation,
+          hints: data.hints,
+          isGenerated: data.isGenerated,
+          isActive: data.isActive,
+          ...(data.dailyKey && { dailyKey: data.dailyKey as any })  // 임시 타입 단언
+        }
+      });
+
+      return {
+        id: challenge.id,
+        type: challenge.type as Challenge['type'],
+        title: challenge.title,
+        content: challenge.content,
+        correctAnswers: JSON.parse(challenge.correctAnswers),
+        explanation: challenge.explanation,
+        difficulty: challenge.difficulty as Challenge['difficulty'],
+        points: challenge.points
+      };
+    } catch (error) {
+      console.error('챌린지 생성 실패:', error);
+      throw error;
     }
   }
 
@@ -328,7 +404,7 @@ class DatabaseService {
             description: badge.description,
             icon: badge.icon,
             earnedAt: new Date().toISOString(),
-            category: badge.category as any
+            category: badge.category as Badge['category']
           });
         }
       }
