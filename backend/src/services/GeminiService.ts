@@ -446,26 +446,147 @@ ${request.content}
 
   async generateChallenge(type: string, difficulty: string): Promise<Record<string, unknown>> {
     const prompt = `
-당신은 미디어 리터러시 교육용 챌린지를 생성하는 전문가입니다.
+# 미디어 리터러시 교육용 챌린지 생성 전문가
 
-**챌린지 타입**: ${type}
+당신은 비판적 사고 능력을 기르는 교육용 챌린지를 생성하는 전문가입니다. 사용자가 실제 뉴스나 콘텐츠에서 마주칠 수 있는 문제들을 학습할 수 있도록 도와주세요.
+
+## 📋 챌린지 사양
+
+**타입**: ${type}
 **난이도**: ${difficulty}
 
-${type}에 맞는 교육용 챌린지를 생성해주세요. 
-사용자가 비판적 사고 능력을 기를 수 있도록 의도적으로 논리적 오류나 편향성을 포함한 가상의 콘텐츠를 만들어주세요.
+## 🎯 난이도별 가이드라인
 
-JSON 형식으로 응답해주세요:
+### Beginner (초급)
+- **목표**: 명확하고 쉽게 식별 가능한 오류 및 편향
+- **문제 수**: 1-2개의 주요 문제점
+- **예시 스타일**: 직관적이고 간단한 예시
+- **점수**: 80-120점
+- **특징**: 
+  * 명백한 논리적 오류 (성급한 일반화, 허위 이분법)
+  * 뚜렷한 감정적 편향 표현
+  * 명확한 과장 표현
+
+### Intermediate (중급)
+- **목표**: 여러 유형의 문제가 혼합된 내용
+- **문제 수**: 2-3개의 문제점
+- **예시 스타일**: 약간의 분석이 필요한 예시
+- **점수**: 120-180점
+- **특징**:
+  * 복합적인 논리 오류
+  * 은밀한 광고성 표현
+  * 미묘한 편향과 선동
+
+### Advanced (고급)
+- **목표**: 복합적이고 미묘한 문제들
+- **문제 수**: 3-4개의 서로 연결된 문제점
+- **예시 스타일**: 깊은 사고가 필요한 예시
+- **점수**: 180-250점
+- **특징**:
+  * 정교한 논리적 함정
+  * 고도의 광고성 콘텐츠
+  * 전문적 왜곡 기법
+
+## 📝 챌린지 유형별 가이드
+
+### article-analysis
+뉴스 기사나 텍스트에서 논리적 오류, 편향성, 광고성을 찾는 챌린지
+
+## 🎨 필수 선택지 목록
+
+다음 옵션들 중에서만 정답을 선택하세요:
+- "성급한 일반화"
+- "허위 이분법"
+- "인신공격"
+- "권위에 호소"
+- "감정적 편향"
+- "과장된 표현"
+- "허수아비 공격"
+- "순환논리"
+- "광고성 콘텐츠"
+- "긴급성 유도"
+- "과장된 수치"
+- "선동적 언어"
+
+## 🔥 생성 요구사항
+
+### 1. 제목 형식
+"이 기사에서 [찾을 문제]을/를 찾아보세요" 형식으로 작성
+
+### 2. 콘텐츠 요구사항
+- **길이**: 150-300자 범위
+- **스타일**: 실제 뉴스처럼 자연스럽게
+- **의도적 문제 포함**: 지정된 난이도에 맞는 논리적 오류나 편향 포함
+- **현실적**: 실제로 볼 법한 내용으로 구성
+
+### 3. 정답 및 설명
+- **정답**: 위 옵션 목록에서 1-4개 선택
+- **설명**: 각 오류에 대한 명확하고 교육적인 설명
+- **구조화**: 1. 2. 3. 형식으로 번호를 매겨 설명
+
+### 4. 힌트 시스템
+- **개수**: 2-3개의 단계적 힌트
+- **스타일**: 직접적인 답 제시 X, 사고 방향 제시 O
+
+## 🌟 주제 다양성 (필수)
+
+### 초급 주제
+스마트폰, 운동, 음식, 학업, 직장, 가족, 건강, 취미
+
+### 중급 주제  
+정책, 사회이슈, 경제, 기술, 건강, 환경, 교육, 문화
+
+### 고급 주제
+과학, 정치, 기업, 글로벌 이슈, 전문 분야, 학술, 연구
+
+## 🎨 콘텐츠 작성 원칙
+
+### DO (해야 할 것)
+✅ 실제 뉴스처럼 자연스러운 문체
+✅ 구체적이고 현실적인 상황 설정
+✅ 명확한 문제점이 포함된 논리 구조
+✅ 교육적 가치가 높은 예시
+✅ 난이도에 맞는 복잡성 조절
+
+### DON'T (하지 말 것)
+❌ 인공적이거나 억지스러운 표현
+❌ 지나치게 명백하거나 유치한 오류
+❌ 실제로는 일어나지 않을 상황
+❌ 특정 개인이나 단체 비방
+❌ 사실과 전혀 맞지 않는 내용
+
+## 📊 출력 형식
+
+반드시 아래 JSON 형식으로만 응답하세요. 다른 설명이나 마크다운 부호 없이 순수 JSON만 반환하세요:
+
 {
-  "id": "unique-id",
+  "id": "challenge-[랜덤숫자]",
   "type": "${type}",
-  "title": "챌린지 제목",
-  "content": "챌린지 내용 (가상의 기사나 텍스트)",
-  "correctAnswers": ["정답 배열"],
-  "explanation": "정답 설명",
+  "title": "이 기사에서 [문제유형]을/를 찾아보세요",
+  "content": "의도적 오류가 포함된 150-300자의 가상 기사 내용",
+  "correctAnswers": ["정답 옵션들"],
+  "explanation": "각 오류에 대한 상세한 설명 (번호 형식 사용)",
   "difficulty": "${difficulty}",
-  "points": 점수,
-  "hints": ["힌트 배열"]
+  "points": 난이도별_점수,
+  "hints": ["도움말 1", "도움말 2", "도움말 3"]
 }
+
+## 🎯 예시 (참고용)
+
+### Beginner 예시
+{
+  "id": "challenge-12345",
+  "type": "article-analysis",
+  "title": "이 기사에서 논리적 오류를 찾아보세요",
+  "content": "어제 커피를 마신 사람이 오늘 두통이 아프다고 합니다. 커피는 세상에서 가장 나쁜 음료입니다. 박사님들도 커피는 해롭다고 합니다. 전 세계 모든 사람들이 커피를 끊어야 합니다.",
+  "correctAnswers": ["성급한 일반화", "감정적 편향"],
+  "explanation": "1. **성급한 일반화**: 한 명의 사례만으로 커피 전체를 판단\\n2. **감정적 편향**: '가장 나쁜' 같은 극단적 표현 사용",
+  "difficulty": "beginner",
+  "points": 100,
+  "hints": ["한 사람의 경험으로 전체를 일반화하고 있지 않나요?", "감정을 자극하는 단어들을 찾아보세요"]
+}
+
+이제 ${difficulty} 난이도의 ${type} 챌린지를 생성해주세요.
 `;
 
     try {
@@ -473,15 +594,92 @@ JSON 형식으로 응답해주세요:
       const response = await result.response;
       const challengeText = response.text();
       
+      console.log('🤖 AI 챌린지 생성 응답:', challengeText.substring(0, 200));
+      
+      // JSON 추출 및 파싱
       const jsonMatch = challengeText.match(/\{[\s\S]*\}/);
       if (!jsonMatch) {
         throw new Error("유효한 JSON 응답을 찾을 수 없습니다.");
       }
 
-      return JSON.parse(jsonMatch[0]);
+      const parsedChallenge = JSON.parse(jsonMatch[0]);
+      
+      // 생성된 챌린지 검증
+      this.validateGeneratedChallenge(parsedChallenge);
+      
+      console.log('✅ 챌린지 생성 성공:', parsedChallenge.title);
+      return parsedChallenge;
     } catch (error) {
-      console.error("Challenge generation error:", error);
-      throw new Error("챌린지 생성 중 오류가 발생했습니다.");
+      console.error("챌린지 생성 오류:", error);
+      
+      // 에러 시 기본 챌린지 반환
+      return this.getFallbackChallenge(type, difficulty);
     }
+  }
+
+  /**
+   * 생성된 챌린지 검증
+   */
+  private validateGeneratedChallenge(challenge: any): void {
+    const requiredFields = ['id', 'type', 'title', 'content', 'correctAnswers', 'explanation', 'difficulty', 'points'];
+    
+    for (const field of requiredFields) {
+      if (!challenge[field]) {
+        throw new Error(`필수 필드 누락: ${field}`);
+      }
+    }
+    
+    if (!Array.isArray(challenge.correctAnswers) || challenge.correctAnswers.length === 0) {
+      throw new Error('정답 배열이 유효하지 않습니다');
+    }
+    
+    if (typeof challenge.points !== 'number' || challenge.points < 50 || challenge.points > 300) {
+      throw new Error('점수가 유효하지 않습니다 (50-300)');
+    }
+  }
+
+  /**
+   * 에러 시 기본 챌린지 반환
+   */
+  private getFallbackChallenge(type: string, difficulty: string): Record<string, unknown> {
+    const pointsByDifficulty: Record<string, number> = {
+      'beginner': 100,
+      'intermediate': 150,
+      'advanced': 200
+    };
+
+    const fallbackByDifficulty = {
+      'beginner': {
+        title: "이 기사에서 논리적 오류를 찾아보세요",
+        content: "최근 한 연구에 따르면 A를 하는 사람이 B 결과를 나타냈다고 합니다. 따라서 모든 사람이 A를 해야 합니다. 이는 절대적인 진리입니다.",
+        correctAnswers: ["성급한 일반화", "과장된 표현"],
+        explanation: "1. **성급한 일반화**: 한 연구 결과만으로 모든 사람에게 적용\n2. **과장된 표현**: '절대적인 진리' 같은 극단적 표현",
+        hints: ["한 연구의 결과로 전체를 판단하고 있지 않나요?", "극단적인 표현이 사용되었나요?"]
+      },
+      'intermediate': {
+        title: "이 기사에서 편향된 표현을 찾아보세요",
+        content: "충격적인 발표! 새로운 정책이 국민들을 분노하게 만들고 있습니다. 모든 전문가들이 반대하고 있으며, 이 정책은 반드시 철회되어야 합니다. 98%의 국민이 반대한다는 조사 결과도 나왔습니다.",
+        correctAnswers: ["감정적 편향", "과장된 수치", "선동적 언어"],
+        explanation: "1. **감정적 편향**: '충격적인', '분노하게' 등 감정 자극 표현\n2. **과장된 수치**: '98%' 같은 검증되지 않은 구체적 수치\n3. **선동적 언어**: 객관적 사실보다 감정적 반응 유도",
+        hints: ["감정을 자극하는 표현들을 찾아보세요", "구체적인 수치의 출처를 확인해보세요"]
+      },
+      'advanced': {
+        title: "이 기사에서 복합적인 문제를 찾아보세요",
+        content: "권위 있는 연구기관에서 발표한 최신 보고서에 따르면, 특정 제품 사용자들의 만족도가 대폭 상승했다고 합니다. 이는 명백히 해당 제품의 우수성을 증명하는 것입니다. 반대 의견을 제시하는 일부 연구자들은 해당 업계와 이해관계가 얽혀있어 신뢰할 수 없습니다.",
+        correctAnswers: ["권위에 호소", "인신공격", "광고성 콘텐츠"],
+        explanation: "1. **권위에 호소**: '권위 있는 연구기관' 언급으로 신뢰도 차용\n2. **인신공격**: 반대 연구자들의 이해관계를 지적하여 논증 회피\n3. **광고성 콘텐츠**: 특정 제품의 우수성을 강조하는 홍보성 내용",
+        hints: ["권위를 내세우는 부분을 찾아보세요", "상대방을 공격하는 표현이 있나요?", "특정 제품을 홍보하는 목적이 있나요?"]
+      }
+    };
+
+    const selected = fallbackByDifficulty[difficulty as keyof typeof fallbackByDifficulty] || fallbackByDifficulty.beginner;
+
+    return {
+      id: `fallback-${Date.now()}`,
+      type,
+      ...selected,
+      difficulty,
+      points: pointsByDifficulty[difficulty] || 100
+    };
   }
 }
