@@ -181,7 +181,7 @@ http://서버IP주소:3001/health
 #### 6-3. 환경 변수 설정
 ```
 Environment Variables:
-• VITE_BACKEND_URL: http://서버IP주소:3001
+• VITE_BACKEND_URL: https://서버IP주소:3001
 • VITE_APP_NAME: Criti.AI
 • VITE_APP_VERSION: 1.0.0
 ```

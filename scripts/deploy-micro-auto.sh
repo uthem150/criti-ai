@@ -253,9 +253,71 @@ setup_environment() {
     print_warning "프론트엔드 배포 후 FRONTEND_URL을 backend/.env에서 업데이트하세요"
 }
 
+# SSL 인증서 설정
+setup_ssl() {
+    print_step 7 11 "SSL 인증서 설정"
+    
+    show_progress 1 3
+    echo -e "${YELLOW}SSL 설정을 원하시나요? (도메인이 있으면 y, IP만 사용하면 n):${NC}"
+    read -p "SSL 설정 (y/n): " ssl_choice
+    
+    if [ "$ssl_choice" = "y" ]; then
+        echo -e "${YELLOW}도메인을 입력하세요:${NC}"
+        read -p "Domain: " domain
+        
+        if [ -n "$domain" ]; then
+            # nginx 임시 중지
+            docker-compose -f config/docker/docker-compose.micro.yml stop nginx 2>/dev/null || true
+            
+            # Let's Encrypt 인증서 발급
+            sudo certbot certonly --standalone -d "$domain" --non-interactive --agree-tos --email admin@"$domain" 2>/dev/null || {
+                print_warning "Let's Encrypt 실패, 자체 서명 인증서로 대체"
+                domain=$(curl -s ifconfig.me)
+            }
+            
+            show_progress 2 3
+            # 인증서 복사
+            sudo mkdir -p /etc/nginx/ssl
+            if [ -f "/etc/letsencrypt/live/$domain/fullchain.pem" ]; then
+                sudo cp "/etc/letsencrypt/live/$domain/fullchain.pem" /etc/nginx/ssl/criti-ai.crt
+                sudo cp "/etc/letsencrypt/live/$domain/privkey.pem" /etc/nginx/ssl/criti-ai.key
+                print_success "Let's Encrypt 인증서 설정 완료"
+            else
+                # 자체 서명 인증서 생성
+                server_ip=$(curl -s ifconfig.me)
+                sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+                    -keyout /etc/nginx/ssl/criti-ai.key \
+                    -out /etc/nginx/ssl/criti-ai.crt \
+                    -subj "/C=KR/ST=Seoul/L=Seoul/O=CritiAI/OU=Dev/CN=$server_ip" >/dev/null 2>&1
+                print_success "자체 서명 인증서 생성 완료"
+            fi
+        fi
+    else
+        # 자체 서명 인증서 생성 (IP 사용)
+        show_progress 2 3
+        server_ip=$(curl -s ifconfig.me)
+        sudo mkdir -p /etc/nginx/ssl
+        sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+            -keyout /etc/nginx/ssl/criti-ai.key \
+            -out /etc/nginx/ssl/criti-ai.crt \
+            -subj "/C=KR/ST=Seoul/L=Seoul/O=CritiAI/OU=Dev/CN=$server_ip" >/dev/null 2>&1
+        print_success "자체 서명 인증서 생성 완료"
+    fi
+    
+    show_progress 3 3
+    # 인증서 권한 설정
+    sudo chmod 644 /etc/nginx/ssl/criti-ai.crt
+    sudo chmod 600 /etc/nginx/ssl/criti-ai.key
+    
+    # certbot 웹루트 생성
+    sudo mkdir -p /var/www/certbot
+    
+    print_success "SSL 설정 완료"
+}
+
 # 서비스 빌드 및 시작
 build_and_start() {
-    print_step 7 10 "서비스 빌드 및 시작"
+    print_step 8 11 "서비스 빌드 및 시작"
     
     # 기존 컨테이너 정리
     show_progress 1 4
@@ -280,7 +342,7 @@ build_and_start() {
 
 # 서비스 상태 확인
 verify_deployment() {
-    print_step 8 10 "배포 상태 확인"
+    print_step 9 11 "배포 상태 확인"
     
     # 컨테이너 상태 확인
     show_progress 1 3
@@ -319,7 +381,7 @@ verify_deployment() {
 
 # 모니터링 설정
 setup_monitoring() {
-    print_step 9 10 "모니터링 설정"
+    print_step 10 11 "모니터링 설정"
     
     # 모니터링 스크립트 실행 권한 부여
     chmod +x monitor-micro.sh
@@ -352,7 +414,7 @@ EOF
 
 # 최종 정보 출력
 show_final_info() {
-    print_step 10 10 "배포 완료"
+    print_step 11 11 "배포 완료"
     
     SERVER_IP=$(curl -s ifconfig.me 2>/dev/null || echo "서버IP확인불가")
     
@@ -429,6 +491,7 @@ main() {
     setup_firewall
     setup_project
     setup_environment
+    setup_ssl
     build_and_start
     verify_deployment
     setup_monitoring
