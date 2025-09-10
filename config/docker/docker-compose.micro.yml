@@ -68,8 +68,6 @@ services:
       - "443:443"
     volumes:
       - ../nginx.micro.conf:/etc/nginx/nginx.conf:ro
-      - /etc/nginx/ssl:/etc/nginx/ssl:ro
-      - /var/www/certbot:/var/www/certbot:ro
       - logs_data:/var/log/nginx
     depends_on:
       - backend
