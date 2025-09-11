@@ -26,8 +26,13 @@ export default async function handler(req, res) {
     const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
     console.log('Using BACKEND_URL:', BACKEND_URL);
     
-    // 요청 경로에서 /api 제거하지 않고 그대로 전달
-    const path = req.url;
+    // 경로 변환: /api/health → /health, 나머지는 그대로
+    let path = req.url;
+    if (path === '/api/health') {
+      path = '/health';
+      console.log('Converting /api/health to /health');
+    }
+    
     const backendUrl = `${BACKEND_URL}${path}`;
 
     console.log(`Proxying ${req.method} ${req.url} to ${backendUrl}`);
