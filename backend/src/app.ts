@@ -20,6 +20,10 @@ const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
 const allowedOrigins = [
   // 주요 프로덕션/개발 프론트엔드 URL
   FRONTEND_URL,
+  
+  // Vercel 배포 URLs
+  'https://criti-ai-challenge.vercel.app',
+  /^https:\/\/.*\.vercel\.app$/,
   // TODO: 여기에 실제 프로덕션 빌드된 크롬 확장 프로그램 ID 추가필요
   // 예: 'chrome-extension://abcdefghijklmnopqrstuvwxyz123456'
   // `chrome-extension://${process.env.CHROME_EXTENSION_ID || 'your-extension-id-here'}`,

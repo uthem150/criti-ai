@@ -1,6 +1,6 @@
 import type { Challenge, ApiResponse, UserProgress, ChallengeResponse } from "@criti-ai/shared";
 
-const API_BASE_URL = (import.meta.env?.VITE_API_BASE_URL as string) || 'http://localhost:3001';
+const API_BASE_URL = (import.meta.env?.VITE_API_BASE_URL as string) || '/api';
 
 class ChallengeApiService {
   private baseUrl: string;
