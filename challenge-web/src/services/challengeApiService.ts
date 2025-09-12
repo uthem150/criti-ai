@@ -51,7 +51,7 @@ class ChallengeApiService {
     try {
       console.log('🎯 오늘의 챌린지 요청 시작');
       
-      const response = await fetch(`${this.baseUrl}/api/challenge/daily`, {
+      const response = await fetch(`${this.baseUrl}/challenge/daily`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -83,7 +83,7 @@ class ChallengeApiService {
    */
   async getChallenge(id: string): Promise<Challenge | null> {
     try {
-      const response = await fetch(`${this.baseUrl}/api/challenge/challenges/${id}`, {
+      const response = await fetch(`${this.baseUrl}/challenge/challenges/${id}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -121,7 +121,7 @@ class ChallengeApiService {
     bonusPoints?: number;
   } | null> {
     try {
-      const response = await fetch(`${this.baseUrl}/api/challenge/challenges/${challengeId}/submit`, {
+      const response = await fetch(`${this.baseUrl}/challenge/challenges/${challengeId}/submit`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -158,7 +158,7 @@ class ChallengeApiService {
    */
   async getUserProgress(): Promise<UserProgress | null> {
     try {
-      const response = await fetch(`${this.baseUrl}/api/challenge/progress/${this.userId}`, {
+      const response = await fetch(`${this.baseUrl}/challenge/progress/${this.userId}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
