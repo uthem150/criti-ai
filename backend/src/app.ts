@@ -94,6 +94,35 @@ app.get("/health", async (req: Request, res: Response) => {
   });
 });
 
+// API 경로 헬스체크 (Vercel 서버리스 함수용)
+app.get("/api/health", async (req: Request, res: Response) => {
+  const cacheStats = await redisCacheService.getCacheStats();
+  
+  // 데이터베이스 연결 상태 확인
+  let dbStatus = 'disconnected';
+  try {
+    await databaseService.client.$queryRaw`SELECT 1`;
+    dbStatus = 'connected';
+  } catch (_error) {
+    dbStatus = 'error';
+  }
+  
+  res.json({
+    status: "OK",
+    timestamp: new Date().toISOString(),
+    service: "Criti.AI Backend",
+    geminiApiKey: process.env.GEMINI_API_KEY ? "Configured" : "Missing",
+    database: {
+      status: dbStatus,
+      url: process.env.DATABASE_URL ? '설정됨' : '미설정'
+    },
+    redis: {
+      connected: redisCacheService.isRedisAvailable(),
+      ...cacheStats
+    }
+  });
+});
+
 // Gemini API 테스트 엔드포인트
 app.get("/test-gemini", async (req: Request, res: Response) => {
   try {
