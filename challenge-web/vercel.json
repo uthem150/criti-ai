@@ -1,6 +1,14 @@
 {
   "rewrites": [
     {
+      "source": "/api/health",
+      "destination": "/api/proxy?apiPath=/health"
+    },
+    {
+      "source": "/api/challenge/(.*)",
+      "destination": "/api/proxy?apiPath=/challenge/$1"
+    },
+    {
       "source": "/challenge",
       "destination": "/index.html"
     },

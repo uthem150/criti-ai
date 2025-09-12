@@ -2,6 +2,8 @@ export default async function handler(req, res) {
   console.log('=== API Proxy Function Called ===');
   console.log('Method:', req.method);
   console.log('URL:', req.url);
+  console.log('Query:', JSON.stringify(req.query, null, 2));
+  console.log('Body:', JSON.stringify(req.body, null, 2));
   console.log('Headers:', JSON.stringify(req.headers, null, 2));
   console.log('Environment BACKEND_URL:', process.env.BACKEND_URL);
 
@@ -26,28 +28,42 @@ export default async function handler(req, res) {
     const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
     console.log('Using BACKEND_URL:', BACKEND_URL);
     
-    // 경로 변환: /api/health → /health, 나머지는 그대로
-    let path = req.url;
-    if (path === '/api/health') {
-      path = '/health';
-      console.log('Converting /api/health to /health');
+    // URL에서 경로 추출 (/api/proxy → 실제 API 경로로 변환)
+    // req.url 예시: '/api/proxy?apiPath=/health' 또는 '/api/proxy?apiPath=/challenge/daily'
+    let targetPath = req.query.apiPath || req.url.replace('/api/proxy', '') || '/';
+    console.log('Target path:', targetPath);
+    
+    // health 요청의 경우 /api/health → /health로 변경
+    if (targetPath === '/health' || targetPath.endsWith('/health')) {
+      targetPath = '/health';
+    } else if (!targetPath.startsWith('/api/')) {
+      // 다른 API 요청들은 /api/ prefix 추가
+      targetPath = '/api' + targetPath;
     }
     
-    const backendUrl = `${BACKEND_URL}${path}`;
+    const backendUrl = `${BACKEND_URL}${targetPath}`;
 
     console.log(`Proxying ${req.method} ${req.url} to ${backendUrl}`);
 
     // 백엔드로 요청 전달
-    const backendResponse = await fetch(backendUrl, {
+    const requestOptions = {
       method: req.method,
       headers: {
         'Content-Type': 'application/json',
         'User-Agent': 'Vercel-Proxy/1.0',
-        // Origin 헤더 추가 (CORS용)
         'Origin': 'https://criti-ai-challenge.vercel.app',
       },
-      body: req.method !== 'GET' && req.method !== 'HEAD' ? JSON.stringify(req.body) : undefined,
-    });
+    };
+    
+    // POST/PUT 요청일 경우만 body 추가
+    if (req.method !== 'GET' && req.method !== 'HEAD' && req.method !== 'OPTIONS') {
+      if (req.body && Object.keys(req.body).length > 0) {
+        requestOptions.body = JSON.stringify(req.body);
+        console.log('Request body:', JSON.stringify(req.body, null, 2));
+      }
+    }
+    
+    const backendResponse = await fetch(backendUrl, requestOptions);
 
     console.log('Backend response status:', backendResponse.status);
     console.log('Backend response headers:', JSON.stringify([...backendResponse.headers.entries()]));
@@ -81,11 +97,25 @@ export default async function handler(req, res) {
     console.error('Error details:', error);
     console.error('Error message:', error.message);
     console.error('Error stack:', error.stack);
+    console.error('Request URL:', req.url);
+    console.error('Request Method:', req.method);
+    console.error('Path segments:', req.query.path);
+    
+    // 타임아웃 에러 등 구체적인 에러 메시지 제공
+    let errorMessage = 'Internal proxy error';
+    if (error.code === 'ECONNREFUSED') {
+      errorMessage = 'Backend server connection refused';
+    } else if (error.code === 'ETIMEDOUT') {
+      errorMessage = 'Backend server timeout';
+    } else if (error.name === 'TypeError' && error.message.includes('fetch')) {
+      errorMessage = 'Failed to connect to backend server';
+    }
     
     res.status(500).json({ 
       success: false, 
-      error: 'Internal proxy error',
+      error: errorMessage,
       details: error.message,
+      code: error.code || 'UNKNOWN',
       timestamp: new Date().toISOString()
     });
   }
