@@ -68,28 +68,38 @@ export default async function handler(req, res) {
     console.log('Backend response status:', backendResponse.status);
     console.log('Backend response headers:', JSON.stringify([...backendResponse.headers.entries()]));
 
-    const data = await backendResponse.text();
-    console.log('Backend response data length:', data.length);
-    console.log('Backend response data preview:', data.substring(0, 200));
+    // JSON 응답으로 파싱
+    let responseData;
+    try {
+      responseData = await backendResponse.json();
+      console.log('Backend response parsed as JSON:', JSON.stringify(responseData, null, 2));
+    } catch (error) {
+      console.error('Failed to parse JSON, trying text:', error);
+      responseData = await backendResponse.text();
+      console.log('Backend response as text:', responseData.substring(0, 200));
+    }
     
-    // 백엔드 응답 헤더를 프론트엔드로 전달
+    // 백엔드 응답 헤더를 프론트엔드로 전달 (압축 관련 헤더 제외)
     backendResponse.headers.forEach((value, key) => {
-      // CORS 관련 헤더는 이미 설정했으므로 제외
-      if (!key.toLowerCase().startsWith('access-control-')) {
+      const lowerKey = key.toLowerCase();
+      // CORS 관련 헤더와 압축 관련 헤더는 제외
+      if (!lowerKey.startsWith('access-control-') && 
+          !lowerKey.includes('content-encoding') && 
+          !lowerKey.includes('content-length') &&
+          !lowerKey.includes('transfer-encoding')) {
         res.setHeader(key, value);
       }
     });
 
     res.status(backendResponse.status);
     
-    // JSON인 경우 파싱하여 반환, 아니면 텍스트로 반환
-    try {
-      const jsonData = JSON.parse(data);
+    // JSON 데이터는 바로 전송, 텍스트는 그대로 전송
+    if (typeof responseData === 'object' && responseData !== null) {
       console.log('Sending JSON response');
-      res.json(jsonData);
-    } catch {
+      res.json(responseData);
+    } else {
       console.log('Sending text response');
-      res.send(data);
+      res.send(responseData);
     }
     
   } catch (error) {
