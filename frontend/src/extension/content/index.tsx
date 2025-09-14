@@ -95,11 +95,15 @@ const getShadowCSS = () => `
 
   /* 헤더 섹션 */
   .header-section {
-    padding: 24px 20px;
+    padding: 14px 10px;
     background: linear-gradient(135deg, #0ea5e9 0%, #3b82f6 100%);
     color: white;
     position: relative;
     overflow: hidden;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    height: 10vh;
   }
   
   .header-section::before {
@@ -121,7 +125,7 @@ const getShadowCSS = () => `
     color: white;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 5px;
     font-family: inherit !important;
     position: relative;
     z-index: 1;
@@ -223,6 +227,7 @@ const getShadowCSS = () => `
 
   /* 환영 섹션 */
   .welcome-section {
+    min-height: 90vh;
     padding: 32px 24px;
     text-align: center;
     background: linear-gradient(135deg, #f8fafc, #e2e8f0);
@@ -1536,11 +1541,14 @@ const getShadowCSS = () => `
 console.log("🔍 Criti AI Content Script 로드됨 (Shadow DOM 버전)");
 
 // 네이버 블로그 특별 처리 함수
-const extractNaverBlogContent = async (): Promise<{ title: string; content: string } | null> => {
+const extractNaverBlogContent = async (): Promise<{
+  title: string;
+  content: string;
+} | null> => {
   console.log("🔍 네이버 블로그 콘텐츠 추출 시도");
-  
+
   // 네이버 블로그 iframe 확인
-  const mainFrame = document.querySelector('#mainFrame') as HTMLIFrameElement;
+  const mainFrame = document.querySelector("#mainFrame") as HTMLIFrameElement;
   if (!mainFrame) {
     console.log("❌ 네이버 블로그 메인 프레임을 찾을 수 없음");
     return null;
@@ -1548,7 +1556,8 @@ const extractNaverBlogContent = async (): Promise<{ title: string; content: stri
 
   try {
     // iframe 내부 접근 시도
-    const frameDocument = mainFrame.contentDocument || mainFrame.contentWindow?.document;
+    const frameDocument =
+      mainFrame.contentDocument || mainFrame.contentWindow?.document;
     if (!frameDocument) {
       console.log("❌ iframe 내부 문서에 접근할 수 없음");
       return null;
@@ -1556,28 +1565,28 @@ const extractNaverBlogContent = async (): Promise<{ title: string; content: stri
 
     // 네이버 블로그 특화 선택자들
     const blogSelectors = [
-      '.se-main-container', // 스마트 에디터
-      '.se-component-content',
-      '.se-text-paragraph',
-      '#postViewArea', // 구 에디터
-      '.post-view',
-      '.post_ct',
-      '#post-view-content',
-      '.se-viewer',
-      '.content-area'
+      ".se-main-container", // 스마트 에디터
+      ".se-component-content",
+      ".se-text-paragraph",
+      "#postViewArea", // 구 에디터
+      ".post-view",
+      ".post_ct",
+      "#post-view-content",
+      ".se-viewer",
+      ".content-area",
     ];
 
-    let content = '';
-    let title = '';
+    let content = "";
+    let title = "";
 
     // 제목 찾기
     const titleSelectors = [
-      '.se-title-text',
-      '.post_title',
-      '.title_post',
-      '#title_1',
-      'h2.title',
-      '.post-title'
+      ".se-title-text",
+      ".post_title",
+      ".title_post",
+      "#title_1",
+      "h2.title",
+      ".post-title",
     ];
 
     for (const selector of titleSelectors) {
@@ -1594,12 +1603,16 @@ const extractNaverBlogContent = async (): Promise<{ title: string; content: stri
       const elements = frameDocument.querySelectorAll(selector);
       if (elements.length > 0) {
         const textArray = Array.from(elements)
-          .map(el => el.textContent?.trim() || '')
-          .filter(text => text.length > 20); // 20자 이상인 것만
+          .map((el) => el.textContent?.trim() || "")
+          .filter((text) => text.length > 20); // 20자 이상인 것만
 
         if (textArray.length > 0) {
-          content = textArray.join('\n\n');
-          console.log(`✅ 네이버 블로그 콘텐츠 발견 (${selector}):`, content.length, "글자");
+          content = textArray.join("\n\n");
+          console.log(
+            `✅ 네이버 블로그 콘텐츠 발견 (${selector}):`,
+            content.length,
+            "글자"
+          );
           break;
         }
       }
@@ -1607,26 +1620,30 @@ const extractNaverBlogContent = async (): Promise<{ title: string; content: stri
 
     // 제목이 없으면 원본 페이지에서 가져오기
     if (!title) {
-      title = document.title || frameDocument.title || '네이버 블로그 포스트';
+      title = document.title || frameDocument.title || "네이버 블로그 포스트";
     }
 
     if (content.length < 50) {
       console.log("❌ 네이버 블로그 콘텐츠가 너무 짧음:", content.length);
-      
+
       // 동적 로딩을 위해 잠시 대기 후 재시도
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
       // 재시도
       for (const selector of blogSelectors) {
         const elements = frameDocument.querySelectorAll(selector);
         if (elements.length > 0) {
           const textArray = Array.from(elements)
-            .map(el => el.textContent?.trim() || '')
-            .filter(text => text.length > 20);
+            .map((el) => el.textContent?.trim() || "")
+            .filter((text) => text.length > 20);
 
           if (textArray.length > 0) {
-            content = textArray.join('\n\n');
-            console.log(`✅ 재시도로 네이버 블로그 콘텐츠 발견:`, content.length, "글자");
+            content = textArray.join("\n\n");
+            console.log(
+              `✅ 재시도로 네이버 블로그 콘텐츠 발견:`,
+              content.length,
+              "글자"
+            );
             break;
           }
         }
@@ -1639,7 +1656,6 @@ const extractNaverBlogContent = async (): Promise<{ title: string; content: stri
       console.log("❌ 네이버 블로그 콘텐츠 추출 실패 - 내용이 부족함");
       return null;
     }
-
   } catch (error) {
     console.error("❌ 네이버 블로그 iframe 접근 오류:", error);
     return null;
@@ -1656,7 +1672,7 @@ const isAnalyzableContent = async (): Promise<boolean> => {
     "chrome-devtools://",
     "moz-extension://",
     "edge://",
-    "safari-extension://"
+    "safari-extension://",
   ];
 
   const currentUrl = window.location.href;
@@ -1666,11 +1682,15 @@ const isAnalyzableContent = async (): Promise<boolean> => {
   }
 
   // 네이버 블로그 특별 처리
-  if (currentUrl.includes('blog.naver.com')) {
+  if (currentUrl.includes("blog.naver.com")) {
     console.log("🔍 네이버 블로그 감지 - 특별 처리 시작");
     const naverContent = await extractNaverBlogContent();
     if (naverContent && naverContent.content.length > 50) {
-      console.log("✅ 네이버 블로그 분석 가능:", naverContent.content.length, "글자");
+      console.log(
+        "✅ 네이버 블로그 분석 가능:",
+        naverContent.content.length,
+        "글자"
+      );
       return true;
     } else {
       console.log("❌ 네이버 블로그 콘텐츠 부족");
@@ -1681,22 +1701,25 @@ const isAnalyzableContent = async (): Promise<boolean> => {
   // 일반 페이지 처리
   const textContent = document.body.textContent?.trim() || "";
   const isValid = textContent.length > 30;
-  
+
   console.log("📝 컨텐츠 체크:", {
     url: currentUrl,
     textLength: textContent.length,
-    isValid: isValid
+    isValid: isValid,
   });
-  
+
   return isValid;
 };
 
 // 향상된 컨텐츠 추출 - 네이버 블로그 포함
-const extractPageContent = async (): Promise<{ title: string; content: string }> => {
+const extractPageContent = async (): Promise<{
+  title: string;
+  content: string;
+}> => {
   console.log("📄 컨텐츠 추출 시작");
-  
+
   // 네이버 블로그 우선 처리
-  if (window.location.href.includes('blog.naver.com')) {
+  if (window.location.href.includes("blog.naver.com")) {
     console.log("🔍 네이버 블로그 콘텐츠 추출 시도");
     const naverContent = await extractNaverBlogContent();
     if (naverContent) {
@@ -1709,11 +1732,26 @@ const extractPageContent = async (): Promise<{ title: string; content: string }>
   // 일반 페이지 제목 추출
   const titleSelectors = [
     "h1",
-    ".article-title", ".news-title", ".post-title", ".entry-title",
-    "[data-testid='headline']", ".title", ".headline", ".subject",
-    ".article-header h1", ".content-title", ".main-title", ".page-title",
-    ".story-title", ".article_title", ".news_title", ".tit_view",
-    ".se-title-text", ".se_title", "#articleTitle", ".title_text"
+    ".article-title",
+    ".news-title",
+    ".post-title",
+    ".entry-title",
+    "[data-testid='headline']",
+    ".title",
+    ".headline",
+    ".subject",
+    ".article-header h1",
+    ".content-title",
+    ".main-title",
+    ".page-title",
+    ".story-title",
+    ".article_title",
+    ".news_title",
+    ".tit_view",
+    ".se-title-text",
+    ".se_title",
+    "#articleTitle",
+    ".title_text",
   ];
 
   let title = document.title;
@@ -1729,13 +1767,32 @@ const extractPageContent = async (): Promise<{ title: string; content: string }>
   // 일반 페이지 컨텐츠 추출
   const contentSelectors = [
     "article",
-    ".article-content", ".news-content", ".post-content", ".entry-content",
-    ".content", ".main-content", "[role='main']", "main",
-    ".article-body", ".story-body", ".post-body", ".content-body",
-    ".article-text", ".news-body", ".detail-content", ".view-content",
-    ".read-content", ".article_content", ".news_content",
-    ".se-main-container", ".se-component", ".se_component",
-    ".content-area", ".txt_content", ".article_txt", ".newsct_article"
+    ".article-content",
+    ".news-content",
+    ".post-content",
+    ".entry-content",
+    ".content",
+    ".main-content",
+    "[role='main']",
+    "main",
+    ".article-body",
+    ".story-body",
+    ".post-body",
+    ".content-body",
+    ".article-text",
+    ".news-body",
+    ".detail-content",
+    ".view-content",
+    ".read-content",
+    ".article_content",
+    ".news_content",
+    ".se-main-container",
+    ".se-component",
+    ".se_component",
+    ".content-area",
+    ".txt_content",
+    ".article_txt",
+    ".newsct_article",
   ];
 
   let content = "";
@@ -1757,46 +1814,53 @@ const extractPageContent = async (): Promise<{ title: string; content: string }>
   // 여전히 부족하면 intelligent 추출
   if (content.length < 200) {
     console.log("🔍 Intelligent 컨텐츠 추출 시도");
-    
-    const potentialElements = document.querySelectorAll('p, div, section, article, span');
+
+    const potentialElements = document.querySelectorAll(
+      "p, div, section, article, span"
+    );
     const bestElements: Element[] = [];
-    
-    Array.from(potentialElements).forEach(element => {
-      const text = element.textContent?.trim() || '';
+
+    Array.from(potentialElements).forEach((element) => {
+      const text = element.textContent?.trim() || "";
       const textLength = text.length;
       const childElementsCount = element.children.length;
-      
-      const density = childElementsCount > 0 ? textLength / (childElementsCount + 1) : textLength;
+
+      const density =
+        childElementsCount > 0
+          ? textLength / (childElementsCount + 1)
+          : textLength;
       const hasParent = element.parentElement;
-      const isNotScript = !element.tagName.toLowerCase().match(/script|style|noscript/);
-      
+      const isNotScript = !element.tagName
+        .toLowerCase()
+        .match(/script|style|noscript/);
+
       if (textLength > 50 && density > 30 && hasParent && isNotScript) {
         bestElements.push(element);
       }
     });
-    
+
     if (bestElements.length > 0) {
-      bestElements.sort((a, b) => 
-        (b.textContent?.length || 0) - (a.textContent?.length || 0)
+      bestElements.sort(
+        (a, b) => (b.textContent?.length || 0) - (a.textContent?.length || 0)
       );
-      
+
       content = bestElements
         .slice(0, 8)
-        .map(el => el.textContent?.trim())
-        .filter(text => text && text.length > 30)
-        .join('\n\n');
-      
+        .map((el) => el.textContent?.trim())
+        .filter((text) => text && text.length > 30)
+        .join("\n\n");
+
       console.log("✅ Intelligent 추출 성공:", content.length, "글자");
     }
   }
 
   const finalContent = content.substring(0, 4000);
-  
+
   console.log("📊 최종 컨텐츠 추출 완료:", {
     title: title.substring(0, 50),
     contentLength: finalContent.length,
     domain: window.location.hostname,
-    success: finalContent.length >= 50
+    success: finalContent.length >= 50,
   });
 
   return { title, content: finalContent };
@@ -1809,14 +1873,14 @@ const mountApp = () => {
   let sidebarVisible = false;
   let shadowHost: HTMLElement | null = null;
   let shadowRoot: ShadowRoot | null = null;
-  let reactRoot: import('react-dom/client').Root | null = null;
+  let reactRoot: import("react-dom/client").Root | null = null;
 
   const toggleSidebar = () => {
     console.log("🔄 사이드바 토글, 현재 상태:", sidebarVisible);
 
     if (!shadowHost) {
       console.log("🌟 Shadow DOM 생성");
-      
+
       shadowHost = document.createElement("div");
       shadowHost.id = "criti-ai-shadow-host";
       shadowHost.style.cssText = `
@@ -1828,27 +1892,27 @@ const mountApp = () => {
         z-index: 999999 !important;
         pointer-events: none !important;
       `;
-      
+
       document.body.appendChild(shadowHost);
-      
-      shadowRoot = shadowHost.attachShadow({ mode: 'closed' });
-      
+
+      shadowRoot = shadowHost.attachShadow({ mode: "closed" });
+
       // Shadow DOM 내부 CSS 주입
-      const style = document.createElement('style');
+      const style = document.createElement("style");
       style.textContent = getShadowCSS();
       shadowRoot.appendChild(style);
-      
+
       // 사이드바 컨테이너 생성
-      const sidebarContainer = document.createElement('div');
-      sidebarContainer.className = 'criti-ai-sidebar-container';
-      sidebarContainer.style.pointerEvents = 'auto';
+      const sidebarContainer = document.createElement("div");
+      sidebarContainer.className = "criti-ai-sidebar-container";
+      sidebarContainer.style.pointerEvents = "auto";
       shadowRoot.appendChild(sidebarContainer);
-      
+
       // React 앱 마운트
       reactRoot = createRoot(sidebarContainer);
-      
+
       // 페이지 데이터 추출 (네이버 블로그 지원)
-      extractPageContent().then(pageData => {
+      extractPageContent().then((pageData) => {
         if (reactRoot) {
           reactRoot.render(
             <ContentScriptApp
@@ -1877,12 +1941,12 @@ const mountApp = () => {
     console.log("🔓 사이드바 열기");
     sidebarVisible = true;
     if (shadowRoot) {
-      const container = shadowRoot.querySelector('.criti-ai-sidebar-container');
+      const container = shadowRoot.querySelector(".criti-ai-sidebar-container");
       if (container) {
-        container.classList.add('open');
+        container.classList.add("open");
       }
     }
-    
+
     // React 상태 업데이트
     updateReactAppState();
   };
@@ -1890,26 +1954,26 @@ const mountApp = () => {
   const closeSidebar = () => {
     console.log("🔒 사이드바 닫기 및 하이라이트 제거");
     sidebarVisible = false;
-    
+
     // 사이드바 닫기 애니메이션
     if (shadowRoot) {
-      const container = shadowRoot.querySelector('.criti-ai-sidebar-container');
+      const container = shadowRoot.querySelector(".criti-ai-sidebar-container");
       if (container) {
-        container.classList.remove('open');
+        container.classList.remove("open");
       }
     }
-    
+
     // 모든 하이라이트 제거
     clearAllHighlights();
-    
+
     // React 상태 업데이트
     updateReactAppState();
   };
-  
+
   // React 앱 상태 업데이트 함수
   const updateReactAppState = () => {
     if (reactRoot && shadowRoot) {
-      extractPageContent().then(pageData => {
+      extractPageContent().then((pageData) => {
         if (reactRoot) {
           reactRoot.render(
             <ContentScriptApp
@@ -1932,148 +1996,164 @@ const mountApp = () => {
   const highlightElements = new Map<string, HTMLElement>();
   const activeTooltips = new Set<HTMLElement>();
   const eventListeners = new Set<() => void>();
-  
+
   // 메모리 누수 방지를 위한 정리 함수
   const cleanupResources = () => {
-    console.log('🧹 리소스 정리 시작');
-    
+    console.log("🧹 리소스 정리 시작");
+
     // 모든 이벤트 리스너 제거
-    eventListeners.forEach(cleanup => {
+    eventListeners.forEach((cleanup) => {
       try {
         cleanup();
       } catch (error) {
-        console.warn('⚠️ 이벤트 리스너 정리 실패:', error);
+        console.warn("⚠️ 이벤트 리스너 정리 실패:", error);
       }
     });
     eventListeners.clear();
-    
+
     // 모든 툴팁 제거
-    activeTooltips.forEach(tooltip => {
+    activeTooltips.forEach((tooltip) => {
       if (tooltip.parentNode) {
         tooltip.remove();
       }
     });
     activeTooltips.clear();
-    
+
     // 하이라이트 요소 맵 정리
     highlightElements.clear();
-    
-    console.log('✅ 리소스 정리 완료');
+
+    console.log("✅ 리소스 정리 완료");
   };
-  
+
   const scrollToHighlight = (highlightId: string): void => {
-    console.log('🎯 스크롤 요청:', highlightId);
+    console.log("🎯 스크롤 요청:", highlightId);
     const element = highlightElements.get(highlightId);
     if (element) {
       // 부드러운 스크롤
-      element.scrollIntoView({ 
-        behavior: 'smooth', 
-        block: 'center',
-        inline: 'nearest'
+      element.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+        inline: "nearest",
       });
-      
+
       // 임시 강조 효과
-      element.classList.add('criti-ai-highlight-focused');
+      element.classList.add("criti-ai-highlight-focused");
       setTimeout(() => {
-        element.classList.remove('criti-ai-highlight-focused');
+        element.classList.remove("criti-ai-highlight-focused");
       }, 2000);
-      
-      console.log('✅ 스크롤 완료:', highlightId);
+
+      console.log("✅ 스크롤 완료:", highlightId);
     } else {
-      console.log('❌ 하이라이트 요소를 찾을 수 없음:', highlightId);
+      console.log("❌ 하이라이트 요소를 찾을 수 없음:", highlightId);
     }
   };
-  
+
   const clearAllHighlights = (): void => {
-    console.log('🗑️ 모든 하이라이트 제거 시작');
-    
+    console.log("🗑️ 모든 하이라이트 제거 시작");
+
     // 메인 문서 툴팅 제거
-    const tooltips = document.querySelectorAll('.criti-ai-tooltip');
-    tooltips.forEach(tooltip => {
+    const tooltips = document.querySelectorAll(".criti-ai-tooltip");
+    tooltips.forEach((tooltip) => {
       activeTooltips.delete(tooltip as HTMLElement);
       tooltip.remove();
     });
-    
+
     // 메인 문서 하이라이트 제거
-    const highlights = document.querySelectorAll('.criti-ai-highlight');
-    highlights.forEach(element => {
+    const highlights = document.querySelectorAll(".criti-ai-highlight");
+    highlights.forEach((element) => {
       const parent = element.parentNode;
       if (parent) {
-        parent.replaceChild(document.createTextNode(element.textContent || ''), element);
+        parent.replaceChild(
+          document.createTextNode(element.textContent || ""),
+          element
+        );
         parent.normalize();
       }
     });
-    
+
     // 네이버 블로그 iframe 내부 하이라이트 제거
-    if (window.location.href.includes('blog.naver.com')) {
-      const mainFrame = document.querySelector('#mainFrame') as HTMLIFrameElement;
+    if (window.location.href.includes("blog.naver.com")) {
+      const mainFrame = document.querySelector(
+        "#mainFrame"
+      ) as HTMLIFrameElement;
       if (mainFrame && mainFrame.contentDocument) {
         try {
           // iframe 툴팅 제거
-          const frameTooltips = mainFrame.contentDocument.querySelectorAll('.criti-ai-tooltip');
-          frameTooltips.forEach(tooltip => {
+          const frameTooltips =
+            mainFrame.contentDocument.querySelectorAll(".criti-ai-tooltip");
+          frameTooltips.forEach((tooltip) => {
             activeTooltips.delete(tooltip as HTMLElement);
             tooltip.remove();
           });
-          
+
           // iframe 하이라이트 제거
-          const frameHighlights = mainFrame.contentDocument.querySelectorAll('.criti-ai-highlight');
-          frameHighlights.forEach(element => {
+          const frameHighlights = mainFrame.contentDocument.querySelectorAll(
+            ".criti-ai-highlight"
+          );
+          frameHighlights.forEach((element) => {
             const parent = element.parentNode;
             if (parent) {
-              parent.replaceChild(mainFrame.contentDocument!.createTextNode(element.textContent || ''), element);
+              parent.replaceChild(
+                mainFrame.contentDocument!.createTextNode(
+                  element.textContent || ""
+                ),
+                element
+              );
               parent.normalize();
             }
           });
-          
-          console.log('✅ iframe 하이라이트 제거 완료');
+
+          console.log("✅ iframe 하이라이트 제거 완료");
         } catch (error) {
-          console.log('⚠️ iframe 하이라이트 제거 실패 (보안 제한):', error);
+          console.log("⚠️ iframe 하이라이트 제거 실패 (보안 제한):", error);
         }
       }
     }
-    
+
     // 맵 정리
     highlightElements.clear();
     activeTooltips.clear();
-    
-    console.log('✅ 모든 하이라이트 제거 완료');
+
+    console.log("✅ 모든 하이라이트 제거 완료");
   };
-  
+
   const scrollToHighlightByText = (text: string, type?: string): boolean => {
-    console.log('🔍 텍스트로 하이라이트 찾기:', text, type);
-    
+    console.log("🔍 텍스트로 하이라이트 찾기:", text, type);
+
     // Map에서 텍스트 매칭하여 찾기
     for (const [id, element] of highlightElements) {
-      const elementText = element.textContent?.trim() || '';
-      const isTextMatch = elementText.includes(text) || text.includes(elementText);
+      const elementText = element.textContent?.trim() || "";
+      const isTextMatch =
+        elementText.includes(text) || text.includes(elementText);
       const isTypeMatch = !type || id.includes(type);
-      
+
       if (isTextMatch && isTypeMatch) {
         scrollToHighlight(id);
         return true;
       }
     }
-    
+
     // 직접 DOM에서 찾기 (fallback)
-    const allHighlights = document.querySelectorAll('.criti-ai-highlight');
+    const allHighlights = document.querySelectorAll(".criti-ai-highlight");
     for (const highlight of allHighlights) {
-      const highlightText = highlight.textContent?.trim() || '';
-      const isTextMatch = highlightText.includes(text) || text.includes(highlightText);
-      const isTypeMatch = !type || highlight.className.includes(`criti-ai-highlight-${type}`);
-      
+      const highlightText = highlight.textContent?.trim() || "";
+      const isTextMatch =
+        highlightText.includes(text) || text.includes(highlightText);
+      const isTypeMatch =
+        !type || highlight.className.includes(`criti-ai-highlight-${type}`);
+
       if (isTextMatch && isTypeMatch) {
-        highlight.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        highlight.classList.add('criti-ai-highlight-focused');
+        highlight.scrollIntoView({ behavior: "smooth", block: "center" });
+        highlight.classList.add("criti-ai-highlight-focused");
         setTimeout(() => {
-          highlight.classList.remove('criti-ai-highlight-focused');
+          highlight.classList.remove("criti-ai-highlight-focused");
         }, 2000);
-        console.log('✅ Fallback 스크롤 성공');
+        console.log("✅ Fallback 스크롤 성공");
         return true;
       }
     }
-    
-    console.log('❌ 해당 텍스트의 하이라이트를 찾을 수 없음');
+
+    console.log("❌ 해당 텍스트의 하이라이트를 찾을 수 없음");
     return false;
   };
 
@@ -2099,7 +2179,7 @@ const mountApp = () => {
     clearAllHighlights,
     scrollToHighlightByText,
     cleanupResources,
-    version: '2.0.0'
+    version: "2.0.0",
   };
 
   // 개선된 메시지 리스너
@@ -2110,13 +2190,13 @@ const mountApp = () => {
       sendResponse: (response: { success: boolean; ready?: boolean }) => void
     ) => {
       console.log("📨 메시지 수신:", request);
-      
+
       if (request.action === "ping") {
         console.log("📡 Ping 요청 - Content Script 준비 상태 확인");
         sendResponse({ success: true, ready: true });
         return true;
       }
-      
+
       if (request.action === "toggleSidebar") {
         console.log("📨 Popup에서 사이드바 토글 요청");
         try {
@@ -2128,7 +2208,7 @@ const mountApp = () => {
         }
         return true;
       }
-      
+
       sendResponse({ success: false });
       return true;
     }
@@ -2306,59 +2386,61 @@ const getOptimizedHighlightCSS = () => `
 
 // 하이라이트용 CSS를 문서 전체에 주입
 const injectHighlightCSS = () => {
-
   const cssText = getOptimizedHighlightCSS();
-  
+
   // 1. 메인 문서에 스타일 주입
-  if (!document.getElementById('criti-ai-highlight-styles')) {
-    const style = document.createElement('style');
-    style.id = 'criti-ai-highlight-styles';
+  if (!document.getElementById("criti-ai-highlight-styles")) {
+    const style = document.createElement("style");
+    style.id = "criti-ai-highlight-styles";
     style.textContent = cssText;
     document.head.appendChild(style);
-    console.log('✅ 메인 문서에 하이라이트 CSS 주입 완료');
+    console.log("✅ 메인 문서에 하이라이트 CSS 주입 완료");
   }
 
   // 2. 네이버 블로그 iframe에 스타일 주입
-  if (window.location.href.includes('blog.naver.com')) {
-    const iframe = document.querySelector('#mainFrame') as HTMLIFrameElement;
+  if (window.location.href.includes("blog.naver.com")) {
+    const iframe = document.querySelector("#mainFrame") as HTMLIFrameElement;
     if (iframe) {
       // 즉시 CSS 주입 시도
       const injectFrameCSS = () => {
         try {
           const frameDocument = iframe.contentDocument;
-          if (frameDocument && !frameDocument.getElementById('criti-ai-highlight-styles')) {
-            const frameStyle = frameDocument.createElement('style');
-            frameStyle.id = 'criti-ai-highlight-styles';
+          if (
+            frameDocument &&
+            !frameDocument.getElementById("criti-ai-highlight-styles")
+          ) {
+            const frameStyle = frameDocument.createElement("style");
+            frameStyle.id = "criti-ai-highlight-styles";
             frameStyle.textContent = cssText;
             frameDocument.head.appendChild(frameStyle);
-            console.log('✅ 네이버 블로그 iframe에 CSS 주입 성공');
+            console.log("✅ 네이버 블로그 iframe에 CSS 주입 성공");
             return true;
           }
         } catch (e) {
-          console.log('⚠️ iframe CSS 주입 실패 (보안 제한):', e);
+          console.log("⚠️ iframe CSS 주입 실패 (보안 제한):", e);
           return false;
         }
         return false;
       };
-      
+
       // 즉시 시도
       injectFrameCSS();
-      
+
       // iframe 로드 이벤트
-      iframe.addEventListener('load', injectFrameCSS);
-      
+      iframe.addEventListener("load", injectFrameCSS);
+
       // 동적 로딩 반복 시도
       let retryCount = 0;
       const maxRetries = 10;
       const retryInjection = () => {
         if (retryCount >= maxRetries) return;
-        
+
         if (!injectFrameCSS()) {
           retryCount++;
           setTimeout(retryInjection, 500);
         }
       };
-      
+
       setTimeout(retryInjection, 1000);
     }
   }
@@ -2367,7 +2449,7 @@ const injectHighlightCSS = () => {
 // 페이지 로드 완료 후 실행
 const initialize = async () => {
   const canAnalyze = await isAnalyzableContent();
-  
+
   if (canAnalyze) {
     injectHighlightCSS();
     mountApp();
@@ -2375,10 +2457,22 @@ const initialize = async () => {
   } else {
     // 분석 불가능한 페이지에서도 ping에는 응답
     chrome.runtime.onMessage.addListener(
-      (request: { action: string }, _sender, sendResponse: (response: { success: boolean; ready?: boolean; reason?: string }) => void) => {
+      (
+        request: { action: string },
+        _sender,
+        sendResponse: (response: {
+          success: boolean;
+          ready?: boolean;
+          reason?: string;
+        }) => void
+      ) => {
         if (request.action === "ping") {
           console.log("📡 분석 불가능한 페이지에서 Ping 응답");
-          sendResponse({ success: false, ready: false, reason: 'not_analyzable' });
+          sendResponse({
+            success: false,
+            ready: false,
+            reason: "not_analyzable",
+          });
           return true;
         }
         sendResponse({ success: false });
@@ -2403,101 +2497,103 @@ let frameObserver: MutationObserver | null = null;
 let cleanupTimeout: NodeJS.Timeout | null = null;
 
 const cleanupObservers = () => {
-  console.log('📊 관찰자 정리 시작');
-  
+  console.log("📊 관찰자 정리 시작");
+
   if (pageObserver) {
     pageObserver.disconnect();
     pageObserver = null;
   }
-  
+
   if (frameObserver) {
     frameObserver.disconnect();
     frameObserver = null;
   }
-  
+
   if (cleanupTimeout) {
     clearTimeout(cleanupTimeout);
     cleanupTimeout = null;
   }
-  
-  console.log('✅ 관찰자 정리 완료');
+
+  console.log("✅ 관찰자 정리 완료");
 };
 
 const setupObservers = () => {
   // 기존 관찰자 정리
   cleanupObservers();
-  
+
   pageObserver = new MutationObserver(async (mutations) => {
     // URL 변화 감지
     if (lastUrl !== window.location.href) {
       lastUrl = window.location.href;
-      console.log('🔄 페이지 URL 변화 감지, 재초기화');
-      
+      console.log("🔄 페이지 URL 변화 감지, 재초기화");
+
       // 리소스 정리 후 재초기화
       if (window.critiAI?.cleanupResources) {
         window.critiAI.cleanupResources();
       }
-      
+
       // 지연 후 재초기화 (페이지 안정화 대기)
       cleanupTimeout = setTimeout(initialize, 1000);
       return;
     }
-    
+
     // 네이버 블로그 동적 컨테이너 변화 감지
-    if (window.location.href.includes('blog.naver.com')) {
-      const hasContentChanges = mutations.some(mutation => 
-        Array.from(mutation.addedNodes).some(node => 
-          node.nodeType === Node.ELEMENT_NODE && 
-          (node as Element).querySelector && (
-            (node as Element).querySelector('.se-main-container') ||
-            (node as Element).querySelector('.se-component-content') ||
-            (node as Element).matches('.se-main-container, .se-component-content')
-          )
+    if (window.location.href.includes("blog.naver.com")) {
+      const hasContentChanges = mutations.some((mutation) =>
+        Array.from(mutation.addedNodes).some(
+          (node) =>
+            node.nodeType === Node.ELEMENT_NODE &&
+            (node as Element).querySelector &&
+            ((node as Element).querySelector(".se-main-container") ||
+              (node as Element).querySelector(".se-component-content") ||
+              (node as Element).matches(
+                ".se-main-container, .se-component-content"
+              ))
         )
       );
-      
+
       if (hasContentChanges) {
-        console.log('🔄 네이버 블로그 컨테이너 변화 감지');
+        console.log("🔄 네이버 블로그 컨테이너 변화 감지");
         // 하이라이트 재적용 로직은 TextHighlighter에서 처리
       }
     }
   });
 
-  pageObserver.observe(document.body, { 
-    childList: true, 
+  pageObserver.observe(document.body, {
+    childList: true,
     subtree: true,
     attributes: false, // 성능 최적화
-    characterData: false
+    characterData: false,
   });
 
   // 네이버 블로그 iframe 관찰자 설정
-  if (window.location.href.includes('blog.naver.com')) {
-    const mainFrame = document.querySelector('#mainFrame') as HTMLIFrameElement;
+  if (window.location.href.includes("blog.naver.com")) {
+    const mainFrame = document.querySelector("#mainFrame") as HTMLIFrameElement;
     if (mainFrame) {
       const setupFrameObserver = () => {
         try {
           if (mainFrame.contentDocument && !frameObserver) {
             frameObserver = new MutationObserver(() => {
-              console.log('🔄 네이버 블로그 iframe 컨테이너 변화 감지');
+              console.log("🔄 네이버 블로그 iframe 컨테이너 변화 감지");
             });
-            
+
             frameObserver.observe(mainFrame.contentDocument.body, {
               childList: true,
               subtree: true,
               attributes: false,
-              characterData: false
+              characterData: false,
             });
-            
-            console.log('✅ iframe 관찰자 설정 완료');
+
+            console.log("✅ iframe 관찰자 설정 완료");
           }
         } catch (error) {
-          console.log('⚠️ iframe 관찰 설정 실패 (보안 제한):', error);
+          console.log("⚠️ iframe 관찰 설정 실패 (보안 제한):", error);
         }
       };
-      
+
       // 즉시 시도 및 load 이벤트
       setupFrameObserver();
-      mainFrame.addEventListener('load', setupFrameObserver);
+      mainFrame.addEventListener("load", setupFrameObserver);
     }
   }
 };
@@ -2505,8 +2601,8 @@ const setupObservers = () => {
 setupObservers();
 
 // 페이지 언로드 시 정리
-window.addEventListener('beforeunload', () => {
-  console.log('📊 페이지 언로드 - 리소스 정리');
+window.addEventListener("beforeunload", () => {
+  console.log("📊 페이지 언로드 - 리소스 정리");
   cleanupObservers();
   if (window.critiAI?.cleanupResources) {
     window.critiAI.cleanupResources();
@@ -2514,14 +2610,17 @@ window.addEventListener('beforeunload', () => {
 });
 
 // 개발 디버깅 도구 활성화
-if (typeof process !== 'undefined' && process.env?.NODE_ENV === 'development') {
-  (window as Window & { critiAIDebug?: typeof debugCommands }).critiAIDebug = debugCommands;
-  console.log('🔧 개발자 도구 활성화: window.critiAIDebug');
+if (typeof process !== "undefined" && process.env?.NODE_ENV === "development") {
+  (window as Window & { critiAIDebug?: typeof debugCommands }).critiAIDebug =
+    debugCommands;
+  console.log("🔧 개발자 도구 활성화: window.critiAIDebug");
 } else {
   // 프로덕션에서도 기본 디버깅 기능 제공
-  (window as Window & { critiAIDebug?: Partial<typeof debugCommands> }).critiAIDebug = {
+  (
+    window as Window & { critiAIDebug?: Partial<typeof debugCommands> }
+  ).critiAIDebug = {
     version: debugCommands.version,
     diagnose: debugCommands.diagnose,
-    checkHighlights: debugCommands.checkHighlights
+    checkHighlights: debugCommands.checkHighlights,
   };
 }

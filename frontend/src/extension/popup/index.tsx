@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { createRoot } from 'react-dom/client';
+import React, { useState, useEffect } from "react";
+import { createRoot } from "react-dom/client";
 
 export const PopupApp: React.FC = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [currentTab, setCurrentTab] = useState<chrome.tabs.Tab | null>(null);
-  const [connectionStatus, setConnectionStatus] = useState<'checking' | 'ready' | 'not_ready' | 'error'>('checking');
+  const [connectionStatus, setConnectionStatus] = useState<
+    "checking" | "ready" | "not_ready" | "error"
+  >("checking");
 
   // Tab 정보 및 Content Script 상태 확인
   useEffect(() => {
@@ -12,88 +14,100 @@ export const PopupApp: React.FC = () => {
 
     const checkContentScript = async () => {
       try {
-        console.log('🔍 현재 탭 정보 확인 중...');
-        
+        console.log("🔍 현재 탭 정보 확인 중...");
+
         // 현재 활성 탭 가져오기
-        const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-        
+        const [tab] = await chrome.tabs.query({
+          active: true,
+          currentWindow: true,
+        });
+
         if (!isMounted) return;
-        
+
         if (!tab?.id || !tab.url) {
-          console.log('❌ 유효하지 않은 탭');
-          setConnectionStatus('error');
+          console.log("❌ 유효하지 않은 탭");
+          setConnectionStatus("error");
           return;
         }
 
         setCurrentTab(tab);
-        console.log('📍 현재 탭:', { url: tab.url, title: tab.title });
+        console.log("📍 현재 탭:", { url: tab.url, title: tab.title });
 
         // Content Script 준비 상태 확인 (ping)
-        console.log('📡 Content Script ping 전송 중...');
-        
-        const response = await chrome.tabs.sendMessage(tab.id, { action: 'ping' });
-        
+        console.log("📡 Content Script ping 전송 중...");
+
+        const response = await chrome.tabs.sendMessage(tab.id, {
+          action: "ping",
+        });
+
         if (!isMounted) return;
-        
-        console.log('📨 Content Script 응답:', response);
-        
+
+        console.log("📨 Content Script 응답:", response);
+
         if (response?.success && response?.ready) {
-          setConnectionStatus('ready');
-          console.log('✅ Content Script 준비 완료');
+          setConnectionStatus("ready");
+          console.log("✅ Content Script 준비 완료");
         } else {
-          setConnectionStatus('not_ready');
-          console.log('⚠️ Content Script 준비되지 않음:', response?.reason || 'unknown');
+          setConnectionStatus("not_ready");
+          console.log(
+            "⚠️ Content Script 준비되지 않음:",
+            response?.reason || "unknown"
+          );
         }
-        
       } catch (pingError) {
         if (!isMounted) return;
-        
-        console.log('❌ Content Script ping 실패:', pingError);
-        setConnectionStatus('not_ready');
-        
+
+        console.log("❌ Content Script ping 실패:", pingError);
+        setConnectionStatus("not_ready");
+
         // 재시도 로직 (최대 3번)
         let retryCount = 0;
         const maxRetries = 3;
-        
+
         const retryPing = async () => {
           while (retryCount < maxRetries && isMounted) {
             retryCount++;
             console.log(`🔄 재시도 ${retryCount}/${maxRetries}`);
-            
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            
+
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+
             try {
-              const [currentTab] = await chrome.tabs.query({ active: true, currentWindow: true });
+              const [currentTab] = await chrome.tabs.query({
+                active: true,
+                currentWindow: true,
+              });
               if (!currentTab?.id) continue;
-              
-              const retryResponse = await chrome.tabs.sendMessage(currentTab.id, { action: 'ping' });
-              
+
+              const retryResponse = await chrome.tabs.sendMessage(
+                currentTab.id,
+                { action: "ping" }
+              );
+
               if (retryResponse?.success && retryResponse?.ready) {
-                console.log('✅ 재시도 성공');
+                console.log("✅ 재시도 성공");
                 if (isMounted) {
-                  setConnectionStatus('ready');
+                  setConnectionStatus("ready");
                 }
                 return;
               }
-              
             } catch {
               console.log(`❌ 재시도 ${retryCount} 실패`);
             }
           }
-          
+
           // 모든 재시도 실패
           if (isMounted) {
-            console.log('❌ 모든 재시도 실패');
-            setConnectionStatus('error');
+            console.log("❌ 모든 재시도 실패");
+            setConnectionStatus("error");
           }
         };
-        
+
         retryPing();
       }
     };
 
     checkContentScript();
-    
+
     return () => {
       isMounted = false;
     };
@@ -101,31 +115,30 @@ export const PopupApp: React.FC = () => {
 
   const handleAnalyzeClick = async () => {
     if (!currentTab?.id) {
-      console.log('❌ 현재 탭 정보가 없습니다.');
+      console.log("❌ 현재 탭 정보가 없습니다.");
       return;
     }
 
     setIsAnalyzing(true);
-    console.log('📊 분석 시작 요청');
+    console.log("📊 분석 시작 요청");
 
     try {
       // Content Script에 사이드바 토글 메시지 전송
-      const response = await chrome.tabs.sendMessage(currentTab.id, { 
-        action: 'toggleSidebar'
+      const response = await chrome.tabs.sendMessage(currentTab.id, {
+        action: "toggleSidebar",
       });
 
-      console.log('📨 사이드바 토글 응답:', response);
+      console.log("📨 사이드바 토글 응답:", response);
 
       if (response?.success) {
-        console.log('✅ 사이드바 토글 성공');
+        console.log("✅ 사이드바 토글 성공");
         // 팝업 창 닫기 (선택사항)
         window.close();
       } else {
-        console.log('❌ 사이드바 토글 실패');
+        console.log("❌ 사이드바 토글 실패");
       }
-      
     } catch (toggleError) {
-      console.error('❌ 사이드바 토글 에러:', toggleError);
+      console.error("❌ 사이드바 토글 에러:", toggleError);
     } finally {
       setIsAnalyzing(false);
     }
@@ -133,17 +146,18 @@ export const PopupApp: React.FC = () => {
 
   const handleChallengeClick = () => {
     // Challenge 웹 페이지로 이동 (개발 환경)
-    const challengeUrl = process.env.NODE_ENV === 'production' 
-      ? 'https://criti-ai-challenge.vercel.app' 
-      : 'http://localhost:3000/challenge';
-    
+    const challengeUrl =
+      process.env.NODE_ENV === "production"
+        ? "https://criti-ai-challenge.vercel.app"
+        : "http://localhost:3000/challenge";
+
     chrome.tabs.create({ url: challengeUrl });
-    console.log('🎮 Challenge 페이지로 이동:', challengeUrl);
+    console.log("🎮 Challenge 페이지로 이동:", challengeUrl);
   };
 
   const renderConnectionStatus = () => {
     switch (connectionStatus) {
-      case 'checking':
+      case "checking":
         return (
           <div className="status-checking">
             <div className="spinner"></div>
@@ -152,15 +166,16 @@ export const PopupApp: React.FC = () => {
           </div>
         );
 
-      case 'ready':
+      case "ready":
         return (
           <div className="status-ready">
             <div className="icon">🎯</div>
             <h3>신뢰도 분석 준비 완료</h3>
             <p>
-              현재 페이지의 내용을 분석하여 신뢰도, 편향성, 논리적 오류를 검토할 수 있습니다.
+              현재 페이지의 내용을 분석하여 신뢰도, 편향성, 논리적 오류를 검토할
+              수 있습니다.
             </p>
-            <button 
+            <button
               onClick={handleAnalyzeClick}
               disabled={isAnalyzing}
               className="analyze-button"
@@ -171,59 +186,64 @@ export const PopupApp: React.FC = () => {
                   분석 중...
                 </>
               ) : (
-                '🔍 페이지 분석 시작'
+                "🔍 페이지 분석 시작"
               )}
             </button>
             {currentTab?.title && (
               <div className="current-page">
                 <small>
                   📄 {currentTab.title.substring(0, 50)}
-                  {currentTab.title.length > 50 ? '...' : ''}
+                  {currentTab.title.length > 50 ? "..." : ""}
                 </small>
               </div>
             )}
           </div>
         );
 
-      case 'not_ready':
+      case "not_ready":
         return (
           <div className="status-not-ready">
             <div className="icon">⚠️</div>
             <h3>분석 준비 중</h3>
             <p>
-              페이지가 아직 완전히 로드되지 않았거나, 분석할 수 있는 콘텐츠가 부족합니다.
+              페이지가 아직 완전히 로드되지 않았거나, 분석할 수 있는 콘텐츠가
+              부족합니다.
             </p>
-            <button 
+            <button
               onClick={() => window.location.reload()}
               className="retry-button"
             >
               🔄 다시 시도
             </button>
             <small>
-              💡 뉴스, 블로그, 게시글 등 텍스트 콘텐츠가 있는 페이지에서 사용하세요.
+              💡 뉴스, 블로그, 게시글 등 텍스트 콘텐츠가 있는 페이지에서
+              사용하세요.
             </small>
           </div>
         );
 
-      case 'error':
+      case "error":
         return (
           <div className="status-error">
             <div className="icon">❌</div>
             <h3>연결 실패</h3>
-            <p>
-              현재 페이지는 분석할 수 없습니다.
-            </p>
+            <p>현재 페이지는 분석할 수 없습니다.</p>
             <div className="error-details">
               <small>
-                다음과 같은 페이지는 분석이 제한됩니다:<br />
-                • Chrome 확장 프로그램 페이지<br />
-                • Chrome 설정 페이지<br />
-                • 파일 시스템 페이지<br />
-                • 텍스트 내용이 부족한 페이지
+                다음과 같은 페이지는 분석이 제한됩니다:
+                <br />
+                • Chrome 확장 프로그램 페이지
+                <br />
+                • Chrome 설정 페이지
+                <br />
+                • 파일 시스템 페이지
+                <br />• 텍스트 내용이 부족한 페이지
               </small>
             </div>
-            <button 
-              onClick={() => chrome.tabs.create({ url: 'https://news.naver.com' })}
+            <button
+              onClick={() =>
+                chrome.tabs.create({ url: "https://news.naver.com" })
+              }
               className="demo-button"
             >
               📰 네이버 뉴스로 테스트
@@ -242,19 +262,13 @@ export const PopupApp: React.FC = () => {
         <h2>🎯 Criti AI</h2>
         <p>디지털 콘텐츠 신뢰도 분석</p>
       </header>
-      
+
       <main className="popup-main">
         {renderConnectionStatus()}
-        
+
         {/* Challenge 버튼 섹션 - 연결 상태와 무관하게 항상 표시 */}
         <div className="challenge-section">
-          <div className="divider">
-            <span>또는</span>
-          </div>
-          <button 
-            onClick={handleChallengeClick}
-            className="challenge-button"
-          >
+          <button onClick={handleChallengeClick} className="challenge-button">
             🎮 비판적 사고 훈련하기
           </button>
           <p className="challenge-description">
@@ -262,8 +276,8 @@ export const PopupApp: React.FC = () => {
           </p>
         </div>
       </main>
-      
-      <footer className="popup-footer">
+
+      {/* <footer className="popup-footer">
         <div className="version-info">
           <small>v1.0.0 • 개발 모드</small>
         </div>
@@ -275,7 +289,7 @@ export const PopupApp: React.FC = () => {
             📚 도움말
           </a>
         </div>
-      </footer>
+      </footer> */}
     </div>
   );
 };
@@ -306,7 +320,7 @@ const styles = `
   .popup-header {
     background: linear-gradient(135deg, #0ea5e9, #0284c7);
     color: white;
-    padding: 20px;
+    padding: 15px;
     text-align: center;
     
     h2 {
@@ -559,22 +573,22 @@ const styles = `
 `;
 
 // 스타일 주입
-const styleSheet = document.createElement('style');
+const styleSheet = document.createElement("style");
 styleSheet.textContent = styles;
 document.head.appendChild(styleSheet);
 
 // React 앱 렌더링
-const container = document.getElementById('popup-root');
+const container = document.getElementById("popup-root");
 if (container) {
   // 초기 로딩 상태 제거
-  container.innerHTML = '';
-  
+  container.innerHTML = "";
+
   const root = createRoot(container);
   root.render(<PopupApp />);
-  
-  console.log('✅ Popup React 앱 마운트 성공');
+
+  console.log("✅ Popup React 앱 마운트 성공");
 } else {
-  console.error('❌ Popup root container not found');
+  console.error("❌ Popup root container not found");
   // 비상 상황 대비
   document.body.innerHTML = `
     <div style="padding: 20px; text-align: center; color: #dc2626;">
