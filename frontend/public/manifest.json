@@ -14,7 +14,8 @@
     "https://*/*",
     "http://localhost:*/*",
     "https://localhost:*/*",
-    "http://144.24.79.13:3001"
+    "http://144.24.79.13:*/*",
+    "https://144.24.79.13:*/*"
   ],
   "background": {
     "service_worker": "src/extension/background/index.ts",
