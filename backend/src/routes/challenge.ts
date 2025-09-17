@@ -14,6 +14,48 @@ import type {
 const router = Router();
 const geminiService = new GeminiService();
 
+// 강제로 오늘의 챌린지 재생성 (개발/테스트용)
+router.post("/daily/regenerate", async (req: Request, res: Response): Promise<void> => {
+  try {
+    console.log("🔄 오늘의 챌린지 강제 재생성 요청");
+    
+    const today = new Date().toISOString().split('T')[0];
+    const kstOffset = 9 * 60;
+    const kstTime = new Date(new Date().getTime() + (kstOffset * 60 * 1000));
+    const todayKST = kstTime.toISOString().split('T')[0];
+    
+    console.log(`📅 재생성 대상 날짜: ${todayKST}`);
+    
+    // 기존 오늘의 챌린지 삭제
+    const deleteResult = await databaseService.client.challenge.deleteMany({
+      where: { dailyKey: todayKST }
+    });
+    
+    console.log(`🗑️ 삭제된 기존 챌린지: ${deleteResult.count}개`);
+    
+    // 새로운 챌린지 생성
+    const newChallenges = await dailyChallengeService.generateDailyChallenges(todayKST);
+    
+    res.json({
+      success: true,
+      data: {
+        date: todayKST,
+        deletedCount: deleteResult.count,
+        newChallenges: newChallenges,
+        message: `${newChallenges.length}개의 새로운 챌린지가 생성되었습니다.`
+      },
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error) {
+    console.error("❌ 챌린지 강제 재생성 실패:", error);
+    res.status(500).json({
+      success: false,
+      error: "챌린지 재생성 중 오류가 발생했습니다.",
+      timestamp: new Date().toISOString(),
+    });
+  }
+});
+
 // 오늘의 챌린지 조회 (일일 챌린지)
 router.get("/daily", async (req: Request, res: Response): Promise<void> => {
   try {

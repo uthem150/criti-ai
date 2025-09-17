@@ -4,6 +4,7 @@ import type { TrustAnalysis, AnalysisRequest, LogicalFallacy, AdvertisementIndic
 export class GeminiService {
   private genAI: GoogleGenerativeAI;
   private model: ReturnType<GoogleGenerativeAI['getGenerativeModel']>;
+  private creativeModel: ReturnType<GoogleGenerativeAI['getGenerativeModel']>;
 
   constructor() {
     console.log('🔍 환경변수 디버그:');
@@ -19,12 +20,24 @@ export class GeminiService {
     console.log('✅ GEMINI_API_KEY 로드 성공');
 
     this.genAI = new GoogleGenerativeAI(apiKey);
+    
+    // 분석용 모델 (낮은 temperature)
     this.model = this.genAI.getGenerativeModel({
       model: "gemini-1.5-flash",
       generationConfig: {
         temperature: 0.1, // 일관된 분석을 위해 낮은 temperature
         topK: 1,
         topP: 1,
+      },
+    });
+    
+    // 채린지 생성용 모델 (높은 temperature)
+    this.creativeModel = this.genAI.getGenerativeModel({
+      model: "gemini-1.5-flash",
+      generationConfig: {
+        temperature: 0.8, // 창의적이고 다양한 채린지 생성
+        topK: 40,
+        topP: 0.95,
       },
     });
   }
@@ -445,7 +458,20 @@ ${request.content}
   }
 
   async generateChallenge(type: string, difficulty: string): Promise<Record<string, unknown>> {
+    // 날짜 기반 시드를 추가하여 매일 다른 결과 보장
+    const today = new Date().toISOString().split('T')[0];
+    const randomSeed = Math.floor(Math.random() * 1000);
+    
     const prompt = `
+# 다양성 보장 시드 키
+
+날짜: ${today}
+시드: ${randomSeed}
+난이도: ${difficulty}
+타입: ${type}
+
+⚡ **중요**: 매일 완전히 다른 주제와 시나리오로 생성해주세요!
+
 # 미디어 리터러시 교육용 챌린지 생성 전문가
 
 당신은 비판적 사고 능력을 기르는 교육용 챌린지를 생성하는 전문가입니다. 사용자가 실제 뉴스나 콘텐츠에서 마주칠 수 있는 문제들을 학습할 수 있도록 도와주세요.
@@ -590,7 +616,7 @@ ${request.content}
 `;
 
     try {
-      const result = await this.model.generateContent(prompt);
+      const result = await this.creativeModel.generateContent(prompt);
       const response = await result.response;
       const challengeText = response.text();
       
