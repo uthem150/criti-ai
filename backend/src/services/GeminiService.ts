@@ -35,7 +35,7 @@ export class GeminiService {
     this.creativeModel = this.genAI.getGenerativeModel({
       model: "gemini-1.5-flash",
       generationConfig: {
-        temperature: 0.8, // 창의적이고 다양한 채린지 생성
+        temperature: 0.8, // 창의적이고 다양한 챌린지 생성
         topK: 40,
         topP: 0.95,
       },

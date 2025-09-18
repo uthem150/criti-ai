@@ -1,11 +1,11 @@
-import { PrismaClient } from '@prisma/client';
-import type { 
-  TrustAnalysis, 
-  Challenge, 
-  UserProgress, 
+import { PrismaClient } from "@prisma/client";
+import type {
+  TrustAnalysis,
+  Challenge,
+  UserProgress,
   Badge,
-  ChallengeResponse 
-} from '@criti-ai/shared';
+  ChallengeResponse,
+} from "@criti-ai/shared";
 
 class DatabaseService {
   private static instance: DatabaseService;
@@ -13,7 +13,10 @@ class DatabaseService {
 
   private constructor() {
     this.prisma = new PrismaClient({
-      log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
+      log:
+        process.env.NODE_ENV === "development"
+          ? ["query", "error", "warn"]
+          : ["error"],
     });
   }
 
@@ -28,9 +31,9 @@ class DatabaseService {
   async connect(): Promise<void> {
     try {
       await this.prisma.$connect();
-      console.log('✅ 데이터베이스 연결 성공');
+      console.log("✅ 데이터베이스 연결 성공");
     } catch (error) {
-      console.error('❌ 데이터베이스 연결 실패:', error);
+      console.error("❌ 데이터베이스 연결 실패:", error);
       throw error;
     }
   }
@@ -38,34 +41,38 @@ class DatabaseService {
   // 연결 종료
   async disconnect(): Promise<void> {
     await this.prisma.$disconnect();
-    console.log('✅ 데이터베이스 연결 종료');
+    console.log("✅ 데이터베이스 연결 종료");
   }
 
   // === 분석 캐시 관련 ===
-
+  // 특정 URL에 대한 분석 결과를 데이터베이스의 AnalysisCache 테이블에 저장하거나, 이미 존재한다면 업데이트
   async saveAnalysisToCache(
-    url: string, 
-    analysis: TrustAnalysis, 
+    url: string,
+    analysis: TrustAnalysis,
     title?: string,
     contentType?: string
   ): Promise<void> {
     try {
+      // 1. 필요한 메타데이터 준비
       const domain = new URL(url).hostname;
-      const urlHash = Buffer.from(url).toString('base64');
+      const urlHash = Buffer.from(url).toString("base64");
       const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24시간 후
 
+      // 2. Prisma의 upsert 메서드 사용
       await this.prisma.analysisCache.upsert({
-        where: { url },
+        where: { url }, // 이 URL로 데이터를 먼저 찾는다
         update: {
+          // 데이터가 있으면 이 내용을 실행
           analysis: JSON.stringify(analysis),
           overallScore: analysis.overallScore,
           title,
           contentType,
-          hitCount: { increment: 1 },
+          hitCount: { increment: 1 }, // 조회 수를 1 증가시킨다
           lastAccessedAt: new Date(),
-          expiresAt
+          expiresAt, // 만료 시간도 갱신
         },
         create: {
+          // 데이터가 없으면 이 내용을 실행
           url,
           urlHash,
           domain,
@@ -73,44 +80,48 @@ class DatabaseService {
           contentType,
           analysis: JSON.stringify(analysis),
           overallScore: analysis.overallScore,
-          expiresAt
-        }
+          expiresAt,
+        },
       });
 
       console.log(`✅ 분석 결과 DB 저장: ${url}`);
     } catch (error) {
-      console.error('분석 결과 DB 저장 실패:', error);
+      console.error("분석 결과 DB 저장 실패:", error);
     }
   }
 
+  // 데이터베이스에 저장된 유효한 분석 결과가 있는지 확인하고 가져옴
   async getAnalysisFromCache(url: string): Promise<TrustAnalysis | null> {
     try {
+      // 1. URL로 캐시 데이터 조회
       const cached = await this.prisma.analysisCache.findUnique({
-        where: { url }
+        where: { url },
       });
 
+      // 2. Cache Miss: 데이터가 없는 경우
       if (!cached) {
         return null;
       }
 
-      // 만료 확인
+      // 3. Cache Miss: 데이터가 만료된 경우
       if (new Date() > cached.expiresAt) {
         await this.prisma.analysisCache.delete({ where: { url } });
         return null;
       }
 
-      // 히트 카운트 증가
+      // 4. Cache Hit: 유효한 데이터가 있는 경우
       await this.prisma.analysisCache.update({
         where: { url },
-        data: { 
-          hitCount: { increment: 1 },
-          lastAccessedAt: new Date()
-        }
+        data: {
+          hitCount: { increment: 1 }, // 조회 수 1 증가
+          lastAccessedAt: new Date(),
+        },
       });
 
+      // 5. JSON 문자열을 객체로 변환하여 반환
       return JSON.parse(cached.analysis) as TrustAnalysis;
     } catch (error) {
-      console.error('분석 결과 DB 조회 실패:', error);
+      console.error("분석 결과 DB 조회 실패:", error);
       return null;
     }
   }
@@ -124,7 +135,7 @@ class DatabaseService {
     displayName?: string;
   }): Promise<string> {
     const user = await this.prisma.user.create({
-      data
+      data,
     });
     return user.id;
   }
@@ -136,29 +147,35 @@ class DatabaseService {
         include: {
           badges: {
             include: {
-              badge: true
-            }
+              badge: true,
+            },
           },
           challengeResults: {
             include: {
-              challenge: true
-            }
-          }
-        }
+              challenge: true,
+            },
+          },
+        },
       });
 
       if (!user) {
         return null;
       }
 
-      const completedChallenges = user.challengeResults.map(r => r.challengeId);
-      const badges = user.badges.map(ub => ({
+      const completedChallenges = user.challengeResults.map(
+        (r) => r.challengeId
+      );
+      const badges = user.badges.map((ub) => ({
         id: ub.badge.id,
         name: ub.badge.name,
         description: ub.badge.description,
         icon: ub.badge.icon,
         earnedAt: ub.earnedAt.toISOString(),
-        category: ub.badge.category as "analysis" | "training" | "milestone" | "special"
+        category: ub.badge.category as
+          | "analysis"
+          | "training"
+          | "milestone"
+          | "special",
       }));
 
       return {
@@ -167,10 +184,10 @@ class DatabaseService {
         level: user.level,
         badges,
         completedChallenges,
-        analyticsUsed: user.analyticsUsed
+        analyticsUsed: user.analyticsUsed,
       };
     } catch (error) {
-      console.error('사용자 진행도 조회 실패:', error);
+      console.error("사용자 진행도 조회 실패:", error);
       return null;
     }
   }
@@ -182,25 +199,25 @@ class DatabaseService {
       const challenges = await this.prisma.challenge.findMany({
         where: {
           isActive: true,
-          ...(difficulty && { difficulty })
+          ...(difficulty && { difficulty }),
         },
         orderBy: {
-          createdAt: 'desc'
-        }
+          createdAt: "desc",
+        },
       });
 
-      return challenges.map(c => ({
+      return challenges.map((c) => ({
         id: c.id,
-        type: c.type as Challenge['type'],
+        type: c.type as Challenge["type"],
         title: c.title,
         content: c.content,
         correctAnswers: JSON.parse(c.correctAnswers),
         explanation: c.explanation,
-        difficulty: c.difficulty as Challenge['difficulty'],
-        points: c.points
+        difficulty: c.difficulty as Challenge["difficulty"],
+        points: c.points,
       }));
     } catch (error) {
-      console.error('챌린지 조회 실패:', error);
+      console.error("챌린지 조회 실패:", error);
       return [];
     }
   }
@@ -208,7 +225,7 @@ class DatabaseService {
   async getChallenge(id: string): Promise<Challenge | null> {
     try {
       const challenge = await this.prisma.challenge.findUnique({
-        where: { id, isActive: true }
+        where: { id, isActive: true },
       });
 
       if (!challenge) {
@@ -217,23 +234,23 @@ class DatabaseService {
 
       return {
         id: challenge.id,
-        type: challenge.type as Challenge['type'],
+        type: challenge.type as Challenge["type"],
         title: challenge.title,
         content: challenge.content,
         correctAnswers: JSON.parse(challenge.correctAnswers),
         explanation: challenge.explanation,
-        difficulty: challenge.difficulty as Challenge['difficulty'],
-        points: challenge.points
+        difficulty: challenge.difficulty as Challenge["difficulty"],
+        points: challenge.points,
       };
     } catch (error) {
-      console.error('챌린지 조회 실패:', error);
+      console.error("챌린지 조회 실패:", error);
       return null;
     }
   }
 
   async saveChallengeResult(
-    userId: string, 
-    challengeId: string, 
+    userId: string,
+    challengeId: string,
     response: ChallengeResponse,
     isCorrect: boolean,
     score: number,
@@ -249,16 +266,16 @@ class DatabaseService {
           score,
           bonusPoints,
           timeSpent: response.timeSpent,
-          hintsUsed: response.hintsUsed || 0
-        }
+          hintsUsed: response.hintsUsed || 0,
+        },
       });
 
       // 챌린지 통계 업데이트
       await this.prisma.challenge.update({
         where: { id: challengeId },
         data: {
-          totalAttempts: { increment: 1 }
-        }
+          totalAttempts: { increment: 1 },
+        },
       });
 
       // 사용자 점수 업데이트
@@ -266,13 +283,13 @@ class DatabaseService {
         where: { id: userId },
         data: {
           totalPoints: { increment: score + bonusPoints },
-          lastActiveAt: new Date()
-        }
+          lastActiveAt: new Date(),
+        },
       });
 
       console.log(`✅ 챌린지 결과 저장: ${userId} -> ${challengeId}`);
     } catch (error) {
-      console.error('챌린지 결과 저장 실패:', error);
+      console.error("챌린지 결과 저장 실패:", error);
     }
   }
 
@@ -283,14 +300,14 @@ class DatabaseService {
       const challenges = await this.prisma.challenge.findMany({
         where: {
           isActive: true,
-          ...(dateKey && { dailyKey: dateKey as any })  // 임시 타입 단언
+          ...(dateKey && { dailyKey: dateKey as any }), // 임시 타입 단언
         },
         orderBy: {
-          difficulty: 'asc'
-        }
+          difficulty: "asc",
+        },
       });
 
-      return challenges.map(c => ({
+      return challenges.map((c) => ({
         id: c.id,
         type: c.type as any,
         title: c.title,
@@ -298,10 +315,10 @@ class DatabaseService {
         correctAnswers: JSON.parse(c.correctAnswers),
         explanation: c.explanation,
         difficulty: c.difficulty as any,
-        points: c.points
+        points: c.points,
       }));
     } catch (error) {
-      console.error('일일 챌린지 조회 실패:', error);
+      console.error("일일 챌린지 조회 실패:", error);
       return [];
     }
   }
@@ -332,22 +349,22 @@ class DatabaseService {
           hints: data.hints,
           isGenerated: data.isGenerated,
           isActive: data.isActive,
-          ...(data.dailyKey && { dailyKey: data.dailyKey as any })  // 임시 타입 단언
-        }
+          ...(data.dailyKey && { dailyKey: data.dailyKey as any }), // 임시 타입 단언
+        },
       });
 
       return {
         id: challenge.id,
-        type: challenge.type as Challenge['type'],
+        type: challenge.type as Challenge["type"],
         title: challenge.title,
         content: challenge.content,
         correctAnswers: JSON.parse(challenge.correctAnswers),
         explanation: challenge.explanation,
-        difficulty: challenge.difficulty as Challenge['difficulty'],
-        points: challenge.points
+        difficulty: challenge.difficulty as Challenge["difficulty"],
+        points: challenge.points,
       };
     } catch (error) {
-      console.error('챌린지 생성 실패:', error);
+      console.error("챌린지 생성 실패:", error);
       throw error;
     }
   }
@@ -360,20 +377,20 @@ class DatabaseService {
         where: { id: userId },
         include: {
           badges: { include: { badge: true } },
-          challengeResults: true
-        }
+          challengeResults: true,
+        },
       });
 
       if (!user) {
         return [];
       }
 
-      const earnedBadgeIds = user.badges.map(ub => ub.badgeId);
+      const earnedBadgeIds = user.badges.map((ub) => ub.badgeId);
       const availableBadges = await this.prisma.badge.findMany({
         where: {
           isActive: true,
-          id: { notIn: earnedBadgeIds }
-        }
+          id: { notIn: earnedBadgeIds },
+        },
       });
 
       const newBadges: Badge[] = [];
@@ -387,7 +404,10 @@ class DatabaseService {
         }
 
         // 챌린지 완료 기반 배지
-        if (badge.challengesRequired && user.challengeResults.length >= badge.challengesRequired) {
+        if (
+          badge.challengesRequired &&
+          user.challengeResults.length >= badge.challengesRequired
+        ) {
           shouldAward = true;
         }
 
@@ -395,8 +415,8 @@ class DatabaseService {
           await this.prisma.userBadge.create({
             data: {
               userId,
-              badgeId: badge.id
-            }
+              badgeId: badge.id,
+            },
           });
 
           newBadges.push({
@@ -405,14 +425,14 @@ class DatabaseService {
             description: badge.description,
             icon: badge.icon,
             earnedAt: new Date().toISOString(),
-            category: badge.category as Badge['category']
+            category: badge.category as Badge["category"],
           });
         }
       }
 
       return newBadges;
     } catch (error) {
-      console.error('배지 확인 실패:', error);
+      console.error("배지 확인 실패:", error);
       return [];
     }
   }
@@ -423,7 +443,7 @@ class DatabaseService {
     try {
       const startOfDay = new Date(date);
       startOfDay.setHours(0, 0, 0, 0);
-      
+
       const endOfDay = new Date(date);
       endOfDay.setHours(23, 59, 59, 999);
 
@@ -431,56 +451,58 @@ class DatabaseService {
         where: {
           createdAt: {
             gte: startOfDay,
-            lte: endOfDay
-          }
-        }
+            lte: endOfDay,
+          },
+        },
       });
 
       const analyses = await this.prisma.analysisCache.findMany({
         where: {
           createdAt: {
             gte: startOfDay,
-            lte: endOfDay
-          }
-        }
+            lte: endOfDay,
+          },
+        },
       });
 
-      const averageScore = analyses.length > 0 
-        ? analyses.reduce((sum, a) => sum + a.overallScore, 0) / analyses.length 
-        : 0;
+      const averageScore =
+        analyses.length > 0
+          ? analyses.reduce((sum, a) => sum + a.overallScore, 0) /
+            analyses.length
+          : 0;
 
       await this.prisma.analysisStats.upsert({
         where: { date: startOfDay },
         update: {
           totalAnalyses,
-          averageScore
+          averageScore,
         },
         create: {
           date: startOfDay,
           totalAnalyses,
-          averageScore
-        }
+          averageScore,
+        },
       });
     } catch (error) {
-      console.error('분석 통계 업데이트 실패:', error);
+      console.error("분석 통계 업데이트 실패:", error);
     }
   }
 
   // === 유틸리티 ===
-
+  // 주기적으로 호출되어 데이터베이스에 쌓인 모든 만료된 캐시 데이터를 한 번에 정리
   async cleanExpiredCache(): Promise<void> {
     try {
       const result = await this.prisma.analysisCache.deleteMany({
         where: {
           expiresAt: {
-            lt: new Date()
-          }
-        }
+            lt: new Date(), // 만료 시간이 현재 시간보다 이전(less than)인 모든 데이터
+          },
+        },
       });
 
       console.log(`🗑️ 만료된 캐시 ${result.count}개 삭제`);
     } catch (error) {
-      console.error('만료된 캐시 삭제 실패:', error);
+      console.error("만료된 캐시 삭제 실패:", error);
     }
   }
 
