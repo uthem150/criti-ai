@@ -1,73 +1,72 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
-import type { TrustAnalysis, AnalysisRequest, LogicalFallacy, AdvertisementIndicator } from "@criti-ai/shared";
+import { GoogleGenAI } from "@google/genai";
+import type {
+  TrustAnalysis,
+  AnalysisRequest,
+  LogicalFallacy,
+  AdvertisementIndicator,
+} from "@criti-ai/shared";
 
 export class GeminiService {
-  private genAI: GoogleGenerativeAI;
-  private model: ReturnType<GoogleGenerativeAI['getGenerativeModel']>;
-  private creativeModel: ReturnType<GoogleGenerativeAI['getGenerativeModel']>;
+  private ai: GoogleGenAI;
 
   constructor() {
-    console.log('🔍 환경변수 디버그:');
-    console.log('- NODE_ENV:', process.env.NODE_ENV);
-    console.log('- GEMINI_API_KEY 존재:', !!process.env.GEMINI_API_KEY);
-    
+    console.log("🔍 환경변수 디버그:");
+    console.log("- NODE_ENV:", process.env.NODE_ENV);
+    console.log("- GEMINI_API_KEY 존재:", !!process.env.GEMINI_API_KEY);
+
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
-      console.error('❌ GEMINI_API_KEY가 설정되지 않았습니다.');
+      console.error("❌ GEMINI_API_KEY가 설정되지 않았습니다.");
       throw new Error("GEMINI_API_KEY 환경 변수가 설정되지 않았습니다.");
     }
-    
-    console.log('✅ GEMINI_API_KEY 로드 성공');
 
-    this.genAI = new GoogleGenerativeAI(apiKey);
-    
-    // 분석용 모델 (낮은 temperature)
-    this.model = this.genAI.getGenerativeModel({
-      model: "gemini-1.5-flash",
-      generationConfig: {
-        temperature: 0.1, // 일관된 분석을 위해 낮은 temperature
-        topK: 1,
-        topP: 1,
-      },
-    });
-    
-    // 채린지 생성용 모델 (높은 temperature)
-    this.creativeModel = this.genAI.getGenerativeModel({
-      model: "gemini-1.5-flash",
-      generationConfig: {
-        temperature: 0.8, // 창의적이고 다양한 챌린지 생성
-        topK: 40,
-        topP: 0.95,
-      },
-    });
+    console.log("✅ GEMINI_API_KEY 로드 성공");
+
+    this.ai = new GoogleGenAI({ apiKey });
   }
 
   async analyzeContent(request: AnalysisRequest): Promise<TrustAnalysis> {
-    console.log('🔍 Gemini API 분석 시작:', {
+    console.log("🔍 Gemini API 분석 시작:", {
       url: request.url,
       contentLength: request.content.length,
-      contentType: request.contentType || 'unknown'
+      contentType: request.contentType || "unknown",
     });
 
     const prompt = this.buildAnalysisPrompt(request);
 
     try {
-      console.log('🤖 Gemini API 호출 중...');
-      const result = await this.model.generateContent(prompt);
-      const response = await result.response;
-      const analysisText = response.text();
-      
-      console.log('✅ Gemini API 응답 성공');
-      return this.parseAnalysisResult(analysisText);
+      console.log("🤖 Gemini API 호출 중...");
+
+      // 분석용 설정 (낮은 temperature)
+      const response = await this.ai.models.generateContent({
+        model: "gemini-2.0-flash",
+        contents: prompt,
+        config: {
+          temperature: 0.1, // 일관된 분석을 위해 낮은 temperature
+          topK: 1,
+          topP: 1,
+        },
+      });
+
+      console.log("✅ Gemini API 응답 성공");
+
+      const responseText = response.text;
+      if (!responseText) {
+        throw new Error("AI 응답이 비어있습니다.");
+      }
+
+      return this.parseAnalysisResult(responseText);
     } catch (error) {
-      console.error('❌ Gemini API 에러:', error);
-      throw new Error(`분석 중 오류가 발생했습니다: ${error instanceof Error ? error.message : '알 수 없는 오류'}`);
+      console.error("❌ Gemini API 에러:", error);
+      const errorMessage =
+        error instanceof Error ? error.message : "알 수 없는 오류";
+      throw new Error(`분석 중 오류가 발생했습니다: ${errorMessage}`);
     }
   }
 
   private buildAnalysisPrompt(request: AnalysisRequest): string {
     const contentType = this.detectContentType(request.url, request.content);
-    
+
     return `
 # MISSION
 당신은 세계 최고의 디지털 미디어 리터러시 전문가이자, 텍스트 콘텐츠의 신뢰도를 다차원적으로 분석하는 AI 애널리스트 'Criti.AI'입니다. 
@@ -296,54 +295,85 @@ ${request.content}
 
   private detectContentType(url: string, content: string): string {
     const hostname = new URL(url).hostname.toLowerCase();
-    
+
     // 도메인 기반 콘텐츠 타입 감지
-    if (hostname.includes('news') || hostname.includes('chosun') || hostname.includes('joongang') || hostname.includes('hankyoreh')) {
-      return '뉴스 기사';
+    if (
+      hostname.includes("news") ||
+      hostname.includes("chosun") ||
+      hostname.includes("joongang") ||
+      hostname.includes("hankyoreh")
+    ) {
+      return "뉴스 기사";
     }
-    
-    if (hostname.includes('blog') || hostname.includes('tistory') || hostname.includes('wordpress')) {
-      return '블로그 포스트';
+
+    if (
+      hostname.includes("blog") ||
+      hostname.includes("tistory") ||
+      hostname.includes("wordpress")
+    ) {
+      return "블로그 포스트";
     }
-    
-    if (hostname.includes('naver.com') && url.includes('cafe')) {
-      return '카페 글';
+
+    if (hostname.includes("naver.com") && url.includes("cafe")) {
+      return "카페 글";
     }
-    
-    if (hostname.includes('instagram') || hostname.includes('facebook') || hostname.includes('twitter')) {
-      return '소셜 미디어 포스트';
+
+    if (
+      hostname.includes("instagram") ||
+      hostname.includes("facebook") ||
+      hostname.includes("twitter")
+    ) {
+      return "소셜 미디어 포스트";
     }
-    
-    if (hostname.includes('shopping') || hostname.includes('market') || hostname.includes('coupang') || hostname.includes('11st')) {
-      return '쇼핑몰/상업적 콘텐츠';
+
+    if (
+      hostname.includes("shopping") ||
+      hostname.includes("market") ||
+      hostname.includes("coupang") ||
+      hostname.includes("11st")
+    ) {
+      return "쇼핑몰/상업적 콘텐츠";
     }
-    
+
     // 콘텐츠 내용 기반 감지
-    const commercialKeywords = ['구매', '할인', '특가', '이벤트', '쿠폰', '무료배송', '리뷰', '추천'];
-    const hasCommercialKeywords = commercialKeywords.some(keyword => content.includes(keyword));
-    
+    const commercialKeywords = [
+      "구매",
+      "할인",
+      "특가",
+      "이벤트",
+      "쿠폰",
+      "무료배송",
+      "리뷰",
+      "추천",
+    ];
+    const hasCommercialKeywords = commercialKeywords.some((keyword) =>
+      content.includes(keyword)
+    );
+
     if (hasCommercialKeywords) {
-      return '상업적/광고성 콘텐츠';
+      return "상업적/광고성 콘텐츠";
     }
-    
-    return '일반 웹 콘텐츠';
+
+    return "일반 웹 콘텐츠";
   }
 
   private parseAnalysisResult(analysisText: string): TrustAnalysis {
     try {
-      console.log('🔍 원본 Gemini 응답 길이:', analysisText.length);
-      console.log('🔍 원본 응답 시작:', analysisText.substring(0, 300));
-      
+      console.log("🔍 원본 Gemini 응답 길이:", analysisText.length);
+      console.log("🔍 원본 응답 시작:", analysisText.substring(0, 300));
+
       // 다양한 방식으로 JSON 추출 시도
-      let jsonString = '';
-      
+      let jsonString = "";
+
       // 1. 마크다운 코드 블록 제거
-      const cleanText = analysisText.replace(/```json\s*/g, '').replace(/```\s*/g, '');
-      
+      const cleanText = analysisText
+        .replace(/```json\s*/g, "")
+        .replace(/```\s*/g, "");
+
       // 2. 첫 번째 { 부터 마지막 } 까지 추출
-      const firstBrace = cleanText.indexOf('{');
-      const lastBrace = cleanText.lastIndexOf('}');
-      
+      const firstBrace = cleanText.indexOf("{");
+      const lastBrace = cleanText.lastIndexOf("}");
+
       if (firstBrace !== -1 && lastBrace !== -1 && firstBrace < lastBrace) {
         jsonString = cleanText.substring(firstBrace, lastBrace + 1);
       } else {
@@ -355,96 +385,123 @@ ${request.content}
           throw new Error("JSON 형식의 응답을 찾을 수 없습니다.");
         }
       }
-      
-      console.log('🔍 추출된 JSON 길이:', jsonString.length);
-      console.log('🔍 JSON 시작:', jsonString.substring(0, 300));
-      
+
+      console.log("🔍 추출된 JSON 길이:", jsonString.length);
+      console.log("🔍 JSON 시작:", jsonString.substring(0, 300));
+
       const parsed = JSON.parse(jsonString) as TrustAnalysis;
-      
+
       // 분석 결과 검증
       this.validateAnalysisResult(parsed);
-      
+
       // 하이라이트 텍스트 후처리 (중복 제거 및 정리)
       this.postProcessHighlights(parsed);
-      
+
       return parsed;
     } catch (error) {
       console.error("❌ JSON 파싱 오류:", error);
       console.error("📄 원본 응답 전체:", analysisText);
-      
+
       // 비상 방식: 기본 구조 반환
       console.log("⚙️ 비상 대응: 기본 분석 결과 생성");
-      throw new Error(`AI 분석 결과 파싱 실패 - 원인: ${error instanceof Error ? error.message : '알 수 없는 오류'}. 전체 응답: ${analysisText.substring(0, 500)}...`);
-    
+      const errorMessage =
+        error instanceof Error ? error.message : "알 수 없는 오류";
+      throw new Error(
+        `AI 분석 결과 파싱 실패 - 원인: ${errorMessage}. 전체 응답: ${analysisText.substring(0, 500)}...`
+      );
     }
   }
 
   private validateAnalysisResult(analysis: TrustAnalysis): void {
     // 필수 필드 검증
-    if (typeof analysis.overallScore !== 'number' || analysis.overallScore < -1 || analysis.overallScore > 100) {
+    if (
+      typeof analysis.overallScore !== "number" ||
+      analysis.overallScore < -1 ||
+      analysis.overallScore > 100
+    ) {
       throw new Error("overallScore가 유효하지 않습니다");
     }
-    
-    if (!analysis.analysisSummary || typeof analysis.analysisSummary !== 'string') {
+
+    if (
+      !analysis.analysisSummary ||
+      typeof analysis.analysisSummary !== "string"
+    ) {
       throw new Error("analysisSummary가 유효하지 않습니다");
     }
-    
-    if (!analysis.sourceCredibility || typeof analysis.sourceCredibility.score !== 'number') {
+
+    if (
+      !analysis.sourceCredibility ||
+      typeof analysis.sourceCredibility.score !== "number"
+    ) {
       throw new Error("sourceCredibility.score가 유효하지 않습니다");
     }
-    
+
     // 배열 필드 검증 및 초기화
     if (!Array.isArray(analysis.logicalFallacies)) {
       analysis.logicalFallacies = [];
     }
-    
+
     if (!analysis.biasAnalysis) {
       throw new Error("biasAnalysis가 누락되었습니다");
     }
-    
+
     // highlightedTexts는 더 이상 사용하지 않음 (deprecated)
-    
+
     if (!analysis.advertisementAnalysis) {
       throw new Error("advertisementAnalysis가 누락되었습니다");
     }
-    
-    if (!analysis.advertisementAnalysis.indicators || !Array.isArray(analysis.advertisementAnalysis.indicators)) {
+
+    if (
+      !analysis.advertisementAnalysis.indicators ||
+      !Array.isArray(analysis.advertisementAnalysis.indicators)
+    ) {
       analysis.advertisementAnalysis.indicators = [];
     }
-    
+
     if (!analysis.crossReference) {
       throw new Error("crossReference가 누락되었습니다");
     }
-    
+
     if (!Array.isArray(analysis.crossReference.keyClaims)) {
       analysis.crossReference.keyClaims = [];
     }
-    
+
     console.log("✅ 분석 결과 검증 완료");
   }
 
   private postProcessHighlights(analysis: TrustAnalysis): void {
     // highlightedTexts는 더 이상 사용하지 않음 (deprecated)
-    
+
     // 논리적 오류의 affectedText 정리
     if (analysis.logicalFallacies) {
       analysis.logicalFallacies = analysis.logicalFallacies
-        .filter((fallacy: LogicalFallacy) => fallacy.affectedText && fallacy.affectedText.trim().length >= 3)
+        .filter(
+          (fallacy: LogicalFallacy) =>
+            fallacy.affectedText && fallacy.affectedText.trim().length >= 3
+        )
         .map((fallacy: LogicalFallacy) => ({
           ...fallacy,
           affectedText: fallacy.affectedText.trim(),
-          position: fallacy.position || { start: 0, end: fallacy.affectedText.length, selector: '' }
+          position: fallacy.position || {
+            start: 0,
+            end: fallacy.affectedText?.length || 0,
+            selector: "",
+          },
         }));
     }
 
     // 광고성 지표의 evidence 정리
     if (analysis.advertisementAnalysis?.indicators) {
-      analysis.advertisementAnalysis.indicators = analysis.advertisementAnalysis.indicators
-        .filter((indicator: AdvertisementIndicator) => indicator.evidence && indicator.evidence.trim().length >= 3)
-        .map((indicator: AdvertisementIndicator) => ({
-          ...indicator,
-          evidence: indicator.evidence.trim()
-        }));
+      analysis.advertisementAnalysis.indicators =
+        analysis.advertisementAnalysis.indicators
+          .filter(
+            (indicator: AdvertisementIndicator) =>
+              indicator.evidence && indicator.evidence.trim().length >= 3
+          )
+          .map((indicator: AdvertisementIndicator) => ({
+            ...indicator,
+            evidence: indicator.evidence.trim(),
+          }));
     }
 
     // keyClaims 정리
@@ -457,11 +514,14 @@ ${request.content}
     console.log("✅ 하이라이트 텍스트 후처리 완료");
   }
 
-  async generateChallenge(type: string, difficulty: string): Promise<Record<string, unknown>> {
+  async generateChallenge(
+    type: string,
+    difficulty: string
+  ): Promise<Record<string, unknown>> {
     // 날짜 기반 시드를 추가하여 매일 다른 결과 보장
-    const today = new Date().toISOString().split('T')[0];
+    const today = new Date().toISOString().split("T")[0];
     const randomSeed = Math.floor(Math.random() * 1000);
-    
+
     const prompt = `
 # 다양성 보장 시드 키
 
@@ -616,12 +676,24 @@ ${request.content}
 `;
 
     try {
-      const result = await this.creativeModel.generateContent(prompt);
-      const response = await result.response;
-      const challengeText = response.text();
-      
-      console.log('🤖 AI 챌린지 생성 응답:', challengeText.substring(0, 200));
-      
+      // 창의적 생성용 설정 (높은 temperature)
+      const response = await this.ai.models.generateContent({
+        model: "gemini-2.0-flash",
+        contents: prompt,
+        config: {
+          temperature: 0.8, // 창의적이고 다양한 챌린지 생성
+          topK: 40,
+          topP: 0.95,
+        },
+      });
+
+      const challengeText = response.text;
+      if (!challengeText) {
+        throw new Error("AI 응답이 비어있습니다.");
+      }
+
+      console.log("🤖 AI 챌린지 생성 응답:", challengeText.substring(0, 200));
+
       // JSON 추출 및 파싱
       const jsonMatch = challengeText.match(/\{[\s\S]*\}/);
       if (!jsonMatch) {
@@ -629,15 +701,15 @@ ${request.content}
       }
 
       const parsedChallenge = JSON.parse(jsonMatch[0]);
-      
+
       // 생성된 챌린지 검증
       this.validateGeneratedChallenge(parsedChallenge);
-      
-      console.log('✅ 챌린지 생성 성공:', parsedChallenge.title);
+
+      console.log("✅ 챌린지 생성 성공:", parsedChallenge.title);
       return parsedChallenge;
     } catch (error) {
       console.error("챌린지 생성 오류:", error);
-      
+
       // 에러 시 기본 챌린지 반환
       return this.getFallbackChallenge(type, difficulty);
     }
@@ -646,66 +718,108 @@ ${request.content}
   /**
    * 생성된 챌린지 검증
    */
-  private validateGeneratedChallenge(challenge: any): void {
-    const requiredFields = ['id', 'type', 'title', 'content', 'correctAnswers', 'explanation', 'difficulty', 'points'];
-    
+  private validateGeneratedChallenge(challenge: Record<string, unknown>): void {
+    const requiredFields = [
+      "id",
+      "type",
+      "title",
+      "content",
+      "correctAnswers",
+      "explanation",
+      "difficulty",
+      "points",
+    ];
+
     for (const field of requiredFields) {
       if (!challenge[field]) {
         throw new Error(`필수 필드 누락: ${field}`);
       }
     }
-    
-    if (!Array.isArray(challenge.correctAnswers) || challenge.correctAnswers.length === 0) {
-      throw new Error('정답 배열이 유효하지 않습니다');
+
+    if (
+      !Array.isArray(challenge.correctAnswers) ||
+      (challenge.correctAnswers as unknown[]).length === 0
+    ) {
+      throw new Error("정답 배열이 유효하지 않습니다");
     }
-    
-    if (typeof challenge.points !== 'number' || challenge.points < 50 || challenge.points > 300) {
-      throw new Error('점수가 유효하지 않습니다 (50-300)');
+
+    const points = challenge.points as number;
+    if (typeof points !== "number" || points < 50 || points > 300) {
+      throw new Error("점수가 유효하지 않습니다 (50-300)");
     }
   }
 
   /**
    * 에러 시 기본 챌린지 반환
    */
-  private getFallbackChallenge(type: string, difficulty: string): Record<string, unknown> {
+  private getFallbackChallenge(
+    type: string,
+    difficulty: string
+  ): Record<string, unknown> {
     const pointsByDifficulty: Record<string, number> = {
-      'beginner': 100,
-      'intermediate': 150,
-      'advanced': 200
+      beginner: 100,
+      intermediate: 150,
+      advanced: 200,
     };
 
-    const fallbackByDifficulty = {
-      'beginner': {
-        title: "이 기사에서 논리적 오류를 찾아보세요",
-        content: "최근 한 연구에 따르면 A를 하는 사람이 B 결과를 나타냈다고 합니다. 따라서 모든 사람이 A를 해야 합니다. 이는 절대적인 진리입니다.",
-        correctAnswers: ["성급한 일반화", "과장된 표현"],
-        explanation: "1. **성급한 일반화**: 한 연구 결과만으로 모든 사람에게 적용\n2. **과장된 표현**: '절대적인 진리' 같은 극단적 표현",
-        hints: ["한 연구의 결과로 전체를 판단하고 있지 않나요?", "극단적인 표현이 사용되었나요?"]
-      },
-      'intermediate': {
-        title: "이 기사에서 편향된 표현을 찾아보세요",
-        content: "충격적인 발표! 새로운 정책이 국민들을 분노하게 만들고 있습니다. 모든 전문가들이 반대하고 있으며, 이 정책은 반드시 철회되어야 합니다. 98%의 국민이 반대한다는 조사 결과도 나왔습니다.",
-        correctAnswers: ["감정적 편향", "과장된 수치", "선동적 언어"],
-        explanation: "1. **감정적 편향**: '충격적인', '분노하게' 등 감정 자극 표현\n2. **과장된 수치**: '98%' 같은 검증되지 않은 구체적 수치\n3. **선동적 언어**: 객관적 사실보다 감정적 반응 유도",
-        hints: ["감정을 자극하는 표현들을 찾아보세요", "구체적인 수치의 출처를 확인해보세요"]
-      },
-      'advanced': {
-        title: "이 기사에서 복합적인 문제를 찾아보세요",
-        content: "권위 있는 연구기관에서 발표한 최신 보고서에 따르면, 특정 제품 사용자들의 만족도가 대폭 상승했다고 합니다. 이는 명백히 해당 제품의 우수성을 증명하는 것입니다. 반대 의견을 제시하는 일부 연구자들은 해당 업계와 이해관계가 얽혀있어 신뢰할 수 없습니다.",
-        correctAnswers: ["권위에 호소", "인신공격", "광고성 콘텐츠"],
-        explanation: "1. **권위에 호소**: '권위 있는 연구기관' 언급으로 신뢰도 차용\n2. **인신공격**: 반대 연구자들의 이해관계를 지적하여 논증 회피\n3. **광고성 콘텐츠**: 특정 제품의 우수성을 강조하는 홍보성 내용",
-        hints: ["권위를 내세우는 부분을 찾아보세요", "상대방을 공격하는 표현이 있나요?", "특정 제품을 홍보하는 목적이 있나요?"]
+    const fallbackByDifficulty: Record<
+      string,
+      {
+        title: string;
+        content: string;
+        correctAnswers: string[];
+        explanation: string;
+        hints: string[];
       }
+    > = {
+      beginner: {
+        title: "이 기사에서 논리적 오류를 찾아보세요",
+        content:
+          "최근 한 연구에 따르면 A를 하는 사람이 B 결과를 나타냈다고 합니다. 따라서 모든 사람이 A를 해야 합니다. 이는 절대적인 진리입니다.",
+        correctAnswers: ["성급한 일반화", "과장된 표현"],
+        explanation:
+          "1. **성급한 일반화**: 한 연구 결과만으로 모든 사람에게 적용\n2. **과장된 표현**: '절대적인 진리' 같은 극단적 표현",
+        hints: [
+          "한 연구의 결과로 전체를 판단하고 있지 않나요?",
+          "극단적인 표현이 사용되었나요?",
+        ],
+      },
+      intermediate: {
+        title: "이 기사에서 편향된 표현을 찾아보세요",
+        content:
+          "충격적인 발표! 새로운 정책이 국민들을 분노하게 만들고 있습니다. 모든 전문가들이 반대하고 있으며, 이 정책은 반드시 철회되어야 합니다. 98%의 국민이 반대한다는 조사 결과도 나왔습니다.",
+        correctAnswers: ["감정적 편향", "과장된 수치", "선동적 언어"],
+        explanation:
+          "1. **감정적 편향**: '충격적인', '분노하게' 등 감정 자극 표현\n2. **과장된 수치**: '98%' 같은 검증되지 않은 구체적 수치\n3. **선동적 언어**: 객관적 사실보다 감정적 반응 유도",
+        hints: [
+          "감정을 자극하는 표현들을 찾아보세요",
+          "구체적인 수치의 출처를 확인해보세요",
+        ],
+      },
+      advanced: {
+        title: "이 기사에서 복합적인 문제를 찾아보세요",
+        content:
+          "권위 있는 연구기관에서 발표한 최신 보고서에 따르면, 특정 제품 사용자들의 만족도가 대폭 상승했다고 합니다. 이는 명백히 해당 제품의 우수성을 증명하는 것입니다. 반대 의견을 제시하는 일부 연구자들은 해당 업계와 이해관계가 얽혀있어 신뢰할 수 없습니다.",
+        correctAnswers: ["권위에 호소", "인신공격", "광고성 콘텐츠"],
+        explanation:
+          "1. **권위에 호소**: '권위 있는 연구기관' 언급으로 신뢰도 차용\n2. **인신공격**: 반대 연구자들의 이해관계를 지적하여 논증 회피\n3. **광고성 콘텐츠**: 특정 제품의 우수성을 강조하는 홍보성 내용",
+        hints: [
+          "권위를 내세우는 부분을 찾아보세요",
+          "상대방을 공격하는 표현이 있나요?",
+          "특정 제품을 홍보하는 목적이 있나요?",
+        ],
+      },
     };
 
-    const selected = fallbackByDifficulty[difficulty as keyof typeof fallbackByDifficulty] || fallbackByDifficulty.beginner;
+    const selected =
+      fallbackByDifficulty[difficulty] || fallbackByDifficulty.beginner;
 
     return {
       id: `fallback-${Date.now()}`,
       type,
       ...selected,
       difficulty,
-      points: pointsByDifficulty[difficulty] || 100
+      points: pointsByDifficulty[difficulty] || 100,
     };
   }
 }

@@ -23,7 +23,7 @@
   "description": "",
   "dependencies": {
     "@criti-ai/shared": "file:../shared",
-    "@google/generative-ai": "^0.24.1",
+    "@google/genai": "^1.20.0",
     "@prisma/client": "^6.0.0",
     "better-sqlite3": "^11.0.0",
     "compression": "^1.8.1",
