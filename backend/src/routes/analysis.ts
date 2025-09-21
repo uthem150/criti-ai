@@ -10,13 +10,17 @@ import type {
   TrustAnalysis,
 } from "@criti-ai/shared";
 
+// 새로운 Router 인스턴스 생성
+// 이 'router'가 이제부터 분석 API의 엔드포인트 관리
 const router = Router();
 const geminiService = new GeminiService();
 const cacheService = new CacheService();
 
 // 뉴스 기사 분석 엔드포인트
+// 나중에 app.ts에서 '/api/analysis' 뒤에 연결되므로, 최종 경로는 "POST /api/analysis/analyze"
 router.post("/analyze", async (req: Request, res: Response): Promise<void> => {
   try {
+    // 요청 본문(body)에서 필요한 데이터를 추출
     const { url, content, title }: AnalysisRequest = req.body;
 
     // 입력 검증
@@ -40,7 +44,7 @@ router.post("/analyze", async (req: Request, res: Response): Promise<void> => {
         data: cachedResult,
         timestamp: new Date().toISOString(),
         cached: true,
-        cacheSource: 'redis'
+        cacheSource: "redis",
       } as ApiResponse<TrustAnalysis>);
       return;
     }
@@ -50,16 +54,16 @@ router.post("/analyze", async (req: Request, res: Response): Promise<void> => {
 
     if (cachedResult) {
       console.log("💾 DB cache hit for URL:", url);
-      
+
       // Redis에도 저장 (다음 요청 시 속도 향상)
       await redisCacheService.setAnalysisCache(url, cachedResult, 24 * 60 * 60);
-      
+
       res.json({
         success: true,
         data: cachedResult,
         timestamp: new Date().toISOString(),
         cached: true,
-        cacheSource: 'database'
+        cacheSource: "database",
       } as ApiResponse<TrustAnalysis>);
       return;
     }
@@ -75,7 +79,7 @@ router.post("/analyze", async (req: Request, res: Response): Promise<void> => {
         data: cachedResult,
         timestamp: new Date().toISOString(),
         cached: true,
-        cacheSource: 'memory'
+        cacheSource: "memory",
       } as ApiResponse<TrustAnalysis>);
       return;
     }
@@ -90,13 +94,13 @@ router.post("/analyze", async (req: Request, res: Response): Promise<void> => {
 
     // 3단계 캐시에 결과 저장
     const ttl = 24 * 60 * 60; // 24시간
-    
+
     // 1순위: Redis 저장
     await redisCacheService.setAnalysisCache(url, analysis, ttl);
-    
+
     // 2순위: 데이터베이스 저장 (영구 보관)
-    await databaseService.saveAnalysisToCache(url, analysis, title, 'news'); // contentType 기본값
-    
+    await databaseService.saveAnalysisToCache(url, analysis, title, "news"); // contentType 기본값
+
     // 3순위: 메모리 캐시 저장 (백업)
     const memoryKey = `analysis:${Buffer.from(url).toString("base64")}`;
     await cacheService.set(memoryKey, analysis, ttl);
