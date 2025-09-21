@@ -39,7 +39,7 @@ export class GeminiService {
 
       // 분석용 설정 (낮은 temperature)
       const response = await this.ai.models.generateContent({
-        model: "gemini-2.0-flash",
+        model: "gemini-2.5-flash",
         contents: prompt,
         config: {
           temperature: 0.1, // 일관된 분석을 위해 낮은 temperature
@@ -678,7 +678,7 @@ ${request.content}
     try {
       // 창의적 생성용 설정 (높은 temperature)
       const response = await this.ai.models.generateContent({
-        model: "gemini-2.0-flash",
+        model: "gemini-2.5-flash",
         contents: prompt,
         config: {
           temperature: 0.8, // 창의적이고 다양한 챌린지 생성
