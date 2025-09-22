@@ -821,52 +821,60 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
                 {analysis.advertisementAnalysis.indicators &&
                   analysis.advertisementAnalysis.indicators.length > 0 && (
                     <div className="ad-indicators">
-                      <h4>🔍 광고성 지표 (클릭하여 본문에서 찾기)</h4>
-                      <div className="indicators-grid">
+                      <h5>🔍 광고성 지표 탐지 (클릭하여 본문에서 찾기):</h5>
+                      <div className="words-grid">
                         {analysis.advertisementAnalysis.indicators.map(
-                          (indicator, idx) => (
-                            <div
-                              key={idx}
-                              className={`indicator-item weight-${Math.min(indicator.weight, 10)}`}
-                            >
-                              <div className="indicator-header">
-                                <span className="indicator-type">
-                                  {indicator.type === "product_mention"
-                                    ? "🛍️ 제품 언급"
-                                    : indicator.type === "promotional_language"
-                                      ? "📢 홍보 언어"
-                                      : indicator.type === "call_to_action"
-                                        ? "👆 행동 유도"
-                                        : indicator.type === "brand_focus"
-                                          ? "🏷️ 브랜드 중심"
-                                          : indicator.type === "affiliate_link"
-                                            ? "🔗 제휴 링크"
-                                            : "📝 후원 콘텐츠"}
-                                </span>
-                                <span className="indicator-weight">
-                                  가중치: {indicator.weight}
-                                </span>
-                              </div>
+                          (indicator, idx) => {
+                            // 광고성 표현 텍스트와 설명을 변수로 추출
+                            const text = indicator.evidence;
+                            const explanation = indicator.explanation;
 
-                              <div className="indicator-evidence">
-                                <h5>
-                                  📋 발견된 증거 (클릭하여 본문에서 찾기):
-                                </h5>
-                                <ClickableText
-                                  text={indicator.evidence}
-                                  type="advertisement"
-                                  onTextClick={handleTextClick}
-                                >
-                                  "{indicator.evidence}"
-                                </ClickableText>
-                              </div>
+                            // 가중치(weight)에 따라 영향도를 low, medium, high로 매핑
+                            const impact =
+                              indicator.weight > 6
+                                ? "high"
+                                : indicator.weight > 3
+                                  ? "medium"
+                                  : "low";
 
-                              <div className="indicator-explanation">
-                                <h5>💡 설명:</h5>
-                                <p>{indicator.explanation}</p>
+                            return (
+                              <div key={idx} className="word-item">
+                                <div className="word-header">
+                                  {/* 클릭 가능한 텍스트 (광고성 표현) */}
+                                  <ClickableText
+                                    text={text}
+                                    type="advertisement"
+                                    onTextClick={handleTextClick}
+                                    className={`word-badge ${impact}`} // 가중치에 따른 클래스 적용
+                                  >
+                                    "{text}"
+                                  </ClickableText>
+
+                                  {/* 광고 유형 카테고리 */}
+                                  <span className="word-category">
+                                    {indicator.type === "product_mention"
+                                      ? "🛍️ 제품 언급"
+                                      : indicator.type ===
+                                          "promotional_language"
+                                        ? "📢 홍보 언어"
+                                        : indicator.type === "call_to_action"
+                                          ? "👆 행동 유도"
+                                          : indicator.type === "brand_focus"
+                                            ? "🏷️ 브랜드 중심"
+                                            : indicator.type ===
+                                                "affiliate_link"
+                                              ? "🔗 제휴 링크"
+                                              : "📝 후원 콘텐츠"}
+                                  </span>
+                                </div>
+
+                                {/* 광고성 표현에 대한 설명 */}
+                                <p className="word-explanation">
+                                  {explanation}
+                                </p>
                               </div>
-                            </div>
-                          )
+                            );
+                          }
                         )}
                       </div>
                     </div>
