@@ -1260,6 +1260,7 @@ const getShadowCSS = () => `
     margin-bottom: 8px;
     position: relative;
     line-height: 1.5;
+    padding-left: 5px;
   }
   
   .claim-item::before {
@@ -1540,7 +1541,135 @@ const getShadowCSS = () => `
 // Content Script 진입점
 console.log("🔍 Criti AI Content Script 로드됨 (Shadow DOM 버전)");
 
-// 네이버 블로그 특별 처리 함수
+// 노이즈 요소 선택자 정의
+const NOISE_SELECTORS = [
+  // 스크립트 및 스타일
+  "script",
+  "style",
+  "noscript",
+  "template",
+  'link[rel="stylesheet"]',
+
+  // 네비게이션 및 UI
+  "nav",
+  "header",
+  "footer",
+  ".navigation",
+  ".nav",
+  ".menu",
+  ".header",
+  ".footer",
+  ".sidebar",
+  ".breadcrumb",
+  ".pagination",
+  ".toolbar",
+
+  // 광고 관련
+  ".ad",
+  ".ads",
+  ".advertisement",
+  ".adsense",
+  ".adsbygoogle",
+  ".banner",
+  ".promotion",
+  ".sponsored",
+  ".affiliate",
+  ".marketing",
+  ".commercial",
+  '[class*="ad-"]',
+  '[class*="ads-"]',
+  '[class*="banner-"]',
+  '[class*="promo-"]',
+  '[id*="ad"]',
+  '[id*="google_ads"]',
+  'iframe[src*="googlesyndication"]',
+
+  // 소셜 및 공유
+  ".social",
+  ".share",
+  ".sharing",
+  ".sns",
+  ".facebook",
+  ".twitter",
+  ".instagram",
+  ".youtube",
+  ".social-share",
+  ".share-button",
+
+  // 댓글 및 상호작용
+  ".comment",
+  ".comments",
+  ".reply",
+  ".replies",
+  ".discussion",
+  ".feedback",
+  ".review",
+  ".rating",
+  ".vote",
+
+  // 추천 및 관련
+  ".related",
+  ".recommendation",
+  ".suggestion",
+  ".more",
+  ".similar",
+  ".recommended",
+  ".trending",
+  ".popular",
+
+  // 메타데이터
+  ".tag",
+  ".tags",
+  ".category",
+  ".metadata",
+  ".byline",
+  ".author-info",
+  ".date",
+  ".time",
+  ".share-count",
+  ".view-count",
+  ".read-time",
+
+  // 기타 노이즈
+  ".popup",
+  ".modal",
+  ".overlay",
+  ".tooltip",
+  ".notification",
+  ".cookie",
+  ".privacy",
+  ".legal",
+  ".copyright",
+  ".subscription",
+];
+
+// 간단한 노이즈 제거 함수
+const removeNoiseElements = (container: Element | Document): void => {
+  NOISE_SELECTORS.forEach((selector) => {
+    try {
+      const elements = container.querySelectorAll(selector);
+      elements.forEach((element) => {
+        if (element && element.parentNode) {
+          element.remove();
+        }
+      });
+    } catch (error) {
+      console.warn(`노이즈 선택자 처리 실패: ${selector}`);
+    }
+  });
+
+  // 숨겨진 요소도 제거
+  const hiddenElements = container.querySelectorAll(
+    '[style*="display:none"], [style*="display: none"], [hidden]'
+  );
+  hiddenElements.forEach((element) => {
+    if (element && element.parentNode) {
+      element.remove();
+    }
+  });
+};
+
+// 네이버 블로그 콘텐츠 추출 (노이즈 제거 적용)
 const extractNaverBlogContent = async (): Promise<{
   title: string;
   content: string;
@@ -1563,21 +1692,25 @@ const extractNaverBlogContent = async (): Promise<{
       return null;
     }
 
-    // 네이버 블로그 특화 선택자들
+    // 프레임 문서 복사본 생성
+    const clonedBody = frameDocument.body.cloneNode(true) as Element;
+
+    // 노이즈 제거
+    removeNoiseElements(clonedBody);
+    console.log("네이버 블로그 노이즈 제거 완료");
+
+    // 네이버 블로그 선택자들
     const blogSelectors = [
-      ".se-main-container", // 스마트 에디터
+      ".se-main-container",
       ".se-component-content",
       ".se-text-paragraph",
-      "#postViewArea", // 구 에디터
+      "#postViewArea",
       ".post-view",
       ".post_ct",
       "#post-view-content",
       ".se-viewer",
       ".content-area",
     ];
-
-    let content = "";
-    let title = "";
 
     // 제목 찾기
     const titleSelectors = [
@@ -1589,8 +1722,12 @@ const extractNaverBlogContent = async (): Promise<{
       ".post-title",
     ];
 
+    // 제목 추출
+    let title = "";
     for (const selector of titleSelectors) {
-      const titleElement = frameDocument.querySelector(selector);
+      const titleElement =
+        clonedBody.querySelector(selector) ||
+        frameDocument.querySelector(selector);
       if (titleElement?.textContent?.trim()) {
         title = titleElement.textContent.trim();
         console.log("✅ 네이버 블로그 제목 발견:", title);
@@ -1598,31 +1735,38 @@ const extractNaverBlogContent = async (): Promise<{
       }
     }
 
-    // 본문 찾기 (여러 선택자 시도)
+    // 본문 추출
+    let content = "";
+    let maxTextLength = 0;
+
     for (const selector of blogSelectors) {
-      const elements = frameDocument.querySelectorAll(selector);
+      const elements = clonedBody.querySelectorAll(selector);
       if (elements.length > 0) {
         const textArray = Array.from(elements)
           .map((el) => el.textContent?.trim() || "")
           .filter((text) => text.length > 20); // 20자 이상인 것만
 
         if (textArray.length > 0) {
-          content = textArray.join("\n\n");
-          console.log(
-            `✅ 네이버 블로그 콘텐츠 발견 (${selector}):`,
-            content.length,
-            "글자"
-          );
-          break;
+          const combinedText = textArray.join("\n\n");
+          if (combinedText.length > maxTextLength) {
+            maxTextLength = combinedText.length;
+            content = combinedText;
+            console.log(
+              `✅ 네이버 블로그 콘텐츠 발견 (${selector}):`,
+              content.length,
+              "글자"
+            );
+          }
         }
       }
     }
 
-    // 제목이 없으면 원본 페이지에서 가져오기
+    // 제목 기본값
     if (!title) {
       title = document.title || frameDocument.title || "네이버 블로그 포스트";
     }
 
+    // 콘텐츠가 부족하면 재시도
     if (content.length < 50) {
       console.log("❌ 네이버 블로그 콘텐츠가 너무 짧음:", content.length);
 
@@ -1631,7 +1775,7 @@ const extractNaverBlogContent = async (): Promise<{
 
       // 재시도
       for (const selector of blogSelectors) {
-        const elements = frameDocument.querySelectorAll(selector);
+        const elements = clonedBody.querySelectorAll(selector);
         if (elements.length > 0) {
           const textArray = Array.from(elements)
             .map((el) => el.textContent?.trim() || "")
@@ -1657,7 +1801,7 @@ const extractNaverBlogContent = async (): Promise<{
       return null;
     }
   } catch (error) {
-    console.error("❌ 네이버 블로그 iframe 접근 오류:", error);
+    console.error("❌ 네이버 블로그 추출 중 오류:", error);
     return null;
   }
 };
@@ -1711,7 +1855,7 @@ const isAnalyzableContent = async (): Promise<boolean> => {
   return isValid;
 };
 
-// 향상된 컨텐츠 추출 - 네이버 블로그 포함
+// 일반 페이지 콘텐츠 추출 (노이즈 제거 적용)
 const extractPageContent = async (): Promise<{
   title: string;
   content: string;
@@ -1723,13 +1867,20 @@ const extractPageContent = async (): Promise<{
     console.log("🔍 네이버 블로그 콘텐츠 추출 시도");
     const naverContent = await extractNaverBlogContent();
     if (naverContent) {
-      console.log("✅ 네이버 블로그 콘텐츠 추출 성공");
+      console.log("네이버 블로그 콘텐츠 추출 성공");
       return naverContent;
     }
-    console.log("⚠️ 네이버 블로그 추출 실패, 일반 방식으로 시도");
+    console.log("네이버 블로그 추출 실패, 일반 방식으로 시도");
   }
 
-  // 일반 페이지 제목 추출
+  // DOM 복사본 생성 (원본 보존)
+  const clonedBody = document.body.cloneNode(true) as Element;
+
+  // 노이즈 제거
+  removeNoiseElements(clonedBody);
+  console.log("일반 페이지 노이즈 제거 완료");
+
+  // 제목 추출
   const titleSelectors = [
     "h1",
     ".article-title",
@@ -1748,23 +1899,21 @@ const extractPageContent = async (): Promise<{
     ".article_title",
     ".news_title",
     ".tit_view",
-    ".se-title-text",
-    ".se_title",
     "#articleTitle",
     ".title_text",
   ];
 
   let title = document.title;
   for (const selector of titleSelectors) {
-    const element = document.querySelector(selector);
+    const element = clonedBody.querySelector(selector);
     if (element?.textContent?.trim() && element.textContent.trim().length > 5) {
       title = element.textContent.trim();
-      console.log("✅ 제목 발견:", selector, title.substring(0, 50));
+      console.log("제목 발견:", title.substring(0, 50));
       break;
     }
   }
 
-  // 일반 페이지 컨텐츠 추출
+  // 본문 콘텐츠 추출
   const contentSelectors = [
     "article",
     ".article-content",
@@ -1786,13 +1935,6 @@ const extractPageContent = async (): Promise<{
     ".read-content",
     ".article_content",
     ".news_content",
-    ".se-main-container",
-    ".se-component",
-    ".se_component",
-    ".content-area",
-    ".txt_content",
-    ".article_txt",
-    ".newsct_article",
   ];
 
   let content = "";
@@ -1800,22 +1942,22 @@ const extractPageContent = async (): Promise<{
 
   // 각 선택자별로 텍스트 길이 체크하여 가장 긴 것 선택
   for (const selector of contentSelectors) {
-    const element = document.querySelector(selector);
+    const element = clonedBody.querySelector(selector);
     if (element?.textContent?.trim()) {
       const textLength = element.textContent.trim().length;
       if (textLength > maxTextLength && textLength > 100) {
         maxTextLength = textLength;
         content = element.textContent.trim();
-        console.log("📝 컨텐츠 후보:", selector, textLength, "글자");
+        console.log("콘텐츠 후보:", selector, textLength, "글자");
       }
     }
   }
 
   // 여전히 부족하면 intelligent 추출
   if (content.length < 200) {
-    console.log("🔍 Intelligent 컨텐츠 추출 시도");
+    console.log("Intelligent 콘텐츠 추출 시도");
 
-    const potentialElements = document.querySelectorAll(
+    const potentialElements = clonedBody.querySelectorAll(
       "p, div, section, article, span"
     );
     const bestElements: Element[] = [];
@@ -1850,13 +1992,13 @@ const extractPageContent = async (): Promise<{
         .filter((text) => text && text.length > 30)
         .join("\n\n");
 
-      console.log("✅ Intelligent 추출 성공:", content.length, "글자");
+      console.log("Intelligent 추출 성공:", content.length, "글자");
     }
   }
 
   const finalContent = content.substring(0, 4000);
 
-  console.log("📊 최종 컨텐츠 추출 완료:", {
+  console.log("최종 콘텐츠 추출 완료:", {
     title: title.substring(0, 50),
     contentLength: finalContent.length,
     domain: window.location.hostname,

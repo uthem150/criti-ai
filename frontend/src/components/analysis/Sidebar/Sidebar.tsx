@@ -190,9 +190,9 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
 
   // 전체 컨테이너 스타일 - 최소 높이 보장
   const containerStyle: React.CSSProperties = {
-    minHeight: '100vh',
-    display: 'flex',
-    flexDirection: 'column'
+    minHeight: "100vh",
+    display: "flex",
+    flexDirection: "column",
   };
 
   return (
@@ -904,7 +904,7 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
                 {analysis.crossReference.keyClaims &&
                   analysis.crossReference.keyClaims.length > 0 && (
                     <div className="key-claims">
-                      <h4>🎯 핵심 주장 (클릭하여 본문에서 찾기)</h4>
+                      <h4>🎯 핵심 주장</h4>
                       <ul className="claims-list">
                         {analysis.crossReference.keyClaims.map((claim, idx) => (
                           <li key={idx} className="claim-item">
