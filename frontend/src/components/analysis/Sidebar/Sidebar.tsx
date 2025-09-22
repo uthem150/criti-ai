@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import type { TrustAnalysis } from "@shared/types";
-import { sidebarStyles } from "./Sidebar.style";
 
 interface SidebarProps {
   analysis: TrustAnalysis | null;
@@ -165,16 +164,6 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
     advertisement: false,
     crossref: false,
   });
-
-  useEffect(() => {
-    // 스타일 주입
-    if (!document.querySelector("#criti-ai-sidebar-styles")) {
-      const style = document.createElement("style");
-      style.id = "criti-ai-sidebar-styles";
-      style.textContent = sidebarStyles.styles;
-      document.head.appendChild(style);
-    }
-  }, []);
 
   const toggleSection = (sectionId: string) => {
     setExpandedSections((prev) => ({
