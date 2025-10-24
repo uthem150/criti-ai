@@ -24,7 +24,7 @@
     /* Path mapping */
     "paths": {
       "@/*": ["./src/*"],
-      "@criti-ai/shared": ["../shared/src"]
+      "@criti-ai/shared/*": ["../shared/src/*"]
     },
 
     /* Additional options */
