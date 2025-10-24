@@ -1,6 +1,13 @@
-import type { Challenge, ApiResponse, UserProgress, ChallengeResponse } from "@criti-ai/shared";
+import type {
+  Challenge,
+  ApiResponse,
+  UserProgress,
+  ChallengeResponse,
+} from "@criti-ai/shared";
 
-const API_BASE_URL = (import.meta.env?.VITE_API_BASE_URL as string) || '/api';
+const API_BASE_URL = import.meta.env.PROD
+  ? "/api"
+  : (import.meta.env?.VITE_API_BASE_URL as string) || "/api";
 
 class ChallengeApiService {
   private baseUrl: string;
@@ -9,7 +16,12 @@ class ChallengeApiService {
   constructor() {
     this.baseUrl = API_BASE_URL;
     this.userId = this.getOrCreateUserId();
-    console.log('🔗 ChallengeApiService 초기화:', this.baseUrl, 'UserID:', this.userId);
+    console.log(
+      "🔗 ChallengeApiService 초기화:",
+      this.baseUrl,
+      "UserID:",
+      this.userId
+    );
   }
 
   /**
@@ -18,22 +30,23 @@ class ChallengeApiService {
   private getOrCreateUserId(): string {
     try {
       // localStorage에서 기존 ID 확인
-      let userId = localStorage.getItem('criti-ai-user-id');
-      
+      let userId = localStorage.getItem("criti-ai-user-id");
+
       if (!userId) {
         // 새로운 고유 ID 생성
-        userId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-        localStorage.setItem('criti-ai-user-id', userId);
-        console.log('🆕 새로운 사용자 ID 생성:', userId);
+        userId =
+          "user_" + Date.now() + "_" + Math.random().toString(36).substr(2, 9);
+        localStorage.setItem("criti-ai-user-id", userId);
+        console.log("🆕 새로운 사용자 ID 생성:", userId);
       } else {
-        console.log('👤 기존 사용자 ID 사용:', userId);
+        console.log("👤 기존 사용자 ID 사용:", userId);
       }
-      
+
       return userId;
     } catch (error) {
       // localStorage 사용 불가 시 fallback
-      console.warn('⚠️ localStorage 사용 불가, 임시 ID 사용');
-      return 'temp_' + Date.now();
+      console.warn("⚠️ localStorage 사용 불가, 임시 ID 사용");
+      return "temp_" + Date.now();
     }
   }
 
@@ -49,30 +62,32 @@ class ChallengeApiService {
    */
   async getTodaysChallenges(): Promise<Challenge[]> {
     try {
-      console.log('🎯 오늘의 챌린지 요청 시작');
-      
+      console.log("🎯 오늘의 챌린지 요청 시작");
+
       const response = await fetch(`${this.baseUrl}/challenge/daily`, {
-        method: 'GET',
+        method: "GET",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
       });
 
       if (!response.ok) {
-        throw new Error(`API 요청 실패: ${response.status} ${response.statusText}`);
+        throw new Error(
+          `API 요청 실패: ${response.status} ${response.statusText}`
+        );
       }
 
       const data: ApiResponse<Challenge[]> = await response.json();
-      
+
       if (!data.success) {
-        throw new Error(data.error || '알 수 없는 오류가 발생했습니다');
+        throw new Error(data.error || "알 수 없는 오류가 발생했습니다");
       }
 
-      console.log('✅ 오늘의 챌린지 로드 성공:', data.data?.length || 0, '개');
+      console.log("✅ 오늘의 챌린지 로드 성공:", data.data?.length || 0, "개");
       return data.data || [];
     } catch (error) {
-      console.error('❌ 오늘의 챌린지 로드 실패:', error);
-      
+      console.error("❌ 오늘의 챌린지 로드 실패:", error);
+
       // 에러 시 기본 챌린지 반환
       return this.getFallbackChallenges();
     }
@@ -83,12 +98,15 @@ class ChallengeApiService {
    */
   async getChallenge(id: string): Promise<Challenge | null> {
     try {
-      const response = await fetch(`${this.baseUrl}/challenge/challenges/${id}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      const response = await fetch(
+        `${this.baseUrl}/challenge/challenges/${id}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       if (!response.ok) {
         if (response.status === 404) {
@@ -100,7 +118,7 @@ class ChallengeApiService {
       const data: ApiResponse<Challenge> = await response.json();
       return data.success ? data.data || null : null;
     } catch (error) {
-      console.error('챌린지 조회 실패:', error);
+      console.error("챌린지 조회 실패:", error);
       return null;
     }
   }
@@ -109,8 +127,8 @@ class ChallengeApiService {
    * 챌린지 답안 제출
    */
   async submitChallenge(
-    challengeId: string, 
-    userAnswers: string[], 
+    challengeId: string,
+    userAnswers: string[],
     timeSpent: number,
     hintsUsed: number = 0
   ): Promise<{
@@ -121,34 +139,37 @@ class ChallengeApiService {
     bonusPoints?: number;
   } | null> {
     try {
-      const response = await fetch(`${this.baseUrl}/challenge/challenges/${challengeId}/submit`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          challengeId,
-          userAnswers,
-          timeSpent,
-          hintsUsed,
-          userId: this.userId // 동적 사용자 ID 사용
-        } as ChallengeResponse),
-      });
+      const response = await fetch(
+        `${this.baseUrl}/challenge/challenges/${challengeId}/submit`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            challengeId,
+            userAnswers,
+            timeSpent,
+            hintsUsed,
+            userId: this.userId, // 동적 사용자 ID 사용
+          } as ChallengeResponse),
+        }
+      );
 
       if (!response.ok) {
         throw new Error(`답안 제출 실패: ${response.status}`);
       }
 
       const data = await response.json();
-      
+
       if (!data.success) {
-        throw new Error(data.error || '답안 제출 실패');
+        throw new Error(data.error || "답안 제출 실패");
       }
 
-      console.log('✅ 답안 제출 성공');
+      console.log("✅ 답안 제출 성공");
       return data.data;
     } catch (error) {
-      console.error('❌ 답안 제출 실패:', error);
+      console.error("❌ 답안 제출 실패:", error);
       return null;
     }
   }
@@ -158,12 +179,15 @@ class ChallengeApiService {
    */
   async getUserProgress(): Promise<UserProgress | null> {
     try {
-      const response = await fetch(`${this.baseUrl}/challenge/progress/${this.userId}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      const response = await fetch(
+        `${this.baseUrl}/challenge/progress/${this.userId}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       if (!response.ok) {
         throw new Error(`진행도 조회 실패: ${response.status}`);
@@ -172,8 +196,8 @@ class ChallengeApiService {
       const data: ApiResponse<UserProgress> = await response.json();
       return data.success ? data.data || null : null;
     } catch (error) {
-      console.error('사용자 진행도 조회 실패:', error);
-      
+      console.error("사용자 진행도 조회 실패:", error);
+
       // 기본 진행도 반환
       return {
         userId: this.userId,
@@ -181,7 +205,7 @@ class ChallengeApiService {
         level: 1,
         badges: [],
         completedChallenges: [],
-        analyticsUsed: 0
+        analyticsUsed: 0,
       };
     }
   }
@@ -192,15 +216,15 @@ class ChallengeApiService {
   async healthCheck(): Promise<boolean> {
     try {
       const response = await fetch(`${this.baseUrl}/health`, {
-        method: 'GET',
+        method: "GET",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
       });
 
       return response.ok;
     } catch (error) {
-      console.error('백엔드 헬스 체크 실패:', error);
+      console.error("백엔드 헬스 체크 실패:", error);
       return false;
     }
   }
@@ -209,8 +233,8 @@ class ChallengeApiService {
    * 에러 시 기본 챌린지 반환
    */
   private getFallbackChallenges(): Challenge[] {
-    console.log('🔄 기본 챌린지 사용');
-    
+    console.log("🔄 기본 챌린지 사용");
+
     return [
       {
         id: "fallback-1",
@@ -253,7 +277,7 @@ class ChallengeApiService {
       },
       {
         id: "fallback-3",
-        type: "article-analysis", 
+        type: "article-analysis",
         title: "광고성 콘텐츠를 판별해보세요",
         content: `
           "건강을 지키는 혁신적인 방법! 최근 수많은 연예인들이 선택한 '슈퍼푸드 X'가 화제입니다.
@@ -270,7 +294,7 @@ class ChallengeApiService {
         `,
         difficulty: "intermediate",
         points: 120,
-      }
+      },
     ];
   }
 }

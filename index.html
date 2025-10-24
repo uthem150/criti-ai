@@ -349,7 +349,7 @@ graph TB
           <pre class="mermaid">
 graph TB
     subgraph "<b>🎯 클라이언트 레이어</b>"
-        CHROME["🧩 Chrome Extension<br/>frontend/<br/>React + Vite"]
+        CHROME["🧩 Chrome Extension<br/>chrome-extension/<br/>React + Vite"]
         WEB["🌐 웹 플랫폼<br/>challenge-web/<br/>Next.js SPA"]
         FUTURE["📱 모바일 앱<br/>(향후 확장)"]
     end
@@ -459,7 +459,7 @@ graph TD
     subgraph "Criti AI Monorepo"
         Root[루트 package.json<br/>- workspaces 설정<br/>- 통합 스크립트]
         subgraph "Frontend Apps"
-            Frontend[frontend/<br/>Next.js 메인 앱]
+            chrome-extension[chrome-extension/<br/>Next.js 메인 앱]
             Challenge[challenge-web/<br/>React SPA]
         end
         subgraph "Backend"
@@ -471,18 +471,18 @@ graph TD
         end
     end
     
-    Frontend --> Shared
+    chrome-extension --> Shared
     Challenge --> Shared
     API --> Shared
-    Root --> Frontend & Challenge & API & Shared
+    Root --> chrome-extension & Challenge & API & Shared
 
     classDef root fill:#f44336,color:#fff
-    classDef frontend fill:#2196f3,color:#fff
+    classDef chrome-extension fill:#2196f3,color:#fff
     classDef backend fill:#ff9800,color:#fff
     classDef shared fill:#4caf50,color:#fff
     
     class Root root
-    class Frontend,Challenge frontend
+    class chrome-extension,Challenge chrome-extension
     class API backend
     class Shared,Config shared
                 </pre>
