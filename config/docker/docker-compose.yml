@@ -47,11 +47,11 @@ services:
       retries: 5
 
   # 프론트엔드 (개발용 - 프로덕션에서는 Nginx 사용 권장)
-  frontend:
+  chrome-extension:
     build:
-      context: ../../frontend
+      context: ../../chrome-extension
       dockerfile: Dockerfile
-    container_name: criti-ai-frontend
+    container_name: criti-ai-chrome-extension
     ports:
       - "5173:5173"
     environment:

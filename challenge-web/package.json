@@ -1,9 +1,9 @@
 {
-  "name": "criti-ai-challenge-web",
+  "name": "criti-ai-web",
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "Criti.AI Challenge Web Application - 비판적 사고 훈련 플랫폼",
+  "description": "Criti.AI Web Application - 비판적 사고 훈련 플랫폼",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",

@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Criti.AI 전체 아키텍처</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap");
+      body {
+        font-family: "Noto Sans KR", sans-serif;
+        background-color: #f8fafc;
+      }
+      .diagram-card {
+        background-color: white;
+        border-radius: 0.75rem;
+        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1),
+          0 2px 4px -2px rgb(0 0 0 / 0.1);
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        overflow: hidden;
+      }
+      h1,
+      h2,
+      h3 {
+        font-weight: 700;
+      }
+      pre.mermaid {
+        background-color: #f1f5f9;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        text-align: center;
+      }
+      code {
+        background-color: #e2e8f0;
+        padding: 0.2rem 0.4rem;
+        border-radius: 0.25rem;
+        font-size: 0.9em;
+      }
+      .key-feature {
+        background-color: #f1f5f9;
+        border-left: 4px solid #3b82f6;
+        padding: 1rem;
+        margin: 1rem 0;
+        border-radius: 0.25rem;
+      }
+    </style>
+  </head>
+  <body class="p-4 sm:p-8">
+    <div class="max-w-7xl mx-auto">
+      <header class="text-center mb-12">
+        <h1 class="text-4xl md:text-5xl font-bold text-gray-800">
+          🏗️ Criti.AI 아키텍처
+        </h1>
+        <p class="text-lg text-gray-600 mt-2">
+          시스템 구조, 데이터 흐름, 배포 전략에 대한 시각적 개요
+        </p>
+      </header>
+
+      <!-- Document Part 1: Backend & Caching Focus -->
+      <div class="mb-16">
+        <h2
+          class="text-3xl font-bold text-gray-800 border-b-2 border-blue-500 pb-2 mb-8"
+        >
+          백엔드 시스템 아키텍처
+        </h2>
+
+        <div class="diagram-card">
+          <h3 class="text-2xl mb-4">🏛️ 1. 전체 시스템 아키텍처</h3>
+          <pre class="mermaid">
+graph TB
+    subgraph "<b>Client Layer</b>"
+        WEB["웹 애플리케이션<br/>React/Vite"]
+        EXT["Chrome <br/>확장 프로그램"]
+        MOB["모바일 앱<br/>(향후)"]
+    end
+
+    subgraph "<b>Network Layer</b>"
+        LB["리버스 프록시<br/>Nginx"]
+        CORS["CORS 정책<br/>Express Middleware"]
+    end
+
+    subgraph "<b>Application Layer</b>"
+        API["Express.js API 서버<br/>TypeScript"]
+        subgraph "<b>라우터</b>"
+            AR["Analysis Router<br/>/api/analysis"]
+            CR["Challenge Router<br/>/api/challenge"]
+            HR["Health Router<br/>/health"]
+        end
+        subgraph "<b>서비스</b>"
+            GS["Gemini Service<br/>AI 분석 엔진"]
+            DCS["Daily Challenge Service<br/>자동 챌린지 생성"]
+            DS["Database Service<br/>데이터 관리"]
+            CS["Cache Service<br/>3단계 캐싱"]
+        end
+    end
+
+    subgraph "<b>Data Layer</b>"
+        subgraph "<b>Cache Layer</b>"
+            L1["L1: Redis Cache"]
+            L2["L2: Database Cache"]
+            L3["L3: Memory Cache"]
+        end
+        subgraph "<b>영구 저장소</b>"
+            DB[("SQLite/PostgreSQL<br/>메인 데이터베이스")]
+            FILES["파일 시스템<br/>로그 & 백업"]
+        end
+    end
+
+    subgraph "<b>외부 API</b>"
+        GEMINI["Google Gemini AI<br/>콘텐츠 분석"]
+        NEWS["추가 API<br/>(향후 확장)"]
+    end
+
+    subgraph "<b>인프라 레이어</b>"
+        DOCKER["Docker 컨테이너<br/>격리된 실행 환경"]
+        MONITOR["로길 & 성능 분석"]
+        BACKUP["백업 시스템<br/>자동 백업"]
+    end
+
+    WEB --> LB; EXT --> LB; MOB --> LB
+    LB --> CORS; CORS --> API
+    API --> AR; API --> CR; API --> HR
+    AR --> GS; AR --> CS; CR --> DCS; CR --> DS
+    CS --> L1; CS --> L2; CS --> L3
+    DS --> DB; GS --> GEMINI; DCS --> GEMINI
+    L2 --> DB
+    DOCKER --> API; MONITOR --> DOCKER
+    BACKUP --> DB; BACKUP --> FILES
+
+    classDef client fill:#e1f5fe,stroke:#a7d7f9
+    classDef network fill:#f3e5f5,stroke:#d0a9e2
+    classDef app fill:#e8f5e8,stroke:#a5d6a7
+    classDef data fill:#fff3e0,stroke:#ffcc80
+    classDef external fill:#ffebee,stroke:#ef9a9a
+    classDef infra fill:#f1f8e9,stroke:#c5e1a5
+    class WEB,EXT,MOB client
+    class LB,CORS network
+    class API,AR,CR,HR,GS,DCS,DS,CS app
+    class L1,L2,L3,DB,FILES data
+    class GEMINI,NEWS external
+    class DOCKER,MONITOR,BACKUP infra
+                </pre>
+        </div>
+
+        <div class="diagram-card">
+          <h3 class="text-2xl mb-4">🔄 2. 요청-응답 데이터 플로우</h3>
+          <pre class="mermaid">
+sequenceDiagram
+    participant C as 클라이언트
+    participant API as Express API
+    participant CACHE as 캐시 시스템
+    participant DB as 데이터베이스
+    participant AI as Gemini AI
+
+    Note over C,AI: 🔍 뉴스 기사 분석 요청 플로우
+
+    C->>+API: POST /api/analysis/analyze<br/>{url, content, title}
+    Note over API: 📝 입력 검증 및 전처리
+    API->>API: URL 정규화<br/>콘텐츠 크기 확인
+
+    Note over API,CACHE: ⚡ 1단계: Redis 캐시 확인
+    API->>+CACHE: Redis.get(urlHash)
+    CACHE->>-API: cache_result || null
+
+    alt 🎯 Redis 캐시 히트 (95%)
+        API->>C: ✅ 분석 결과 반환<br/>(5ms 응답)
+    else ❌ Redis 캐시 미스
+        Note over API,DB: 💾 2단계: DB 캐시 확인
+        API->>+DB: SELECT * FROM analysis_cache<br/>WHERE url = ?
+        DB->>-API: db_result || null
+        alt 💾 DB 캐시 히트 (4%)
+            API->>CACHE: Redis.set(key, result)
+            API->>C: ✅ 분석 결과 반환<br/>(50ms 응답)
+        else ❌ DB 캐시 미스
+            Note over API,AI: 🤖 3단계: AI 분석 실행
+            API->>+AI: Gemini.generateContent(prompt)
+            Note over AI: 🧠 AI 분석 과정<br/>- 콘텐츠 신뢰도 분석<br/>- 편향성 탐지<br/>- 논리적 오류 식별<br/>- JSON 응답 생성
+            AI->>-API: analysis_result
+            Note over API: 📊 결과 검증 및 후처리
+            API->>API: validateResult()<br/>postProcessHighlights()
+            par 📦 병렬 캐시 저장
+                API->>CACHE: Redis.set(key, result, 24h)
+            and
+                API->>DB: INSERT INTO analysis_cache
+            and
+                API->>API: Memory.set(key, result)
+            end
+            API->>C: ✅ 분석 결과 반환<br/>(2.5초 응답)
+        end
+    end
+    Note over C,AI: 📈 성능 통계: Redis 95% | DB 4% | AI 1%
+                </pre>
+        </div>
+
+        <div class="diagram-card">
+          <h3 class="text-2xl mb-4">⚡ 3. 3단계 캐싱 시스템 아키텍처</h3>
+          <pre class="mermaid">
+graph TD
+    subgraph "📥 요청 진입점"
+        REQ[클라이언트 요청<br/>분석 API 호출]
+    end
+
+    subgraph "🏃‍♂️ L1: Redis 캐시 (초고속)"
+        R1{Redis<br/>캐시 확인}
+        R2[Redis 히트<br/>⚡ 5ms 응답]
+        R3[Redis에 저장<br/>TTL: 24시간]
+    end
+
+    subgraph "💾 L2: Database 캐시 (중속)"
+        D1{Database<br/>캐시 확인}
+        D2[DB 히트<br/>💾 50ms 응답]
+        D3[DB에 영구 저장<br/>히트 카운트 증가]
+    end
+
+    subgraph "🧠 L3: Memory 캐시 (최고속)"
+        M1{Memory<br/>캐시 확인}
+        M2[Memory 히트<br/>🧠 1ms 응답]
+        M3[Memory에 저장<br/>LRU 정책, 100개 제한]
+    end
+
+    subgraph "🤖 L4: AI 분석 (저속)"
+        A1[Gemini AI 호출<br/>🤖 2500ms 응답]
+        A2[결과 검증<br/>JSON 파싱]
+    end
+
+    REQ --> R1
+    R1 -->|캐시 히트| R2
+    R1 -->|캐시 미스| D1
+    D1 -->|캐시 히트| D2
+    D1 -->|캐시 미스| M1
+    M1 -->|캐시 히트| M2
+    M1 -->|캐시 미스| A1
+    A1 --> A2
+    A2 --> A3[전체 캐시 레이어 저장]
+    A3 --> R3; A3 --> D3; A3 --> M3
+    D2 --> R3
+
+    classDef redis fill:#ffcdd2,stroke:#ef5350
+    classDef database fill:#bbdefb,stroke:#42a5f5
+    classDef memory fill:#c8e6c9,stroke:#66bb6a
+    classDef ai fill:#ffecb3,stroke:#ffa726
+    
+    class R1,R2,R3 redis
+    class D1,D2,D3 database
+    class M1,M2,M3 memory
+    class A1,A2,A3 ai
+                </pre>
+        </div>
+
+        <div class="diagram-card">
+          <h3 class="text-2xl mb-4">🎮 4. 일일 챌린지 자동 생성 시스템</h3>
+          <pre class="mermaid">
+graph TB
+    subgraph "⏰ 스케줄링 시스템"
+        CRON[매일 자정 실행<br/>Node.js setTimeout]
+        CHECK{오늘 챌린지<br/>존재 확인}
+    end
+
+    subgraph "🤖 AI 챌린지 생성"
+        TEMPLATE[챌린지 템플릿<br/>난이도별 5개]
+        subgraph "난이도별 생성"
+            BEG[초급 챌린지<br/>논리적 오류]
+            INT1[중급 챌린지<br/>광고성 콘텐츠]
+            INT2[중급 챌린지<br/>정보 출처]
+            ADV[고급 챌린지<br/>복합적 문제]
+        end
+        AI_GEN[Gemini AI<br/>프롬프트 기반 생성]
+        VALIDATE[결과 검증<br/>품질 확인]
+    end
+
+    subgraph "🛡️ 백업 시스템"
+        FALLBACK{AI 생성<br/>실패?}
+        MANUAL[수동 작성<br/>백업 챌린지]
+        BASIC[기본 챌린지<br/>하드코딩]
+    end
+
+    subgraph "💾 저장 시스템"
+        DB_SAVE[(데이터베이스 저장<br/>dailyKey로 구분)]
+        CACHE_SAVE[Redis 캐싱<br/>25시간 TTL]
+    end
+    
+    CRON --> CHECK
+    CHECK -->|존재함| RETURN[기존 챌린지 반환]
+    CHECK -->|없음| TEMPLATE
+    TEMPLATE --> BEG & INT1 & INT2 & ADV
+    BEG --> AI_GEN; INT1 --> AI_GEN; INT2 --> AI_GEN; ADV --> AI_GEN
+    AI_GEN --> VALIDATE
+    VALIDATE -->|성공| DB_SAVE
+    VALIDATE -->|실패| FALLBACK
+    FALLBACK -->|재시도| MANUAL
+    FALLBACK -->|최종 실패| BASIC
+    MANUAL --> DB_SAVE
+    BASIC --> DB_SAVE
+    DB_SAVE --> CACHE_SAVE
+    CACHE_SAVE --> COMPLETE[✅ 생성 완료]
+
+    classDef schedule fill:#e3f2fd
+    classDef ai fill:#f3e5f5
+    classDef backup fill:#fff3e0
+    classDef storage fill:#e8f5e8
+
+    class CRON,CHECK schedule
+    class TEMPLATE,BEG,INT1,INT2,ADV,AI_GEN,VALIDATE ai
+    class FALLBACK,MANUAL,BASIC backup
+    class DB_SAVE,CACHE_SAVE storage
+                </pre>
+        </div>
+        <div class="diagram-card">
+          <h3 class="text-2xl mb-4">🎯 핵심 아키텍처 특징</h3>
+          <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div class="key-feature">
+              <strong>1. 확장성 (Scalability):</strong> 마이크로서비스 준비,
+              수평 확장 가능한 캐싱, 컨테이너 기반 배포.
+            </div>
+            <div class="key-feature">
+              <strong>2. 성능 (Performance):</strong> 3단계 캐싱으로 95% 요청
+              고속 처리, 비동기 처리, 메모리 최적화.
+            </div>
+            <div class="key-feature">
+              <strong>3. 안정성 (Reliability):</strong> 다층 백업 시스템, 자동
+              모니터링 및 재시작, Graceful degradation.
+            </div>
+            <div class="key-feature">
+              <strong>4. 유지보수성 (Maintainability):</strong> 명확한 계층
+              분리, TypeScript를 통한 타입 안전성, 표준화된 API.
+            </div>
+            <div class="key-feature">
+              <strong>5. 비용 효율성 (Cost Efficiency):</strong> 캐싱으로 AI API
+              호출 98% 절약, 컨테이너 최적화, 운영 자동화.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Document Part 2: Monorepo & Frontend Focus -->
+      <div>
+        <h2
+          class="text-3xl font-bold text-gray-800 border-b-2 border-green-500 pb-2 mb-8"
+        >
+          프로젝트 구조 및 배포 아키텍처
+        </h2>
+
+        <div class="diagram-card">
+          <h3 class="text-2xl mb-4">
+            🌐 1. 전체 시스템 아키텍처 (High-Level Overview)
+          </h3>
+          <pre class="mermaid">
+graph TB
+    subgraph "<b>🎯 클라이언트 레이어</b>"
+        CHROME["🧩 Chrome Extension<br/>frontend/<br/>React + Vite"]
+        WEB["🌐 웹 플랫폼<br/>challenge-web/<br/>Next.js SPA"]
+        FUTURE["📱 모바일 앱<br/>(향후 확장)"]
+    end
+
+    subgraph "<b>🔗 공통 레이어</b>"
+        SHARED["🔧 Shared<br/>공통 타입 & 유틸리티<br/>TypeScript 인터페이스"]
+    end
+
+    subgraph "<b>🎮 애플리케이션 레이어</b>"
+        API["🚀 Express.js API<br/>backend/<br/>TypeScript 서버"]
+        
+        subgraph "<b>📍 라우터</b>"
+            ROUTES["🛣️ API 라우팅<br/>RESTful 엔드포인트"]
+        end
+        
+        subgraph "<b>⚙️ 핵심 서비스</b>"
+            GEMINI["🤖 Gemini Service<br/>AI 분석 엔진"]
+            CACHE["⚡ Redis Cache<br/>성능 최적화"]
+            DB_SVC["💾 Database Service<br/>데이터 영속성"]
+            CHALLENGE["🎯 Challenge Service<br/>게이미피케이션"]
+        end
+    end
+
+    subgraph "<b>📊 데이터 레이어</b>"
+        subgraph "<b>🗄️ 영구 저장소</b>"
+            PRISMA[("🔷 Prisma ORM<br/>schema.prisma<br/>타입 안전 DB")]
+            REDIS[("⚡ Redis Cache<br/>고속 캐싱")]
+        end
+    end
+
+    subgraph "<b>🌍 외부 API</b>"
+        GEMINI_API["🔮 Google Gemini AI<br/>콘텐츠 분석 & 생성"]
+        EXT_API["🔌 확장 API<br/>(향후 통합)"]
+    end
+
+    subgraph "<b>🏗️ 인프라 레이어</b>"
+        DOCKER["🐳 Docker<br/>config/docker/<br/>컨테이너화"]
+        NGINX["🔀 Nginx<br/>리버스 프록시<br/>로드 밸런싱"]
+        SCRIPTS["🚀 DevOps Scripts<br/>자동화 배포<br/>모니터링 & 최적화"]
+    end
+
+    subgraph "<b>☁️ 배포 환경</b>"
+        VERCEL["▲ Vercel<br/>웹 플랫폼 호스팅"]
+        ORACLE["☁️ Oracle Cloud<br/>마이크로 서버<br/>API & 데이터베이스"]
+    end
+
+    %% 클라이언트 → 공통
+    CHROME --> SHARED
+    WEB --> SHARED
+    FUTURE -.-> SHARED
+
+    %% 공통 → 서버
+    SHARED --> API
+
+    %% API 내부 플로우
+    API --> ROUTES
+    ROUTES --> GEMINI
+    ROUTES --> CACHE
+    ROUTES --> DB_SVC
+    ROUTES --> CHALLENGE
+
+    %% 서비스 → 데이터
+    DB_SVC --> PRISMA
+    CACHE --> REDIS
+    GEMINI --> GEMINI_API
+    CHALLENGE --> GEMINI_API
+
+    %% 인프라 연결
+    DOCKER --> API
+    NGINX --> API
+    SCRIPTS --> DOCKER
+    SCRIPTS --> NGINX
+
+    %% 배포 연결
+    WEB --> VERCEL
+    CHROME --> VERCEL
+    API --> ORACLE
+    PRISMA --> ORACLE
+    REDIS --> ORACLE
+
+    %% 외부 API 연결
+    GEMINI_API -.-> EXT_API
+
+    %% 스타일 정의
+    classDef client fill:#e3f2fd,stroke:#1976d2,stroke-width:2px,color:#0d47a1
+    classDef shared fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px,color:#4a148c
+    classDef app fill:#e8f5e8,stroke:#388e3c,stroke-width:2px,color:#1b5e20
+    classDef data fill:#fff8e1,stroke:#f57c00,stroke-width:2px,color:#e65100
+    classDef external fill:#ffebee,stroke:#d32f2f,stroke-width:2px,color:#b71c1c
+    classDef infra fill:#f1f8e9,stroke:#689f38,stroke-width:2px,color:#33691e
+    classDef deploy fill:#fce4ec,stroke:#c2185b,stroke-width:2px,color:#880e4f
+
+    class CHROME,WEB,FUTURE client
+    class SHARED shared
+    class API,ROUTES,GEMINI,CACHE,DB_SVC,CHALLENGE app
+    class PRISMA,REDIS data
+    class GEMINI_API,EXT_API external
+    class DOCKER,NGINX,SCRIPTS infra
+    class VERCEL,ORACLE deploy
+                </pre>
+        </div>
+
+        <div class="diagram-card">
+          <h3 class="text-2xl mb-4">🏢 2. Monorepo 구조도</h3>
+          <pre class="mermaid">
+graph TD
+    subgraph "Criti AI Monorepo"
+        Root[루트 package.json<br/>- workspaces 설정<br/>- 통합 스크립트]
+        subgraph "Frontend Apps"
+            Frontend[frontend/<br/>Next.js 메인 앱]
+            Challenge[challenge-web/<br/>React SPA]
+        end
+        subgraph "Backend"
+            API[backend/<br/>Express.js API]
+        end
+        subgraph "Shared Resources"
+            Shared[shared/<br/>공통 타입/유틸]
+            Config[config/<br/>설정 파일]
+        end
+    end
+    
+    Frontend --> Shared
+    Challenge --> Shared
+    API --> Shared
+    Root --> Frontend & Challenge & API & Shared
+
+    classDef root fill:#f44336,color:#fff
+    classDef frontend fill:#2196f3,color:#fff
+    classDef backend fill:#ff9800,color:#fff
+    classDef shared fill:#4caf50,color:#fff
+    
+    class Root root
+    class Frontend,Challenge frontend
+    class API backend
+    class Shared,Config shared
+                </pre>
+        </div>
+
+        <div class="diagram-card">
+          <h3 class="text-2xl mb-4">🚀 3. 배포 및 인프라 구조</h3>
+          <pre class="mermaid">
+graph TB
+    subgraph "개발 환경"
+        Dev[로컬 개발<br/>- npm run dev:full]
+        Testing[테스트 환경]
+    end
+
+    subgraph "GitHub Repository"
+        Main[main 브랜치]
+        Develop[develop 브랜치]
+        Feature[feature/* 브랜치]
+    end
+
+    subgraph "CI/CD Pipeline"
+        Actions[GitHub Actions<br/>- 타입 체크, 린트, 빌드]
+        Vercel[Vercel CI/CD<br/>- 자동 배포]
+    end
+
+    subgraph "Production Deployment"
+        VercelProd[Vercel Production<br/>challenge-web 배포]
+        VPS[Ubuntu VPS<br/>backend API 배포]
+        CDN[Global CDN<br/>정적 자산 배포]
+    end
+
+    Dev --> Feature --> Develop --> Main
+    Main --> Actions
+    Actions --> Vercel
+    Vercel --> VercelProd
+    Actions --> VPS
+    VercelProd --> CDN
+
+    classDef dev fill:#e3f2fd
+    classDef git fill:#f3e5f5
+    classDef cicd fill:#e8f5e8
+    classDef prod fill:#fff3e0
+
+    class Dev,Testing dev
+    class Main,Develop,Feature git
+    class Actions,Vercel cicd
+    class VercelProd,VPS,CDN prod
+                </pre>
+        </div>
+
+        <div class="diagram-card">
+          <h3 class="text-2xl mb-4">🎮 5. 게이미피케이션 시스템 플로우</h3>
+          <pre class="mermaid">
+stateDiagram-v2
+    [*] --> UserIdentification
+
+    UserIdentification --> LoadProgress: 기존 사용자
+    UserIdentification --> CreateUser: 신규 사용자
+
+    CreateUser --> InitialChallenge
+    LoadProgress --> ChallengeSelection
+    InitialChallenge --> ChallengeInProgress
+    ChallengeSelection --> ChallengeInProgress
+
+    state ChallengeInProgress {
+        [*] --> ReadingChallenge
+        ReadingChallenge --> SelectingAnswers
+        SelectingAnswers --> SubmittingAnswer
+    }
+
+    ChallengeInProgress --> ResultEvaluation
+
+    state ResultEvaluation {
+        [*] --> ScoreCalculation
+        ScoreCalculation --> BadgeCheck
+        BadgeCheck --> StatUpdate
+        Update --> [*]
+    }
+
+    ResultEvaluation --> BadgeAnimation: 새 배지 획득
+    ResultEvaluation --> NextChallenge: 일반 완료
+
+    BadgeAnimation --> NextChallenge
+    NextChallenge --> ChallengeSelection
+
+    note right of UserIdentification
+        localStorage 기반
+        브라우저별 고유 ID
+    end note
+    
+    note right of ScoreCalculation
+        기본 점수
+        + 시간 보너스
+        + 힌트 미사용 보너스
+    end note
+                </pre
+          >
+        </div>
+        <div class="diagram-card">
+          <h3 class="text-2xl mb-4">🎨 6. 컴포넌트 아키텍처 (Challenge-Web)</h3>
+          <pre class="mermaid">
+graph TD
+    subgraph "App Layer"
+        App[App.tsx]
+    end
+    subgraph "Page Layer"
+        ChallengePage[ChallengePage.tsx]
+    end
+    subgraph "Container Components"
+        Header; StatsBar; ChallengeCard; Result;
+    end
+    subgraph "UI Components"
+        Button; OptionButton; Badge; Progress;
+    end
+    subgraph "Service & State"
+        ApiService; LocalStorage; GlobalState;
+    end
+    
+    App --> ChallengePage
+    ChallengePage --> Header & StatsBar & ChallengeCard & Result
+    ChallengeCard --> Button & OptionButton
+    StatsBar --> Progress
+    Result --> Badge
+    
+    ChallengePage --> ApiService & LocalStorage & GlobalState
+    
+    classDef app fill:#f44336,color:#fff
+    classDef page fill:#2196f3,color:#fff
+    classDef container fill:#ff9800,color:#fff
+    classDef ui fill:#4caf50,color:#fff
+    classDef service fill:#9c27b0,color:#fff
+    
+    class App app
+    class ChallengePage page
+    class Header,StatsBar,ChallengeCard,Result container
+    class Button,OptionButton,Badge,Progress ui
+    class ApiService,LocalStorage,GlobalState service
+                </pre
+          >
+        </div>
+      </div>
+    </div>
+
+    <script>
+      mermaid.initialize({ startOnLoad: true, theme: "neutral" });
+    </script>
+  </body>
+</html>

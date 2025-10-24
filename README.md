@@ -29,39 +29,22 @@
 **디렉토리 구조 (Monorepo Tree)**:
 
 ```
-criti-ai/                           # 🏛️ 모노레포 루트
-├── 🔧 shared/                      # 공통 타입 정의 & 유틸리티
+criti-ai/                        # 🏛️ 모노레포 루트
+├── shared/                        # 공통 타입 정의 & 유틸리티
 │   ├── src/types.ts                 # 통합 타입 시스템
 │   └── src/index.ts                 # 공통 인터페이스 Export
-├── 🎮 backend/                    # Express.js API 서버
-│   ├── src/services/                # 비즈니스 로직 계층
-│   │   ├── GeminiService.ts         # AI 분석 엔진
-│   │   ├── RedisCacheService.ts     # 캐싱 최적화
-│   │   ├── DatabaseService.ts       # 데이터 영속성
-│   │   └── DailyChallengeService.ts # 게이미피케이션
-│   ├── src/routes/                  # API 라우팅 계층
-│   └── prisma/schema.prisma         # 데이터 모델링
-├── 🧩 frontend/                   # Chrome Extension
-│   ├── src/extension/               # Extension 핵심 로직
-│   │   ├── background/              # 백그라운드 서비스
-│   │   ├── content/                 # 컨텐츠 스크립트
-│   │   └── popup/                   # 팝업 인터페이스
-│   ├── src/components/              # 재사용 UI 컴포넌트
-│   └── src/services/                # API 통신 레이어
-├── 🌐 challenge-web/              # Vercel 웹 플랫폼
-│   ├── src/pages/                   # 챌린지 페이지들
-│   ├── api/                         # Serverless Functions
-│   └── vercel.json                  # 배포 최적화 설정
-├── 📦 config/                     # 인프라 설정
+├── backend/                       # Express.js API 서버
+├── chrome-extension/             # Chrome Extension
+├── challenge-web/                 # Vercel 웹 플랫폼
+├── config/                        # 인프라 설정
 │   ├── docker/                      # 컨테이너 오케스트레이션
 │   │   ├── docker-compose.yml       # 개발 환경
 │   │   └── docker-compose.micro.yml # Oracle Micro 최적화
 │   ├── nginx.conf                   # 리버스 프록시 설정
 │   └── nginx.micro.conf             # 마이크로 서버 튜닝
-└── 🚀 scripts/                    # DevOps 자동화
-    ├── deploy-micro-auto.sh         # 원클릭 배포
-    ├── monitor-micro.sh             # 서버 모니터링
-    └── optimize-micro.sh            # 성능 최적화
+└── scripts/                      # DevOps 자동화
+    ├── deploy-micro-auto.sh         # 배포 스크립트
+    └── monitor-micro.sh             # 서버 모니터링
 ```
 
 ### 데이터 흐름 (Data Flow)
@@ -104,7 +87,7 @@ graph TD
 
 ### 기술 스택 목록
 
-- **Frontend**: React 19, TypeScript, Emotion, Vite, Chrome Extension APIs
+- **chrome-extension**: React 19, TypeScript, Emotion, Vite, Chrome Extension APIs
 - **Backend**: Node.js, Express, TypeScript, Prisma ORM, SQLite
 - **AI/ML**: Google Gemini 1.5 Flash API
 - **Cache**: Redis (ioredis), 3-tier caching strategy
@@ -147,7 +130,7 @@ graph TD
 **구현 과정 및 결과**:
 
 ```typescript
-// Frontend: Content Script
+// chrome-extension: Content Script
 const analysisResult = await fetch(`${API_BASE_URL}/api/analysis`, {
   method: "POST",
   headers: { "Content-Type": "application/json" },
@@ -389,4 +372,3 @@ npm run dev
 
 - **TypeScript**: 전체 프로젝트 타입 안전성
 - **ESLint + Prettier**: 일관된 코드 스타일
-
