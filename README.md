@@ -1,374 +1,139 @@
-# 🎯 Criti.AI - 차세대 AI 기반 미디어 리터러시 플랫폼
+# **Criti AI: 비판적 사고를 위한 AI 파트너**
 
-> **"AI가 만든 가짜 정보를 AI와 함께 이겨내다"**  
-> 정보 과잉 시대의 비판적 사고 능력 강화를 위한 하이브리드 교육 생태계
+> AI가 만든 정보 오염 문제를 AI 기술로 해결하며, 비판적 사고 능력을 훈련하는 미디어 리터러시 플랫폼입니다. 정보 과잉 시대에 사용자가 스스로 정보의 진위를 판별하는 능력을 기르도록 돕는 것을 목표로 합니다.
+> 
 
-## 🚀 프로젝트 개요 (The Big Picture)
-
-**프로젝트 이름**: `Criti.AI`  
-**한 줄 소개**: AI 시대의 정보 홍수 속에서 사용자의 미디어 리터러시와 비판적 사고 능력을 실시간으로 강화하는 인텔리전트 교육 플랫폼
-
-**프로젝트 목표**: 딥페이크와 AI 생성 콘텐츠가 범람하는 현대 디지털 환경에서, 사용자가 능동적으로 정보의 신뢰성을 판별하고 논리적 사고력을 체계적으로 훈련할 수 있는 통합 솔루션을 구축하여, 개인의 정보 판별력 향상과 사회 전체의 미디어 리터러시 수준 제고를 목표로 합니다.
-
-**데모 및 시각 자료**:
-
-- 🌐 **Live Demo**: [Criti.AI Challenge Platform](https://criti-ai-challenge.vercel.app)
-- ⚡ **Backend Health Check**: `http://localhost:3001/health`
-- 📱 **Chrome Extension**: 개발 완료, 웹 스토어 배포 준비 중
-- 🎥 **핵심 기능 시연**: _ 실시간 뉴스 분석 GIF, Chrome Extension 동작 화면, Challenge 플랫폼 인터페이스, 실시간 신뢰도 하이라이팅 기능 데모 영상 들어갈 예정_
-
----
-
-## 🏗️ 아키텍처 및 설계 (Architecture & Design)
-
-### 시스템 아키텍처 (System Architecture)
-
-**설계 패턴**: `하이브리드 마이크로서비스 아키텍처 + Event-Driven Design`  
-모노레포 기반의 느슨한 결합 구조를 채택하여 각 서비스(Extension, Web App, API)의 독립적 배포와 확장성을 보장하면서도, 공통 타입 시스템을 통해 개발 생산성과 타입 안전성을 극대화했습니다. 또한 실시간 분석과 훈련 결과에 대한 이벤트 기반 처리로 사용자 경험의 즉시성을 확보했습니다.
-
-**디렉토리 구조 (Monorepo Tree)**:
-
-```
-criti-ai/                        # 🏛️ 모노레포 루트
-├── shared/                        # 공통 타입 정의 & 유틸리티
-│   ├── src/types.ts                 # 통합 타입 시스템
-│   └── src/index.ts                 # 공통 인터페이스 Export
-├── backend/                       # Express.js API 서버
-├── chrome-extension/             # Chrome Extension
-├── challenge-web/                 # Vercel 웹 플랫폼
-├── config/                        # 인프라 설정
-│   ├── docker/                      # 컨테이너 오케스트레이션
-│   │   ├── docker-compose.yml       # 개발 환경
-│   │   └── docker-compose.micro.yml # Oracle Micro 최적화
-│   ├── nginx.conf                   # 리버스 프록시 설정
-│   └── nginx.micro.conf             # 마이크로 서버 튜닝
-└── scripts/                      # DevOps 자동화
-    ├── deploy-micro-auto.sh         # 배포 스크립트
-    └── monitor-micro.sh             # 서버 모니터링
-```
-
-### 데이터 흐름 (Data Flow)
-
-**핵심 뉴스 분석 플로우**:
-
-```mermaid
-graph TD
-    A[사용자가 뉴스 페이지 방문] --> B[Content Script 활성화]
-    B --> C[URL/Content 추출]
-    C --> D{Redis 캐시 확인}
-    D -->|Cache Hit| E[캐시된 분석 결과 반환]
-    D -->|Cache Miss| F[Gemini AI API 호출]
-    F --> G[신뢰도 다차원 분석]
-    G --> H[결과 DB 저장 + Redis 캐싱]
-    H --> I[실시간 UI 하이라이팅]
-    I --> J[사용자 피드백 수집]
-    J --> K[분석 품질 개선 순환]
-```
-
-**도전 과제 훈련 플로우**:
-
-1. (웹앱) 사용자가 일일 챌린지 페이지 접속 → 2. (백엔드) DailyChallengeService에서 당일 챌린지 조회 → 3. (AI) 신규 챌린지 필요 시 Gemini API로 자동 생성 → 4. (프론트엔드) 인터랙티브 UI로 사용자 답안 수집 → 5. (백엔드) 정답 검증 및 점수 계산 → 6. (DB) 진행도 업데이트 및 배지 시스템 트리거 → 7. (UI) 실시간 성과 피드백 및 다음 레벨 가이드
-
-### 데이터베이스 설계 (ERD)
-
-**핵심 엔티티 관계**:
-
-- `User` ↔ `ChallengeResult` (1:N) : 사용자별 챌린지 수행 이력
-- `User` ↔ `UserBadge` ↔ `Badge` (M:N) : 성취 배지 시스템
-- `Challenge` ↔ `ChallengeResult` (1:N) : 챌린지별 통계 집계
-- `AnalysisCache` : URL 해시 기반 분석 결과 캐싱 (성능 최적화)
-- `AnalysisStats` : 일일 분석 통계 (운영 모니터링)
-
-**인덱싱 전략**: URL 해시, 만료 시간, 도메인별 조회 최적화를 위한 복합 인덱스 설계로 평균 쿼리 응답 시간 50ms 이하 달성
-
----
-
-## 💻 기술 스택 및 도입 이유 (Tech Stack & Rationale)
-
-### 기술 스택 목록
-
-- **chrome-extension**: React 19, TypeScript, Emotion, Vite, Chrome Extension APIs
-- **Backend**: Node.js, Express, TypeScript, Prisma ORM, SQLite
-- **AI/ML**: Google Gemini 1.5 Flash API
-- **Cache**: Redis (ioredis), 3-tier caching strategy
-- **Database**: SQLite (개발), PostgreSQL 호환 (프로덕션 준비)
-- **Infrastructure**: Docker, Nginx, Oracle Cloud Micro Instance
-- **Deployment**: Vercel (웹앱), Chrome Web Store (확장프로그램)
-- **DevOps**: Docker Compose, 자동화 스크립트, 모니터링 대시보드
-
-### 핵심 기술 및 라이브러리 선택 이유
-
-**🧠 Google Gemini 1.5 Flash**: GPT 대비 한국어 처리 성능이 우수하고, 컨텍스트 윈도우가 넓어 긴 뉴스 기사도 전체적으로 분석 가능. Temperature 0.1로 설정하여 일관된 분석 품질 보장. OpenAI 대비 비용 효율성도 뛰어나 스타트업 환경에 최적화.
-
-**⚡ Redis (3-tier Caching)**: 동일 URL 분석 요청의 95%가 캐시로 처리되어 AI API 호출 비용을 대폭 절감. TTL 기반 만료 정책으로 뉴스의 시의성과 캐시 효율성의 균형 달성. 메모리 사용량 최적화를 위한 LRU 정책 적용.
-
-**🏗️ Prisma ORM**: 타입 안전성과 개발 생산성을 극대화하면서도 복잡한 관계형 쿼리 최적화 가능. Migration 관리와 Database Studio를 통한 운영 편의성 확보. SQLite → PostgreSQL 마이그레이션 시 코드 변경 최소화.
-
-**📦 Monorepo (npm workspaces)**: 공통 타입 시스템 공유로 인터페이스 불일치 오류 원천 차단. 각 패키지의 독립적 배포와 버전 관리 가능. 코드 중복 최소화 및 일관된 개발 환경 구성.
-
-**🎨 Emotion (CSS-in-JS)**: Chrome Extension의 CSS 격리 문제 해결과 동적 스타일링 최적화. 번들 사이즈 최소화를 통한 확장프로그램 로딩 성능 향상. 테마 시스템과 반응형 디자인 구현 용이성.
-
-**🐳 Docker Multi-stage Build**: 개발/스테이징/프로덕션 환경의 일관성 보장. Oracle Micro Instance (1GB RAM) 최적화를 위한 Alpine Linux 기반 경량화. 컨테이너 이미지 크기 70% 압축 달성.
-
----
-
-## 🔬 기술적 도전 및 해결 과정 (Technical Deep Dive)
-
-### 1: Chrome Extension 환경에서의 AI API 보안 이슈 해결
-
-**상황 및 문제점**: Chrome Extension의 Content Script는 웹 페이지와 동일한 보안 컨텍스트에서 실행되어, API 키가 노출될 위험이 있었습니다. 직접 Gemini API를 호출할 경우 개발자 도구를 통해 API 키가 탈취될 수 있어, 서비스 운영에 치명적인 보안 취약점이 발생할 수 있었습니다.
-
-**고려한 해결책 및 최종 선택**:
-
-1. **Environment Variables**: 번들링 시점에 노출되어 부적절
-2. **Chrome Storage API**: 여전히 클라이언트 사이드 저장으로 보안 위험
-3. **Proxy Backend API**: 가장 안전하지만 네트워크 오버헤드 발생
-4. **Background Script with Message Passing**: Extension 내부 격리이지만 여전히 위험
-
-최종적으로 **Backend Proxy Pattern**을 채택하여, Extension은 자체 API 서버만 호출하고, 실제 AI API 통신은 백엔드에서 처리하도록 아키텍처를 설계했습니다.
-
-**구현 과정 및 결과**:
-
-```typescript
-// chrome-extension: Content Script
-const analysisResult = await fetch(`${API_BASE_URL}/api/analysis`, {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ url, content }),
-});
-
-// Backend: Secure Proxy
-class GeminiService {
-  constructor() {
-    const apiKey = process.env.GEMINI_API_KEY; // 서버 환경변수만 접근
-    this.model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-  }
-}
-```
-
-결과적으로 API 키 보안을 완전히 확보하면서도, 백엔드 캐싱 전략으로 95%의 요청을 캐시 처리하여 실제 API 호출 오버헤드를 최소화했습니다.
-
-### 2: Oracle Micro Instance (1GB RAM) 환경 최적화
-
-**상황 및 문제점**: 무료 Oracle Cloud Micro Instance의 제한된 리소스(1GB RAM, 1 VCPU)에서 Node.js 백엔드 + Redis + 데이터베이스를 안정적으로 운영해야 했습니다. 초기에는 메모리 부족으로 인한 OOM 에러가 빈발했고, 동시 접속자 10명만 되어도 응답 지연이 발생했습니다.
-
-**고려한 해결책 및 최종 선택**:
-
-1. **수직 확장**: 비용 발생으로 부적절
-2. **코드 최적화**: 한계 존재
-3. **컨테이너 리소스 제한**: 예측 가능성 확보
-4. **다단계 캐싱 + 경량화**: 근본적 해결책
-
-최종적으로 **메모리 사용량 모니터링 + Docker 리소스 할당 최적화 + 애플리케이션 레벨 캐싱**을 조합한 종합적 접근을 선택했습니다.
-
-**구현 과정 및 결과**:
-
-```yaml
-# docker-compose.micro.yml
-services:
-  backend:
-    deploy:
-      resources:
-        limits:
-          memory: 512M
-        reservations:
-          memory: 256M
-  redis:
-    deploy:
-      resources:
-        limits:
-          memory: 128M
-```
-
-Node.js 힙 사이즈 제한 (`--max-old-space-size=384`)과 Redis 메모리 정책 (`maxmemory-policy allkeys-lru`) 설정으로 메모리 사용량을 80% 이하로 유지. 결과적으로 동시 접속자 50명까지 안정적 서비스 제공이 가능해졌고, 평균 응답 시간도 200ms 이하로 개선되었습니다.
-
-### 3: 실시간 성능 최적화를 위한 3-Tier 캐싱 아키텍처
-
-**상황 및 문제점**: Gemini API 호출 비용과 응답 시간(평균 2-3초)이 사용자 경험에 직접적인 영향을 미쳤습니다. 동일한 뉴스 기사에 대한 중복 분석 요청이 전체의 60% 이상을 차지했지만, 단순한 메모리 캐시만으로는 서버 재시작 시 캐시 손실과 메모리 부족 문제가 발생했습니다.
-
-**고려한 해결책 및 최종 선택**:
-
-1. **Memory Only**: 휘발성, 확장성 부족
-2. **Database Only**: 느린 조회 성능
-3. **Redis Only**: 메모리 제약, 비용
-4. **Hybrid Multi-tier**: 각 캐시의 장점 결합
-
-**3-Tier Caching Strategy**를 구현하여 성능과 안정성을 동시에 확보했습니다.
-
-**구현 과정 및 결과**:
-
-```typescript
-class RedisCacheService {
-  async getAnalysis(urlHash: string): Promise<TrustAnalysis | null> {
-    // 1순위: Redis (평균 5ms)
-    let result = await this.redis.get(`analysis:${urlHash}`);
-    if (result) return JSON.parse(result);
-
-    // 2순위: Database (평균 50ms)
-    result = await this.db.analysisCache.findUnique({ where: { urlHash } });
-    if (result && !this.isExpired(result)) {
-      await this.redis.setex(
-        `analysis:${urlHash}`,
-        3600,
-        JSON.stringify(result)
-      );
-      return result.analysis;
-    }
-
-    // 3순위: Memory fallback + 새로운 분석 요청
-    return null;
-  }
-}
-```
-
-결과적으로 캐시 히트율 95% 달성, 평균 응답 시간 2.8초 → 0.3초로 90% 단축, API 호출 비용 월 $200 → $20으로 90% 절감을 실현했습니다.
-
----
-
-## 📊 성능 및 확장성 지표
-
-### 핵심 성능 메트릭
-
-- **API 응답 시간**: 평균 280ms (캐시 히트 시 50ms 이하)
-- **캐시 히트율**: 95.2% (Redis 85%, DB 10.2%)
-- **동시 접속 처리**: 50명 (1GB RAM 환경)
-- **분석 정확도**: 신뢰도 점수 오차 범위 ±5% 이내
-- **메모리 사용량**: 평균 75% (피크 시 90% 이하)
-
-### 확장성 설계
-
-- **수평 확장**: Redis Cluster, Database 샤딩 준비
-- **마이크로서비스**: 각 서비스 독립 배포 가능
-- **CDN 연동**: 정적 자산 글로벌 캐싱 지원
-- **모니터링**: Prometheus + Grafana 통합 준비
-
----
-
-## 🎮 게이미피케이션 시스템
-
-### 배지 시스템 설계
-
-```typescript
-interface Badge {
-  category: "analysis" | "training" | "milestone" | "special";
-  condition: {
-    type: "point_threshold" | "challenge_count" | "accuracy_rate";
-    value: number;
-  };
-}
-```
-
-- 🎯 **첫 걸음** (First Step): 첫 번째 뉴스 분석 완료
-- 🔍 **편향 탐지자** (Bias Hunter): 편향성 50개 이상 발견
-- 🧠 **논리 마스터** (Logic Master): 논리적 오류 정확도 90% 이상
-- 🏆 **일주일 연속** (Streak Master): 7일 연속 챌린지 참여
-- 💎 **크리티컬 씽커** (Critical Thinker): 전체 점수 1000점 돌파
-
-### 개인화 학습 경로
-
-- **Adaptive Difficulty**: 사용자 정답률에 따른 동적 난이도 조절
-- **Weak Point Analysis**: 취약한 오류 유형 집중 훈련
-- **Progress Visualization**: 상세한 성장 궤적 대시보드
-
----
-
-## 🔮 향후 기술 로드맵
-
-### Phase 2: 고도화 (Q2 2025)
-
-- **다국어 지원**: i18n 시스템 + 다국어 AI 모델 연동
-- **고급 분석**: 감정 분석, 어조 분석, 주제 클러스터링
-- **개인화 추천**: 사용자 성향 기반 맞춤형 훈련 콘텐츠
-
-### Phase 3: 엔터프라이즈 (Q4 2025)
-
-- **교육기관 연동**: LMS 통합, 교사 대시보드
-- **기업용 솔루션**: 브랜드 모니터링, 리스크 알림
-- **API 플랫폼**: 서드파티 개발자를 위한 Public API
-- **모바일 네이티브**: React Native 기반 iOS/Android 앱
-
-### Phase 4: AI 고도화 (2026)
-
-- **멀티모달 분석**: 이미지, 비디오, 음성 분석 지원
-- **실시간 팩트체킹**: 외부 데이터베이스 연동 자동 검증
-- **예측 분석**: 트렌드 예측, 바이럴 패턴 분석
-- **연합학습**: 사용자 피드백 기반 모델 개선
-
----
-
-## 🛡️ 보안 및 개인정보 보호
-
-### 데이터 보안
-
-- **API 키 관리**: 환경변수 + 백엔드 프록시 패턴
-- **사용자 데이터**: 익명화 처리, 최소 수집 원칙
-- **CORS 정책**: 화이트리스트 기반 오리진 제어
-- **Rate Limiting**: 사용자별 API 호출 제한
-
-### 개인정보 보호
-
-- **데이터 최소화**: 필수 정보만 수집 (이메일 선택사항)
-- **암호화**: 전송 중/저장 중 데이터 암호화
-- **사용자 제어**: 데이터 삭제 요청 기능
-- **투명성**: 명확한 개인정보 처리방침
-
----
-
-## 🚀 배포 및 운영
-
-### 배포 환경
-
-- **Backend**: Oracle Cloud Micro Instance (Docker)
-- **Challenge Web**: Vercel Serverless
-- **Chrome Extension**: Chrome Web Store (심사 대기)
-- **Monitoring**: Custom health check + 로그 집계
-
-### DevOps 파이프라인
-
-```bash
-# 원클릭 배포
-./scripts/deploy-micro-auto.sh
-
-# 서버 모니터링
-./scripts/monitor-micro.sh
-
-# 성능 최적화
-./scripts/optimize-micro.sh
-```
-
-### 운영 대시보드
-
-- **실시간 지표**: 동시 접속자, 응답 시간, 오류율
-- **비즈니스 메트릭**: 일일 분석 수, 사용자 참여도, 챌린지 완료율
-- **리소스 모니터링**: CPU, 메모리, 디스크, 네트워크 사용량
-
----
-
-## 개발 환경
-
-### 로컬 개발 설정
-
-```bash
-# 1. 저장소 클론
-git clone https://github.com/your-org/criti-ai.git
-cd criti-ai
-
-# 2. 의존성 설치
-npm run install:all
-
-# 3. 환경 설정
-cp backend/.env.example backend/.env
-cp challenge-web/.env.example challenge-web/.env
-# .env 파일에서 GEMINI_API_KEY 등 설정
-
-# 4. 데이터베이스 초기화
-cd backend && npm run db:push && npm run db:seed
-
-# 5. 개발 서버 실행
-npm run dev
-```
-
-### 코드 품질 관리
-
-- **TypeScript**: 전체 프로젝트 타입 안전성
-- **ESLint + Prettier**: 일관된 코드 스타일
+## **1. 프로젝트 요약**
+
+- **Project Overview**: 생성형 AI와 딥페이크 기술 발전으로 인한 '정보 오염' 문제에 대응하기 위해 기획하였습니다. 사용자가 접하는 디지털 콘텐츠의 신뢰도를 실시간 분석하고, 게임화된 훈련을 통해 비판적 사고 능력을 능동적으로 강화하는 AI 파트너 솔루션입니다
+- **My Role**: 팀 리더 및 풀스택 개발 (기여도: 90%).
+    
+    프로젝트 기획, 아키텍처 설계, 핵심 AI 연동(Gemini), 백엔드 API, Chrome 확장 프로그램, 웹 프론트엔드 개발 및 Oracle Cloud 기반 인프라 구축/최적화 등 전반적인 개발 리딩
+    
+- **Key Outcomes**: Google Gemini AI를 활용한 다차원(출처, 편향, 논리 오류, 광고성) 실시간 콘텐츠 분석 엔진을 개발했습니다. 또한, 극도로 제한된 클라우드 리소스(Oracle Free Tier, 1GB RAM) 환경에서도 안정적으로 운영될 수 있도록 Docker 기반의 경량화된 인프라 아키텍처를 설계하고 최적화했습니다. Monorepo와 공유 타입 시스템을 도입하여 개발 생산성과 코드 품질을 향상시켰습니다.
+
+- **Live Demo**
+
+<video controls src="제목_없는_비디오_-_Clipchamp로_제작.mp4" title="Title"></video>
+
+- 🚀 **Backend Health Check**: `http://144.24.79.13/health`
+- 🧩 **Chrome Extension**: 웹 스토어 배포 준비 중
+- 🐙 **GitHub**
+    
+    https://github.com/uthem150/criti-ai
+    
+
+## **2. 기술 스택 및 선정 이유**
+
+- **AI Engine**: `Google Gemini API`
+    - 선정 이유: 긴 컨텍스트 윈도우(1M 토큰)로 장문의 기사 분석에 유리하며, 비용 효율성과 한국어 처리 성능을 고려하여 선택했습니다. Temperature 0.1 설정으로 일관성 있는 분석 결과를 확보했습니다.
+- **Backend**: `Node.js`, `Express`, `TypeScript`, `Prisma ORM`
+    - 선정 이유: TypeScript 기반의 풀스택 개발 생산성과 비동기 I/O 처리 능력 때문에 Node.js/Express를 선택했습니다. **(Prisma)** 타입 안전성과 자동 마이그레이션 기능으로 개발 생산성을 높이고, SQLite와 PostgreSQL 간 전환을 용이하게 하여 개발 및 운영 효율성을 극대화했습니다8888.
+- **Frontend**: `React`, `TypeScript`, `Emotion`, `Vite`, `Chrome Extension APIs`
+    - *선정 이유: **(Vite + @crxjs)** 기존 Webpack 대비 월등히 빠른 개발 서버 속도와 HMR 경험을 제공하며, Chrome Extension 개발에 필요한 Manifest V3 설정 및 빌드 프로세스를 자동화하여 개발 생산성을 극대화했습니다.*
+        
+        ***(Emotion)** Chrome Extension 환경에서 웹페이지와의 CSS 충돌을 완벽히 방지(Shadow DOM과 연계)하고, 디자인 동적 스타일링 시스템을 구축하기 위해 선택했습니다.*
+        
+- **Cache**: `Redis (ioredis)`, `3-Tier Caching Strategy` 10
+    - 선정 이유: AI API 호출 비용과 응답 시간을 최소화하기 위해 다단계 캐싱 전략을 도입했습니다. 빠른 속도의 (Redis)를 L1 캐시로, 영속성이 보장되는 (Database)를 L2 캐시로, Redis 장애 시 비상 대응을 위한 (Memory)를 L3 캐시로 사용하여 성능과 안정성을 동시에 확보했습니다
+- **Database**: `SQLite` (개발/마이크로), `PostgreSQL` 호환
+    - 선정 이유: Oracle Micro Instance의 제한된 리소스 내에서 별도 DB 서버 없이 운영하기 위해 경량 파일 기반 (SQLite)를 선택했습니다. Prisma ORM을 사용하여 향후 트래픽 증가 시 (PostgreSQL)*로 쉽게 마이그레이션할 수 있도록 설계했습니다.*
+- **Infrastructure**: `Docker`, `Nginx`, `Oracle Cloud Micro Instance`
+    - 선정 이유: **(Oracle Cloud Free Tier)** 비용 없이 안정적인 백엔드 인프라를 구축하기 위해 선택했습니다.
+        
+        **(Docker + Alpine Linux)** 1GB RAM 환경에서의 최적화를 위해 경량 OS인 Alpine Linux 기반의 Docker 이미지를 사용하고, Multi-stage 빌드로 이미지 크기를 70% 이상 압축했습니다
+        
+        **(Nginx)** 리버스 프록시, 로드 밸런싱(향후 확장 대비), 저사양 환경 최적화 설정을 통해 안정적인 서비스 제공 기반을 마련했습니다.
+        
+
+## **3. 아키텍처**
+
+### **시스템 아키텍처**
+
+![alt text](image.png)
+
+### **핵심 설계**
+
+- **Monorepo & Shared Types**: `npm workspaces`와 `shared` 패키지를 통해 여러 프론트엔드(웹, 확장 프로그램)와 백엔드 간의 타입 정의를 통합했습니다. API 인터페이스 불일치로 인한 런타임 에러를 컴파일 시점에 방지하고, 코드 중복을 최소화하여 개발 생산성과 유지보수성을 극대화했습니다
+- **3-Tier Caching Strategy**: AI API 호출 비용과 응답 지연을 최소화하기 위해 Redis(L1), Database(L2), Memory(L3)로 구성된 다층 캐싱 시스템을 설계했습니다. 이를 통해 캐시 히트율에 따른, 평균 응답 시간을 단축시켰습니다.
+- **Resource Optimization for Free Tier**: Oracle Cloud Micro Instance(1GB RAM) 환경에서의 안정적 운영을 위해 Docker 컨테이너별 메모리/CPU 제한(`mem_limit`, `cpus`), Node.js 힙 메모리 제한(`-max-old-space-size`), 경량 Alpine Linux 이미지 사용, Nginx 저사양 최적화 설정(`nginx.micro.conf`) 등 극한의 리소스 최적화를 적용했습니다.
+- **Secure API Proxy (Chrome Extension)**: Chrome 확장 프로그램의 보안 제약(API 키 노출 위험, CORS)을 해결하기 위해, 확장 프로그램은 자체 백엔드 API만 호출하고 실제 외부 AI API 통신은 백엔드 서버가 대리 수행하는 보안 프록시 아키텍처를 구현했습니다.
+
+## **4. 주요 기능**
+
+### **1. 실시간 분석 모듈: `<Insight Guardian>` (Chrome 확장 프로그램)**
+
+![alt text](<Insight Guardian.jpg>)
+
+- **다차원 신뢰도 분석**: 사용자가 보고 있는 웹 콘텐츠(뉴스 기사 등)를 실시간으로 분석하여 브라우저 사이드바에 '신뢰도 대시보드'를 제공합니다
+- **세부 분석 항목**
+    - **출처 신뢰도**: 언론사 평판, 보도 성향 분석 (신뢰/중립/주의/위험 시각화)
+    - **감성/편향 분석**: '충격', '경악' 등 감정 유도 표현 탐지 및 본문 하이라이팅
+    - **논리 오류 탐지**: '성급한 일반화', '흑백논리' 등 AI 기반 탐지 및 마우스오버 설명 팝업
+    - **광고성 분석**: 네이티브 광고, 제휴 마케팅 등 상업적 의도 탐지.**직관적 UX/UI**: 종합 신뢰도 점수(100점 만점)와 신호등 색상으로 위험도를 즉시 인지하도록 설계했습니다. 분석된 문제 문장은 클릭 시 본문 해당 위치로 자동 스크롤됩니다
+
+- **Shadow DOM 격리**: 웹페이지와의 CSS/JS 충돌을 차단하기 위해 Shadow DOM 기술을 적용하여 확장 프로그램 UI의 안정성을 확보했습니다.
+
+### **2. 능동적 훈련 모듈: <Criti Challenge> (웹 서비스)**
+
+![alt text](<Criti Challenge.png>)
+
+- **Daily Challenge 기반 학습**: AI가 매일 자동으로 생성하는 '훈련용 가짜 기사'의 허점 찾기 등의 챌린지를 제공합니다
+- **게이미피케이션**: 정답 시 점수와 배지를 부여하고 레벨 시스템을 도입하여 학습 동기를 부여하고 지속적인 참여를 유도합니다
+- **자동 생성 시스템**: 백그라운드 스케줄러와 Gemini API를 연동하여 매일 자정 새로운 챌린지 콘텐츠가 자동으로 생성 및 배포되도록 설계했습니다. API 실패 시 Fallback 챌린지를 제공하여 서비스 연속성을 보장합니다.
+
+## **5. 핵심 경험 및 문제 해결 과정**
+
+### **1. Oracle Micro Instance (1GB RAM) 환경 최적화**
+
+- **문제 상황**: 무료 Oracle Cloud Micro Instance의 제한된 리소스(1GB RAM, 1 VCPU)에서 Node.js 백엔드 + Redis + Nginx를 안정적으로 운영해야 했습니다. 초기 배포 시 메모리 부족로 컨테이너가 빈번하게 재시작되었고, 동시 사용자 수가 증가하면 응답 속도가 급격히 저하되었습니다.
+- **해결 과정**
+    - **컨테이너 경량화**: 모든 서비스의 Docker 이미지를 `Alpine Linux` 기반으로 교체하고, `Multi-stage build`를 적용하여 최종 이미지 크기를 평균 70% 이상 압축했습니다
+    - **리소스 제한 및 예약**: `docker-compose.micro.yml` 파일에 각 컨테이너별 `mem_limit` (최대 메모리), `mem_reservation` (최소 보장 메모리), `cpus` (CPU 사용률 제한)를 명시적으로 설정하여 특정 서비스가 자원을 독점하는 것을 방지했습니다.
+    - **애플리케이션 레벨 최적화**
+        - Node.js: `NODE_OPTIONS=--max-old-space-size=128` 환경 변수를 설정하여 V8 가비지 컬렉터가 사용할 최대 힙 메모리를 128MB로 제한했습니다.
+        - Redis: `maxmemory 64mb`와 `maxmemory-policy allkeys-lru` 설정을 통해 메모리 사용량을 64MB로 제한하고, 초과 시 LRU 정책에 따라 키를 제거하도록 했습니다. 디스크 영속성 기능(`save`, `appendonly`)은 비활성화하여 순수 캐시로만 사용했습니다.
+    - **모니터링 및 자동 복구**: `healthcheck` 옵션을 모든 컨테이너에 추가하여 Docker가 주기적으로 서비스 상태를 확인하고, 3회 연속 실패 시 `restart: unless-stopped` 정책에 따라 자동으로 컨테이너를 재시작하도록 설정했습니다.
+- **결과**: 최적화를 통해 제한된 리소스(1GB RAM)에서도 다중 서비스(백엔드, Redis, Nginx) 동시 운영을 가능하게 했습니다. Docker 컨테이너 경량화, 인메모리 캐싱, 프로세스 최적화를 통해 OOM 에러 없이 실서비스 수준의 트래픽을 안정적으로 처리할 수 있는 확장 가능한 아키텍처를 구현했습니다.
+
+### **2. Chrome Extension 환경에서의 API 보안 및 CORS 문제 해결**
+
+- **문제 상황**: Chrome 확장 프로그램의 Content Script는 웹 페이지 컨텍스트에서 실행되므로, 여기서 직접 외부 API(`localhost:3001` 또는 클라우드 서버)를 호출하면 **CORS(Cross-Origin Resource Sharing) 정책 위반**으로 브라우저에 의해 차단되었습니다. 또한, Content Script나 Frontend 코드에 백엔드 API 키를 포함할 경우 **심각한 보안 취약점**이 발생할 수 있었습니다.
+- **해결 과정**
+    - **Background Script Proxy 패턴 도입**: CORS 제약이 없고 독립된 실행 환경을 가지는 **Background Script (Service Worker)** 를 API 요청의 Proxy로 활용했습니다.
+    - **통신 흐름**
+        1. Content Script/Popup UI → `chrome.runtime.sendMessage` → Background Script
+        2. Background Script → `fetch API` (Node.js 환경처럼 CORS 제약 없음) → Backend API 서버
+        3. Backend API 서버 → 응답 → Background Script
+        4. Background Script → `sendResponse` 콜백 → Content Script/Popup UI
+    - **구현**: `ApiService` 클래스를 프론트엔드에 구현하여 모든 API 호출이 내부적으로 `sendToBackground` 함수를 통해 Background Script로 메시지를 보내도록 추상화했습니다. Background Script는 `API_PROXY` 타입의 메시지를 수신하면, 실제 HTTP 요청을 생성하여 백엔드 서버와 통신하고 그 결과를 다시 프론트엔드로 전달했습니다.
+    - **보안 강화**: 실제 API 키나 백엔드 서버의 상세 주소는 Background Script 또는 백엔드 서버의 환경 변수에만 저장하여 클라이언트 사이드 코드 노출을 원천 차단했습니다.
+- **결과**: CORS 문제를 **안전하고 안정적으로 우회**하면서, **API 키 등 민감 정보를 클라이언트로부터 완벽하게 격리**하는 보안 아키텍처를 구축했습니다. 모든 API 통신 채널을 Background Script로 단일화하여 로깅, 에러 처리, 재시도 로직 등을 중앙에서 관리할 수 있게 되었습니다.
+
+### **3. Monorepo 환경에서의 공유 타입 시스템 구축**
+
+- **문제 상황**: 프로젝트가 백엔드(Express), 웹 프론트엔드(React/Vite), 크롬 확장 프로그램(React/Vite) 등 여러 패키지로 구성되면서, 공통으로 사용되는 데이터 타입(e.g., `Challenge`, `TrustAnalysis`, `ApiResponse`) 정의가 각 프로젝트에 중복되고 불일치하는 문제가 발생했습니다. API 응답 구조가 변경될 때마다 모든 프로젝트를 수동으로 수정해야 했고, 이 과정에서 잦은 런타임 에러가 발생하여 개발 생산성을 저하시켰습니다.
+- **해결 과정**
+    - **`shared` 패키지 생성**: Monorepo 루트에 `shared`라는 이름의 별도 패키지를 생성하고, 모든 프로젝트에서 공통으로 사용될 TypeScript 인터페이스와 타입을 이곳에 중앙 집중식으로 정의했습니다 (`shared/src/types.ts`).
+    - **`npm workspaces` 활용**: 루트 `package.json`에 `workspaces` 설정을 추가하여 `shared` 패키지를 로컬 의존성으로 관리했습니다. 각 프로젝트(`backend`, `frontend`, `chrome-extension`)의 `package.json`에서는 `dependencies`에 `"@criti-ai/shared": "workspace:*"`와 같이 선언하여 `shared` 패키지를 참조하도록 했습니다.
+    - **TypeScript Project References**: 각 프로젝트의 `tsconfig.json`에 `references` 옵션을 추가하여 `shared` 프로젝트를 참조하도록 설정했습니다. 이를 통해 VS Code 등 개발 도구에서 타입 자동 완성 및 정의 이동(Go to Definition)이 원활하게 작동하고, `shared` 패키지 변경 시 의존하는 프로젝트들의 타입 체크가 연쇄적으로 이루어지도록 했습니다.
+    - **빌드 파이프라인 통합**: 루트 `package.json`의 `build` 스크립트를 수정하여, `shared` 패키지를 가장 먼저 빌드한 후 다른 프로젝트들을 병렬 또는 순차적으로 빌드하도록 구성했습니다.
+- **결과**: `shared` 패키지에서 타입을 한 번만 수정하면, 모든 의존 프로젝트에서 변경 사항이 즉시 반영되고 TypeScript 컴파일러가 타입 불일치 오류를 **컴파일 시점에 검출**해 주었습니다. API 계약이 코드로 명확히 정의되어 협업 효율성이 증대되었고, 수동 타입 동기화 작업이 사라져 **런타임 에러 발생률을 감소**시키고 개발 속도를 크게 향상시켰습니다.
+
+## **6. 프로젝트 성과**
+
+- **정량적 성과**
+    - **비용 절감**: Oracle Cloud Free Tier와 리소스 최적화를 통해 **월 운영 비용 $0**에 가까운 인프라 구축. 3-Tier 캐싱 전략으로 **AI API 호출 비용  절감**
+    - **성능 향상**: 캐시 히트시, 평균 API 분석 시간 20**초 → 1초로 단축**. Vite 도입으로 프론트엔드 개발 서버 시작 시간 단축.
+    - **개발 생산성**: Monorepo 및 공유 타입 시스템 도입으로 API 불일치 버그 100% 제거, **리팩토링 시간 단축**.
+- **정성적 성과**
+    - **사회적 가치 창출**: AI 기술의 역기능(가짜 정보 확산)을 AI 기술(콘텐츠 분석, 교육)로 해결하는 선순환 모델 제시. 사용자의 디지털 리터러시 및 비판적 사고 능력 함양에 기여
+    - **기술적 성과**: 제한된 자원 하에서의 최적화, Chrome Extension 보안 아키텍처, AI 기반 자동 콘텐츠 생성 등 기술적 해결
+    - **사용자 경험**: 실시간 분석 피드백과 게이미피케이션 요소를 통해 정보 판별 능력을 즐겁게 향상시키는 새로운 학습 경험 제공
+    
+
+## **7. 회고 및 배운 점**
+
+- **기술적 성장**: 이번 프로젝트를 통해 프론트엔드부터 백엔드, AI 연동, 클라우드 인프라 구축 및 최적화까지 **풀스택 개발 역량**을 크게 향상시킬 수 있었습니다. 특히, **제한된 리소스 환경에서의 문제 해결 능력**과 **비용 효율적인 시스템 설계**의 중요성을 체감했습니다. Monorepo, 공유 타입 시스템, 보안 프록시 패턴 등 **현대적인 개발 방법론**을 실제 프로젝트에 적용하며 코드 품질과 협업 효율성을 높이는 경험을 했습니다.
+- **아쉬운 점 및 개선 방향**: 초기 기획 단계에서 사용자 인증 시스템을 제외하여 개인화된 학습 기록 추적에 한계가 있었습니다. 향후 OAuth 등을 도입하여 사용자별 맞춤형 피드백과 장기적인 성장 추적 기능을 강화하고 싶습니다. 또한, 현재 SQLite 기반인 데이터베이스를 PostgreSQL로 마이그레이션하여 동시성 처리 능력과 데이터 분석 기능을 확장할 계획입니다.
+- **문제 해결 및 협업**: AI 모델(Gemini)의 예측 불가능성(응답 형식 변화, 할루시네이션)에 대응하기 위해 견고한 JSON 파싱 로직과 Fallback 시스템을 구현하는 과정에서 많은 것을 배웠습니다. 특히 수많은 프롬프트 엔지니어링을 직접 수행하고 조사하기도 하며, 기술적 문제를  해결하고 더 나은 설계를 만들어가는 가치를 경험했습니다.
