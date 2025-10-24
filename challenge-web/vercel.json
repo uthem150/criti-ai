@@ -9,11 +9,7 @@
       "destination": "/api/proxy?apiPath=/challenge/$1"
     },
     {
-      "source": "/challenge",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/challenge/(.*)",
+      "source": "/(.*)",
       "destination": "/index.html"
     }
   ],
@@ -40,7 +36,7 @@
       ]
     },
     {
-      "source": "/static/(.*)",
+      "source": "/assets/(.*)",
       "headers": [
         {
           "key": "Cache-Control",
