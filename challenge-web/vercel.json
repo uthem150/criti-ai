@@ -13,7 +13,7 @@
       "destination": "/index.html"
     },
     {
-      "source": "/challenge/(.*)",
+      "source": "/challenge/((?!api/|assets/|.*\\..*).*)",
       "destination": "/index.html"
     }
   ],
