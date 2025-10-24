@@ -29,6 +29,8 @@ const allowedOrigins = [
   FRONTEND_URL,
 
   // Vercel 배포 환경 URL 패턴
+  "https://criti-ai.vercel.app",
+  "https://criti-ai-web.vercel.app",
   "https://criti-ai-challenge.vercel.app", // 특정 Vercel 배포 주소
   /^https:\/\/.*\.vercel\.app$/, // 모든 Vercel 프리뷰 배포 주소 허용
 
