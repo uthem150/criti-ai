@@ -211,7 +211,7 @@ export interface ChallengeResponse {
 export interface AnalysisCache {
   url: string;
   urlHash: string;
-  analysis: TrustAnalysis;
+  analysis: AnalysisResult; // TrustAnalysis | YoutubeTrustAnalysis 모두 지원
   cachedAt: string;
   expiresAt: string;
   hitCount: number;
@@ -247,4 +247,219 @@ export interface AnalysisWarning {
   severity: "low" | "medium" | "high" | "critical";
   message: string;
   actionRecommendation?: string;
+}
+
+// ===== 유튜브 분석 관련 타입 =====
+
+// 유튜브 비디오 정보
+export interface YoutubeVideoInfo {
+  videoId: string;
+  title: string;
+  channelName: string;
+  channelId: string;
+  duration: number; // 초 단위
+  viewCount: number;
+  likeCount?: number;
+  publishedAt: string;
+  description: string;
+  thumbnailUrl: string;
+  isShorts: boolean; // 쇼츠 여부
+}
+
+// 자막 세그먼트 (타임스탬프 포함)
+export interface TranscriptSegment {
+  text: string;
+  start: number; // 시작 시간 (초)
+  duration: number; // 지속 시간 (초)
+}
+
+// 전체 자막
+export interface VideoTranscript {
+  segments: TranscriptSegment[];
+  fullText: string; // 전체 자막을 합친 텍스트
+  language: string;
+}
+
+// 타임스탬프가 포함된 분석 항목
+export interface TimestampedAnalysisItem {
+  timestamp: number; // 발생 시간 (초)
+  endTime?: number; // 종료 시간 (선택적)
+  text: string; // 해당 시간의 자막 텍스트
+  type: string; // 분석 항목 타입
+  description: string; // 설명
+  severity?: "low" | "medium" | "high";
+}
+
+// 유튜브 편향성 분석 (타임스탬프 포함)
+export interface YoutubeEmotionalBias {
+  score: number; // 0-100 (높을수록 중립적)
+  manipulativeWords: TimestampedManipulativeWord[];
+  intensity: "none" | "low" | "medium" | "high";
+}
+
+export interface TimestampedManipulativeWord {
+  word: string;
+  timestamp: number; // 발생 시간 (초)
+  category: "emotional" | "exaggeration" | "urgency" | "authority" | "fear";
+  impact: "low" | "medium" | "high";
+  explanation: string;
+  contextText: string; // 주변 문맥
+}
+
+// 유튜브 클릭베이트 분석 (타임스탬프 포함)
+export interface TimestampedClickbaitElement {
+  type: "curiosity_gap" | "emotional_trigger" | "urgency" | "superlative";
+  text: string;
+  timestamp: number; // 발생 시간 (초)
+  explanation: string;
+  severity: "low" | "medium" | "high";
+  isInTitle: boolean; // 제목에 포함된 클릭베이트인지
+  isInThumbnail: boolean; // 썸네일 관련 클릭베이트인지
+}
+
+// 유튜브 광고 분석 (타임스탬프 포함)
+export interface TimestampedAdvertisementIndicator {
+  type:
+    | "product_mention"
+    | "affiliate_link"
+    | "sponsored_content"
+    | "promotional_language"
+    | "call_to_action"
+    | "brand_focus";
+  evidence: string;
+  timestamp: number; // 발생 시간 (초)
+  explanation: string;
+  weight: number;
+  contextText: string; // 주변 문맥
+}
+
+// 유튜브 논리적 오류 (타임스탬프 포함)
+export interface TimestampedLogicalFallacy {
+  type: string;
+  description: string;
+  affectedText: string;
+  timestamp: number; // 발생 시간 (초)
+  endTime?: number; // 종료 시간 (선택적)
+  severity: "low" | "medium" | "high";
+  explanation: string;
+  examples?: string[];
+}
+
+// 유튜브 비디오 신뢰도 분석 결과
+export interface YoutubeTrustAnalysis {
+  // 기본 비디오 정보
+  videoInfo: YoutubeVideoInfo;
+  transcript: VideoTranscript;
+
+  // 전체 분석 결과
+  overallScore: number; // 0-100
+  analysisSummary: string;
+
+  // 채널 신뢰도
+  channelCredibility: {
+    score: number; // 0-100
+    level: "trusted" | "neutral" | "caution" | "unreliable";
+    subscriberCount: number;
+    verificationStatus: "verified" | "unverified";
+    reputation: {
+      description: string;
+      factors: string[];
+      contentQuality?: number; // 콘텐츠 품질 점수
+      consistencyScore?: number; // 일관성 점수
+    };
+  };
+
+  // 타임라인 기반 편향성 분석
+  biasAnalysis: {
+    emotionalBias: YoutubeEmotionalBias;
+    politicalBias: PoliticalBias;
+    clickbaitElements: TimestampedClickbaitElement[];
+  };
+
+  // 타임라인 기반 광고 분석
+  advertisementAnalysis: {
+    isAdvertorial: boolean;
+    confidence: number;
+    indicators: TimestampedAdvertisementIndicator[];
+    nativeAdScore: number;
+    commercialIntentScore: number;
+    sponsoredSegments: Array<{
+      start: number;
+      end: number;
+      type: "sponsored" | "product_placement" | "affiliate";
+    }>;
+  };
+
+  // 타임라인 기반 논리적 오류
+  logicalFallacies: TimestampedLogicalFallacy[];
+
+  // 핵심 주장 (타임스탬프 포함)
+  keyClaims: Array<{
+    claim: string;
+    timestamp: number;
+    needsFactCheck: boolean;
+    verificationKeywords: string[];
+  }>;
+
+  // 세부 점수
+  detailedScores: {
+    channelScore: number;
+    objectivityScore: number;
+    logicScore: number;
+    advertisementScore: number;
+    evidenceScore: number;
+    thumbnailAccuracy: number; // 썸네일과 내용의 일치도
+  };
+
+  // 경고 사항
+  warnings: AnalysisWarning[];
+
+  // 타임라인 하이라이트 (주요 문제 발생 시점)
+  timelineHighlights: Array<{
+    timestamp: number;
+    type: "bias" | "fallacy" | "advertisement" | "claim";
+    severity: "low" | "medium" | "high";
+    description: string;
+  }>;
+}
+
+// 유튜브 분석 요청
+export interface YoutubeAnalysisRequest {
+  url: string; // 유튜브 URL
+  videoId?: string; // 비디오 ID (URL에서 추출 가능)
+  analysisLevel?: "basic" | "detailed" | "comprehensive";
+}
+
+// ===== 분석 결과 통합 타입 =====
+
+/**
+ * 모든 분석 결과 타입의 유니온
+ * 캐시 시스템에서 다양한 분석 타입을 처리하기 위해 사용
+ */
+export type AnalysisResult = TrustAnalysis | YoutubeTrustAnalysis;
+
+/**
+ * 타입 가드: TrustAnalysis 여부 확인
+ */
+export function isTrustAnalysis(
+  analysis: AnalysisResult
+): analysis is TrustAnalysis {
+  return (
+    "sourceCredibility" in analysis &&
+    !("videoInfo" in analysis) &&
+    !("transcript" in analysis)
+  );
+}
+
+/**
+ * 타입 가드: YoutubeTrustAnalysis 여부 확인
+ */
+export function isYoutubeTrustAnalysis(
+  analysis: AnalysisResult
+): analysis is YoutubeTrustAnalysis {
+  return (
+    "videoInfo" in analysis &&
+    "transcript" in analysis &&
+    "channelCredibility" in analysis
+  );
 }

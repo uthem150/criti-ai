@@ -1,6 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import type {
-  TrustAnalysis,
+  AnalysisResult,
   Challenge,
   UserProgress,
   Badge,
@@ -48,7 +48,7 @@ class DatabaseService {
   // 특정 URL에 대한 분석 결과를 데이터베이스의 AnalysisCache 테이블에 저장하거나, 이미 존재한다면 업데이트
   async saveAnalysisToCache(
     url: string,
-    analysis: TrustAnalysis,
+    analysis: AnalysisResult,
     title?: string,
     contentType?: string
   ): Promise<void> {
@@ -91,7 +91,7 @@ class DatabaseService {
   }
 
   // 데이터베이스에 저장된 유효한 분석 결과가 있는지 확인하고 가져옴
-  async getAnalysisFromCache(url: string): Promise<TrustAnalysis | null> {
+  async getAnalysisFromCache(url: string): Promise<AnalysisResult | null> {
     try {
       // 1. URL로 캐시 데이터 조회
       const cached = await this.prisma.analysisCache.findUnique({
@@ -119,7 +119,7 @@ class DatabaseService {
       });
 
       // 5. JSON 문자열을 객체로 변환하여 반환
-      return JSON.parse(cached.analysis) as TrustAnalysis;
+      return JSON.parse(cached.analysis) as AnalysisResult;
     } catch (error) {
       console.error("분석 결과 DB 조회 실패:", error);
       return null;

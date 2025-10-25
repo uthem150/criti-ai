@@ -17,7 +17,6 @@
     "declarationMap": true,
     "sourceMap": true,
     "exactOptionalPropertyTypes": false,
-    "noEmit": false,
     "composite": true
   },
   "include": ["src/**/*"],

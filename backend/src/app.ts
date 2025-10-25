@@ -8,6 +8,7 @@ import compression from "compression";
 import type { Request, Response, NextFunction } from "express";
 import analysisRoutes from "./routes/analysis.js";
 import challengeRoutes from "./routes/challenge.js";
+import youtubeRoutes from "./routes/youtube.js";
 import { GeminiService } from "./services/GeminiService.js";
 import { redisCacheService } from "./services/RedisCacheService.js";
 import { databaseService } from "./services/DatabaseService.js";
@@ -82,7 +83,7 @@ app.use(
 );
 
 // compression: 응답 본문 압축 (gzip)
-app.use(compression());
+app.use(compression() as unknown as express.RequestHandler);
 // morgan: HTTP 요청 로그 출력 ('combined' 포맷)
 app.use(morgan("combined"));
 // express.json: JSON 요청 본문 파싱 (10mb 제한)
@@ -189,6 +190,8 @@ app.get("/challenge", (req: Request, res: Response) => {
 app.use("/api/analysis", analysisRoutes);
 // '/api/challenge' 요청은 challengeRoutes에서 처리
 app.use("/api/challenge", challengeRoutes);
+// '/api/youtube' 요청은 youtubeRoutes에서 처리
+app.use("/api/youtube", youtubeRoutes);
 
 /**
  * 에러 핸들링 미들웨어

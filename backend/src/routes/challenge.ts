@@ -152,8 +152,8 @@ router.post("/challenges/:id/submit", async (req: Request, res: Response): Promi
 
     // 답안 채점
     const correctAnswers = challenge.correctAnswers;
-    const isCorrect = correctAnswers.every(answer => userAnswers.includes(answer)) &&
-                      userAnswers.every(answer => correctAnswers.includes(answer));
+    const isCorrect = correctAnswers.every((answer: string) => userAnswers.includes(answer)) &&
+                      userAnswers.every((answer: string) => correctAnswers.includes(answer));
 
     const score = isCorrect ? challenge.points : Math.floor(challenge.points * 0.3); // 남련점 30%
     const bonusPoints = timeSpent < 60 ? Math.floor(challenge.points * 0.1) : 0; // 빠른 답변 보너스

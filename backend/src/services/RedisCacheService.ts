@@ -1,5 +1,5 @@
-import Redis from "ioredis";
-import type { TrustAnalysis, AnalysisCache } from "@criti-ai/shared";
+import { Redis } from "ioredis";
+import type { AnalysisResult, AnalysisCache } from "@criti-ai/shared";
 
 export class RedisCacheService {
   private redis: Redis; // ioredis 인스턴스를 저장할 변수
@@ -56,7 +56,7 @@ export class RedisCacheService {
       this.isConnected = true;
     });
 
-    this.redis.on("error", (err) => {
+    this.redis.on("error", (err: Error) => {
       console.warn("⚠️ Redis connection error:", err.message);
       this.isConnected = false;
 
@@ -99,11 +99,11 @@ export class RedisCacheService {
   }
 
   /**
-   * 분석 결과 캐시 저장
+   * 분석 결과 캐시 저장 (모든 분석 타입 지원)
    */
   async setAnalysisCache(
     url: string,
-    analysis: TrustAnalysis,
+    analysis: AnalysisResult,
     ttlSeconds: number = 24 * 60 * 60
   ): Promise<void> {
     // 1. Redis 사용 불가 시 즉시 중단
@@ -140,9 +140,9 @@ export class RedisCacheService {
   }
 
   /**
-   * 분석 결과 캐시 조회
+   * 분석 결과 캐시 조회 (모든 분석 타입 반환)
    */
-  async getAnalysisCache(url: string): Promise<TrustAnalysis | null> {
+  async getAnalysisCache(url: string): Promise<AnalysisResult | null> {
     if (!this.isRedisAvailable()) {
       return null;
     }
