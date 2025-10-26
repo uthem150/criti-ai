@@ -952,6 +952,458 @@ ${request.content}
     }
   }
   /**
+   * 유튜브 비디오 빠른 분석 (텍스트 기반)
+   *
+   * 자막 + 메타데이터를 먼저 추출하고 텍스트로 분석
+   * 비디오 파일 처리 없이 텍스트만 분석
+   *
+   * @param videoInfo - 비디오 메타데이터
+   * @param transcript - 추출된 자막
+   * @param channelInfo - 채널 정보 (구독자 수 등)
+   * @returns YoutubeTrustAnalysis - 상세 분석 결과
+   */
+  async analyzeYoutubeWithTranscript(
+    videoInfo: any,
+    transcript: any,
+    channelInfo: { subscriberCount: number; verificationStatus: string }
+  ): Promise<YoutubeTrustAnalysis> {
+    console.log("🚀 유튜브 빠른 분석 시작 (텍스트 기반)");
+    console.log(`📺 비디오: ${videoInfo.title}`);
+    console.log(`📝 자막 길이: ${transcript.fullText.length}자`);
+
+    try {
+      // Google Search 그라운딩 설정
+      const groundingTool = {
+        googleSearch: {},
+      };
+
+      const config = {
+        tools: [groundingTool],
+        temperature: 0.1,
+        topK: 1,
+        topP: 1,
+      };
+
+      // 텍스트 기반 분석 프롬프트
+      const prompt = this.buildFastYoutubeAnalysisPrompt(
+        videoInfo,
+        transcript,
+        channelInfo
+      );
+
+      console.log("🤖 Gemini API 호출 중 (텍스트 분석)...");
+
+      const response = await this.ai.models.generateContent({
+        model: "gemini-2.5-flash",
+        contents: prompt,
+        config,
+      });
+
+      console.log("✅ Gemini API 응답 성공");
+
+      // 그라운딩 메타데이터 확인
+      if (response.candidates?.[0]?.groundingMetadata) {
+        const metadata = response.candidates[0].groundingMetadata;
+        console.log(
+          "🔍 [빠른 분석] 그라운딩 검색어:",
+          metadata.webSearchQueries
+        );
+        console.log(
+          "📚 [빠른 분석] 그라운딩 소스 개수:",
+          metadata.groundingChunks?.length || 0
+        );
+      }
+
+      const responseText = response.text;
+
+      if (!responseText) {
+        throw new Error("AI 응답이 비어있습니다.");
+      }
+
+      return this.parseYoutubeAnalysisResult(responseText);
+    } catch (error) {
+      console.error("❌ 유튜브 빠른 분석 오류:", error);
+      const errorMessage =
+        error instanceof Error ? error.message : "알 수 없는 오류";
+      throw new Error(`유튜브 분석 중 오류가 발생했습니다: ${errorMessage}`);
+    }
+  }
+
+  /**
+   * 빠른 유튜브 분석 프롬프트 생성 (텍스트 기반)
+   *
+   * 자막과 메타데이터를 기반으로 상세한 분석
+   */
+  private buildFastYoutubeAnalysisPrompt(
+    videoInfo: any,
+    transcript: any,
+    channelInfo: { subscriberCount: number; verificationStatus: string }
+  ): string {
+    // 자막 세그먼트를 타임스탬프 포함 형식으로 변환
+    const transcriptWithTimestamps = transcript.segments
+      .slice(0, 150) // 최대 150개 세그먼트
+      .map((seg: any) => `[${Math.floor(seg.start)}초] ${seg.text}`)
+      .join("\n");
+
+    return `
+# MISSION: 유튜브 비디오 전문 분석 AI
+
+당신은 세계 최고의 **유튜브 콘텐츠 전문 분석가**이자 **미디어 리터러시 AI 'Criti.AI'**입니다.
+
+당신의 목표는 유튜브 비디오의 신뢰도를 **타임라인 기반**으로 다차원 분석하여, 사용자가 비판적 사고를 기를 수 있도록 돕는 것입니다.
+
+# 📊 제공된 데이터
+
+## 비디오 정보
+- **제목**: ${videoInfo.title}
+- **채널명**: ${videoInfo.channelName}
+- **채널 ID**: ${videoInfo.channelId}
+- **비디오 ID**: ${videoInfo.videoId}
+- **길이**: ${videoInfo.duration}초
+- **조회수**: ${videoInfo.viewCount.toLocaleString()}회
+- **좋아요 수**: ${videoInfo.likeCount?.toLocaleString() || 0}개
+- **게시일**: ${videoInfo.publishedAt}
+- **쇼츠 여부**: ${videoInfo.isShorts ? "예" : "아니오"}
+- **설명**: ${videoInfo.description.substring(0, 500)}${videoInfo.description.length > 500 ? "..." : ""}
+
+## 채널 정보
+- **구독자 수**: ${channelInfo.subscriberCount.toLocaleString()}명
+- **인증 상태**: ${channelInfo.verificationStatus}
+
+## 자막 전문 (타임스탬프 포함)
+${transcriptWithTimestamps}
+
+${transcript.segments.length > 150 ? `\n... (총 ${transcript.segments.length}개 세그먼트 중 일부)` : ""}
+
+## 전체 자막 텍스트
+${transcript.fullText.substring(0, 5000)}${transcript.fullText.length > 5000 ? "..." : ""}
+# 🎯 핵심 분석 원칙
+
+⚡ **정확성 최우선**: 실제 자막 내용에 기반한 분석만 제공
+🕐 **타임스탬프 필수**: 모든 분석 항목에 정확한 시간대 명시 (위 자막 세그먼트의 타임스탬프 활용)
+📊 **구조화된 출력**: JSON 형식의 명확한 분석 결과
+🔍 **세밀한 관찰**: 편향, 광고, 논리오류를 시간대별로 포착
+
+# 📊 분석 차원 (타임스탬프 필수)
+
+## 1. 비디오 기본 정보 추출
+- **제목 분석**: 클릭베이트 요소, 과장 표현
+- **채널 정보**: 구독자 수, 인증 상태, 전문성
+- **비디오 메타데이터**: 길이, 조회수, 좋아요, 게시일
+- **쇼츠 여부**: 60초 미만이면 true
+
+## 2. 채널 신뢰도 평가 (0-100점)
+- **전문성 평가**: 해당 분야에서의 전문성
+- **콘텐츠 품질**: 일관성, 정보의 정확성
+- **구독자 신뢰도**: 규모와 참여도
+- **인증 상태**: 공식 인증 여부
+
+## 3. 자막 및 내용 추출
+- **전체 자막 수집**: 시간대별 세그먼트 (start, duration, text)
+- **주요 메시지 파악**: 영상이 전달하려는 핵심 메시지
+- **언어 감지**: 주 사용 언어
+
+## 4. 타임라인 기반 편향성 분석 ⭐ (핵심)
+
+영상의 **시간대별**로 다음 요소들을 분석하세요:
+
+### 4-1. 감정 조작 표현 (타임스탬프 필수)
+- **과장 표현**: "최고", "역대급", "충격" 등의 시간대
+- **선동적 언어**: 특정 감정을 자극하는 표현의 발생 시점
+- **긴급성 유도**: "지금 당장", "빨리" 등의 타임스탬프
+- **공포 조장**: 불안이나 두려움을 유발하는 구간
+
+**중요**: 각 표현의 정확한 발생 시간(초)과 주변 문맥 제공
+
+### 4-2. 제목 및 썸네일 클릭베이트 분석
+- **호기심 갭**: 정보를 숨기고 클릭 유도
+- **감정 트리거**: 분노, 놀람, 공포 유발
+- **최상급 표현**: "최고의", "절대", "유일한"
+- **긴급성 강조**: 시간 제한 암시
+
+**타임스탬프**: 제목/썸네일은 0초로 표시
+
+### 4-3. 정치적/이념적 편향 (시간대 명시)
+- **특정 관점 편향**: 한쪽 관점만 제시하는 구간
+- **대립 구도 조장**: 갈등을 부추기는 시간대
+- **타임스탬프**: 편향이 드러나는 정확한 시점
+
+## 5. 타임라인 기반 광고성 분석 ⭐ (매우 중요)
+
+### 5-1. 제품/서비스 언급 (타임스탬프 필수)
+- **직접 광고**: 제품명/브랜드 직접 언급 시간
+- **간접 광고**: 제품이 화면에 노출되는 구간
+- **협찬 표시**: 협찬 공지 시점
+- **제휴 링크**: "설명란 링크" 언급 시간
+
+### 5-2. 구매 유도 (타임스탬프 필수)
+- **CTA (Call-to-Action)**: "지금 구매", "할인 코드" 발생 시점
+- **긴급성 유도**: "한정 수량", "오늘만" 등의 시간대
+- **추천 링크**: 제휴 마케팅 언급 구간
+
+### 5-3. 협찬 세그먼트
+- **협찬 구간 범위**: start(초) ~ end(초)
+- **협찬 유형**: sponsored, product_placement, affiliate
+
+**중요**: 모든 광고성 표현의 정확한 타임스탬프와 증거 텍스트 제공
+
+## 6. 타임라인 기반 논리적 오류 분석
+
+### 6-1. 주요 논리적 오류 탐지 (타임스탬프 필수)
+- **성급한 일반화**: 불충분한 근거로 결론 - 발생 시간
+- **흑백논리**: A 아니면 B 식 단순화 - 시간대
+- **인과관계 오류**: 잘못된 인과 추론 - 발생 구간
+- **권위 호소**: 근거 없이 권위에 의존 - 타임스탬프
+- **인신공격**: 논리 대신 인격 공격 - 시간대
+
+**형식**: 각 오류에 대해
+- 오류 유형
+- 발생 시간 (start, end)
+- 해당 자막 텍스트
+- 왜 오류인지 설명
+- 심각도 (low/medium/high)
+
+## 7. 핵심 주장 및 팩트체크 필요 항목
+
+### 7-1. 주요 주장 추출 (타임스탬프 필수)
+- 영상에서 제시하는 주요 주장들
+- 각 주장의 정확한 발생 시간
+- 팩트체크 필요 여부 판단
+- 검증용 키워드 제시
+
+### 7-2. 의심스러운 정보
+- 출처 불명의 통계나 데이터
+- 검증 필요한 주장들
+- 오해의 소지가 있는 표현
+
+## 8. 종합 평가 및 타임라인 하이라이트
+
+### 8-1. 신뢰도 점수 (0-100)
+- **전체 점수**: 종합 신뢰도
+- **채널 점수**: 채널 신뢰도
+- **객관성 점수**: 편향성 역산
+- **논리성 점수**: 논리적 타당성
+- **광고성 점수**: 높을수록 덜 광고적
+- **근거 점수**: 주장의 근거 충실도
+- **썸네일 일치도**: 제목/썸네일과 내용 일치 정도
+
+### 8-2. 타임라인 하이라이트
+주요 문제 발생 시점을 리스트로 제공:
+- 타임스탬프
+- 문제 유형 (bias/fallacy/advertisement/claim)
+- 심각도 (low/medium/high)
+- 설명
+
+### 8-3. 시청 경고
+- 높은 편향성, 다수의 논리적 오류, 신뢰할 수 없는 출처, 과도한 광고, 오해의 소지 데이터 등에 대한 경고
+- 심각도별 권장 조치
+
+# 🚨 중요: 타임스탬프 지침
+
+1. **모든 분석 항목에 타임스탬프 필수**:
+   - 편향적 표현 → 몇 초에 나오는지
+   - 광고성 멘트 → 몇 초에 시작하는지
+   - 논리적 오류 → 몇 초에 발생하는지
+
+2. **타임스탬프 형식**:
+   - 정수형 (초 단위): 125 (2분 5초를 의미)
+   - 범위로 표현 가능: start=125, end=140
+
+3. **정확성 최우선**:
+   - 실제 영상에서 해당 시간대에 문제가 나타나야 함
+   - 추측하지 말고 명확한 경우만 기록
+   - 자막이나 음성 내용을 정확히 인용
+
+4. **원문 정확성**:
+   - 모든 증거 텍스트는 자막이나 음성과 정확히 일치
+   - 임의로 생성하거나 변형하지 말 것
+
+# REQUIRED JSON OUTPUT FORMAT
+
+다른 설명 없이 반드시 아래 JSON 형식으로만 응답하세요:
+
+{
+  "videoInfo": {
+    "videoId": "${videoInfo.videoId}",
+    "title": "${videoInfo.title}",
+    "channelName": "${videoInfo.channelName}",
+    "channelId": "${videoInfo.channelId}",
+    "duration": ${videoInfo.duration},
+    "viewCount": ${videoInfo.viewCount},
+    "likeCount": ${videoInfo.likeCount || 0},
+    "publishedAt": "${videoInfo.publishedAt}",
+    "description": "${videoInfo.description.substring(0, 200).replace(/\n/g, " ").replace(/"/g, '\\"')}",
+    "thumbnailUrl": "${videoInfo.thumbnailUrl}",
+    "isShorts": ${videoInfo.isShorts}
+  },
+  
+  "transcript": {
+    "segments": ${JSON.stringify(transcript.segments.slice(0, 50))},
+    "fullText": "${transcript.fullText.substring(0, 1000).replace(/\n/g, " ").replace(/"/g, '\\"')}...",
+    "language": "${transcript.language}"
+   },
+  
+  "overallScore": 75,
+  "analysisSummary": "이 비디오에 대한 핵심 분석 결과 1-2문장 요약",
+  
+  "channelCredibility": {
+    "score": 80,
+    "level": "trusted | neutral | caution | unreliable",
+    "subscriberCount": 100000,
+    "verificationStatus": "verified | unverified",
+    "reputation": {
+      "description": "채널에 대한 간결한 설명",
+      "factors": ["신뢰도 판단 근거들"],
+      "contentQuality": 85,
+      "consistencyScore": 90
+    }
+  },
+  
+  "biasAnalysis": {
+    "emotionalBias": {
+      "score": 60,
+      "manipulativeWords": [
+        {
+          "word": "충격적인",
+          "timestamp": 45,
+          "category": "emotional | exaggeration | urgency | authority | fear",
+          "impact": "low | medium | high",
+          "explanation": "왜 이 표현이 조작적인지",
+          "contextText": "주변 문맥"
+        }
+      ],
+      "intensity": "none | low | medium | high"
+    },
+    "politicalBias": {
+      "direction": "left | center | right | neutral",
+      "confidence": 50,
+      "indicators": ["정치적 편향 지표들"]
+    },
+    "clickbaitElements": [
+      {
+        "type": "curiosity_gap | emotional_trigger | urgency | superlative",
+        "text": "클릭베이트 텍스트",
+        "timestamp": 0,
+        "explanation": "왜 클릭베이트인지",
+        "severity": "low | medium | high",
+        "isInTitle": true,
+        "isInThumbnail": false
+      }
+    ]
+  },
+  
+  "advertisementAnalysis": {
+    "isAdvertorial": true,
+    "confidence": 85,
+    "nativeAdScore": 70,
+    "commercialIntentScore": 80,
+    "indicators": [
+      {
+        "type": "product_mention | affiliate_link | sponsored_content | promotional_language | call_to_action | brand_focus",
+        "evidence": "광고성 표현 원문",
+        "timestamp": 120,
+        "explanation": "왜 광고성인지",
+        "weight": 8,
+        "contextText": "주변 문맥"
+      }
+    ],
+    "sponsoredSegments": [
+      {
+        "start": 60,
+        "end": 90,
+        "type": "sponsored | product_placement | affiliate"
+      }
+    ]
+  },
+  
+  "logicalFallacies": [
+    {
+      "type": "성급한 일반화",
+      "description": "오류에 대한 설명",
+      "affectedText": "오류가 포함된 정확한 텍스트",
+      "timestamp": 150,
+      "endTime": 165,
+      "severity": "low | medium | high",
+      "explanation": "초등학생도 이해할 수 있는 설명",
+      "examples": ["유사한 오류 예시들"]
+    }
+  ],
+  
+  "keyClaims": [
+    {
+      "claim": "핵심 주장 텍스트",
+      "timestamp": 200,
+      "needsFactCheck": true,
+      "verificationKeywords": ["검증용 키워드들"]
+    }
+  ],
+  
+  "detailedScores": {
+    "channelScore": 80,
+    "objectivityScore": 60,
+    "logicScore": 70,
+    "advertisementScore": 50,
+    "evidenceScore": 75,
+    "thumbnailAccuracy": 40
+  },
+  
+  "warnings": [
+    {
+      "type": "high_bias | multiple_fallacies | unreliable_source | heavy_advertising | misleading_data",
+      "severity": "low | medium | high | critical",
+      "message": "경고 메시지",
+      "actionRecommendation": "권장 조치"
+    }
+  ],
+  
+  "timelineHighlights": [
+    {
+      "timestamp": 45,
+      "type": "bias | fallacy | advertisement | claim",
+      "severity": "low | medium | high",
+      "description": "이 시점에 발생하는 문제 설명"
+    }
+  ]
+}
+
+# FINAL CRITICAL INSTRUCTIONS
+
+⚠️ **반드시 준수해야 할 사항들**:
+
+1. **JSON ONLY**: 
+   - 순수 JSON만 반환
+   - 마크다운 코드 블록 사용하지 말 것
+   - 다른 설명 없이 JSON만
+
+2. **타임스탬프 정확성**: 
+   - 모든 타임스탬프는 정수형 (초 단위)
+   - 실제 영상 내용과 일치
+   - 추측하지 말고 확실한 경우만 기록
+
+3. **원문 정확성**:
+   - affectedText, evidence, claim 등은 실제 자막이나 음성과 일치
+   - 임의로 생성하지 말 것
+
+4. **한국어 응답**: 
+   - 모든 설명과 분석은 자연스러운 한국어
+
+5. **비디오 정보 수집**: 
+   - Gemini가 접근 가능한 메타데이터 최대한 수집
+   - 접근 불가능한 정보는 빈 문자열이나 0
+
+6. **타임라인 하이라이트 우선순위**:
+   - 높은 심각도(high severity) 항목을 포함
+   - 사용자가 주의 깊게 봐야 할 구간 명시
+
+7. **Google 검색 그라운딩 활용**:
+   - 팩트체크가 필요한 주장은 Google 검색으로 검증
+   - 출처를 명확히 밝히고 신뢰도 평가
+
+이제 위 유튜브 URL을 철저히 분석하여 JSON으로 응답해주세요.
+`;
+  }
+
+  /**
    * URL에서 유튜브 비디오 ID 추출
    */
   private extractVideoId(url: string): string | null {
@@ -1350,29 +1802,51 @@ ${request.content}
       console.log("🔍 유튜브 분석 응답 길이:", analysisText.length);
       console.log("🔍 응답 시작:", analysisText.substring(0, 300));
 
-      // JSON 추출
-      let jsonString = "";
-      const cleanText = analysisText
-        .replace(/```json\s*/g, "")
-        .replace(/```\s*/g, "");
+      // 1단계: 마크다운 코드 블록 제거 (더 강력하게)
+      let cleanText = analysisText;
 
+      // ```json\n{...}\n``` 형태 제거
+      cleanText = cleanText.replace(/^```json\s*\n/gm, "");
+      cleanText = cleanText.replace(/^```\s*\n/gm, "");
+      cleanText = cleanText.replace(/\n```$/gm, "");
+
+      // 남아있는 ``` 제거
+      cleanText = cleanText.replace(/```/g, "");
+
+      console.log("🧹 마크다운 제거 후 시작:", cleanText.substring(0, 200));
+
+      // 2단계: JSON 추출
+      let jsonString = "";
       const firstBrace = cleanText.indexOf("{");
       const lastBrace = cleanText.lastIndexOf("}");
 
       if (firstBrace !== -1 && lastBrace !== -1 && firstBrace < lastBrace) {
-        jsonString = cleanText.substring(firstBrace, lastBrace + 1);
+        jsonString = cleanText.substring(firstBrace, lastBrace + 1).trim();
       } else {
         const jsonMatch = cleanText.match(/\{[\s\S]*\}/);
         if (jsonMatch) {
-          jsonString = jsonMatch[0];
+          jsonString = jsonMatch[0].trim();
         } else {
           throw new Error("JSON 형식의 응답을 찾을 수 없습니다.");
         }
       }
 
       console.log("🔍 추출된 JSON 길이:", jsonString.length);
+      console.log("🔍 추출된 JSON 시작:", jsonString.substring(0, 200));
 
-      const parsed = JSON.parse(jsonString);
+      // 3단계: JSON 파싱
+      let parsed;
+      try {
+        parsed = JSON.parse(jsonString);
+      } catch (parseError) {
+        console.error("❌ 첫 번째 파싱 시도 실패, fixJsonQuotes 적용...");
+
+        // JSON 내부 큰따옴표 수정 시도
+        const fixedJsonString = this.fixJsonQuotes(jsonString);
+        console.log("🔧 수정된 JSON 시작:", fixedJsonString.substring(0, 200));
+
+        parsed = JSON.parse(fixedJsonString);
+      }
 
       // 기본 검증
       if (typeof parsed.overallScore !== "number") {
@@ -1383,11 +1857,106 @@ ${request.content}
       return parsed;
     } catch (error) {
       console.error("❌ 유튜브 분석 JSON 파싱 오류:", error);
-      console.error("📄 원본 응답:", analysisText.substring(0, 500));
+      console.error(
+        "📄 원본 응답 (처음 1000자):",
+        analysisText.substring(0, 1000)
+      );
 
       const errorMessage =
         error instanceof Error ? error.message : "알 수 없는 오류";
       throw new Error(`유튜브 분석 결과 파싱 실패 - 원인: ${errorMessage}`);
+    }
+  }
+
+  /**
+   * JSON 문자열 내부의 큰따옴표 수정
+   *
+   * Gemini가 제목이나 설명에 큰따옴표를 제대로 이스케이프하지 않을 때 대응
+   */
+  private fixJsonQuotes(jsonString: string): string {
+    try {
+      // 문제가 되는 필드들을 처리
+      const fieldsToFix = [
+        "title",
+        "description",
+        "text",
+        "claim",
+        "evidence",
+        "word",
+        "explanation",
+        "message",
+      ];
+
+      for (const field of fieldsToFix) {
+        jsonString = this.fixFieldQuotes(jsonString, field);
+      }
+
+      return jsonString;
+    } catch (error) {
+      console.warn("⚠️ JSON 큰따옴표 수정 실패, 원본 반환:", error);
+      return jsonString;
+    }
+  }
+
+  /**
+   * 특정 필드의 큰따옴표를 이스케이프
+   * 예: "title": "이것은 "큰따옴표" 문제" → "title": "이것은 \"큰따옴표\" 문제"
+   */
+  private fixFieldQuotes(jsonString: string, fieldName: string): string {
+    try {
+      // "fieldName": "value" 형태를 찾되, value 안의 큰따옴표를 처리
+      // 탐욕적이지 않은 매칭으로 가장 가까운 닫는 따옴표를 찾음
+      const pattern = new RegExp(`"${fieldName}"\\s*:\\s*"`, "g");
+
+      let result = jsonString;
+      let match;
+      let offset = 0;
+
+      // 각 필드 발생을 찾아서 처리
+      while ((match = pattern.exec(jsonString)) !== null) {
+        const startIndex = match.index + match[0].length; // 값 시작 위치
+        let endIndex = startIndex;
+        let inEscape = false;
+        let foundEnd = false;
+
+        // 값의 끝을 찾음 (이스케이프되지 않은 큰따옴표)
+        for (let i = startIndex; i < jsonString.length; i++) {
+          const char = jsonString[i];
+
+          if (char === "\\" && !inEscape) {
+            inEscape = true;
+            continue;
+          }
+
+          if (char === '"' && !inEscape) {
+            endIndex = i;
+            foundEnd = true;
+            break;
+          }
+
+          inEscape = false;
+        }
+
+        if (!foundEnd) continue;
+
+        // 값 추출 및 큰따옴표 이스케이프
+        const originalValue = jsonString.substring(startIndex, endIndex);
+        // 이미 이스케이프된 것은 놔두고, 이스케이프되지 않은 큰따옴표만 처리
+        const fixedValue = originalValue.replace(/(?<!\\)"/g, '\\"');
+
+        if (originalValue !== fixedValue) {
+          result =
+            result.substring(0, startIndex + offset) +
+            fixedValue +
+            result.substring(endIndex + offset);
+          offset += fixedValue.length - originalValue.length;
+        }
+      }
+
+      return result;
+    } catch (error) {
+      console.warn(`⚠️ ${fieldName} 필드 수정 실패:`, error);
+      return jsonString;
     }
   }
 }

@@ -1,5 +1,10 @@
+# =============================================================================
 # 프로덕션용 백엔드 Dockerfile
+# =============================================================================
 FROM node:18-alpine AS builder
+
+# 빌드 도구 설치
+RUN apk add --no-cache python3 make g++
 
 WORKDIR /app
 
@@ -23,13 +28,36 @@ RUN cd backend && npx prisma generate
 # TypeScript 빌드
 RUN cd backend && npm run build
 
+# =============================================================================
 # 프로덕션 이미지
+# =============================================================================
 FROM node:18-alpine
 
-WORKDIR /app
+# =============================================================================
+# YouTube 자막 추출을 위한 yt-dlp 설치
+# =============================================================================
+RUN apk add --no-cache \
+    # 시스템 유틸리티
+    curl \
+    wget \
+    # Python 3 (yt-dlp 실행에 필요)
+    python3 \
+    py3-pip \
+    # ffmpeg (비디오 처리에 필요)
+    ffmpeg \
+    && rm -rf /var/cache/apk/*
 
-# 필요한 패키지 설치
-RUN apk add --no-cache curl
+# yt-dlp 설치 (pip로 설치하면 자동 업데이트 가능)
+RUN pip3 install --no-cache-dir --break-system-packages yt-dlp
+
+# yt-dlp 버전 확인 (빌드 로그에 출력)
+RUN yt-dlp --version && echo "✅ yt-dlp installed successfully"
+
+# =============================================================================
+# 애플리케이션 설정
+# =============================================================================
+
+WORKDIR /app
 
 # 빌드된 파일들 복사
 COPY --from=builder /app/shared/dist ./shared/dist
@@ -41,6 +69,10 @@ COPY --from=builder /app/backend/prisma ./backend/prisma
 
 # 작업 디렉토리 변경
 WORKDIR /app/backend
+
+# 환경 변수 설정
+ENV NODE_ENV=production \
+    YT_DLP_PATH=/usr/bin/yt-dlp
 
 # 포트 노출
 EXPOSE 3001
