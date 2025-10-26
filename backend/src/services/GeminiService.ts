@@ -38,25 +38,47 @@ export class GeminiService {
     try {
       console.log("🤖 Gemini API 호출 중...");
 
-      // 분석용 설정 (낮은 temperature)
+      // Google Search 그라운딩 설정
+      const groundingTool = {
+        googleSearch: {},
+      };
+
+      // 분석용 설정 (낮은 temperature + Google Search)
+      const config = {
+        tools: [groundingTool], // Google 검색 기능 활성화
+        temperature: 0.1, // 일관된 분석을 위해 낮은 temperature
+        topK: 1,
+        topP: 1,
+      };
+
       const response = await this.ai.models.generateContent({
         model: "gemini-2.5-flash",
         contents: prompt,
-        config: {
-          temperature: 0.1, // 일관된 분석을 위해 낮은 temperature
-          topK: 1,
-          topP: 1,
-        },
+        config: config,
       });
 
       console.log("✅ Gemini API 응답 성공");
+
+      // 그라운딩 메타데이터 확인
+      if (response.candidates?.[0]?.groundingMetadata) {
+        const metadata = response.candidates[0].groundingMetadata;
+        console.log(
+          "🔍 [일반 분석] 그라운딩 검색어:",
+          metadata.webSearchQueries
+        );
+        console.log(
+          "📚 [일반 분석] 그라운딩 소스 개수:",
+          metadata.groundingChunks?.length || 0
+        );
+      }
+
       console.log("🔍 응답 객체 타입:", typeof response);
       console.log("🔍 응답 키들:", Object.keys(response));
 
       const responseText = response.text;
       console.log("🔍 responseText 타입:", typeof responseText);
       console.log("🔍 responseText 길이:", responseText?.length || 0);
-      
+
       if (!responseText) {
         throw new Error("AI 응답이 비어있습니다.");
       }
@@ -81,6 +103,7 @@ export class GeminiService {
 
 **분석 대상**: ${contentType} 콘텐츠
 **분석 수준**: 종합적 분석 (신뢰도, 편향성, 논리성, 광고성, 근거성)
+**사용 도구**: Google 검색 (출처 신뢰도 및 팩트체크용)
 
 # ⭐ 중요: 분석 지침 ⭐
 
@@ -106,10 +129,11 @@ export class GeminiService {
 - 전체적인 맥락과 핵심 주장을 파악합니다
 - 콘텐츠의 목적과 대상 독자를 추정합니다
 
-## 2단계: 출처 및 신뢰도 평가
-- URL과 도메인을 기반으로 언론사/작성자의 성향, 평판, 전문성을 평가합니다
-- 주요 언론사, 전문 매체, 개인 블로그, 상업적 사이트 등을 구분합니다
-- 과거 보도 이력, 사실 확인 시스템, 편집 원칙 등을 고려합니다
+## 2단계: 출처 및 신뢰도 평가 (Google 검색 활용) ⭐
+- **[Google 검색]** 제공된 Google 검색 기능을 활용하여 URL과 도메인을 기반으로 언론사/작성자의 성향, 평판, 전문성을 평가합니다.
+- **[Google 검색]** 검색 결과를 바탕으로 과거 보도 이력, 사실 확인 시스템, 편집 원칙 등을 고려하여 신뢰도를 판단합니다.
+- 주요 언론사, 전문 매체, 개인 블로그, 상업적 사이트 등을 구분합니다.
+- 검색 결과를 \`sourceCredibility.reputation\` 항목에 반영합니다.
 
 ## 3단계: 광고성 및 상업적 의도 분석 ⭐ (중요)
 - 상품/서비스 홍보 의도를 탐지합니다
@@ -132,9 +156,10 @@ export class GeminiService {
 - 사실과 의견을 구분하여 분석합니다
 - **중요**: 논리적 오류가 포함된 정확한 문장을 affectedText에 기록합니다
 
-## 6단계: 핵심 주장 및 교차 검증 필요 사항 식별
+## 6단계: 핵심 주장 및 교차 검증 필요 사항 식별 (Google 검색 활용)
 - 기사의 핵심 주장과 메시지를 추출합니다
 - 팩트체크가 필요한 중요한 주장들을 식별합니다
+- **[Google 검색]** 팩트체크가 필요한 주장에 대해 Google 검색을 활용하여 관련 정보를 \`crossReference.relatedArticles\` 또는 \`crossReference.factCheckSources\`에 반영합니다.
 - **중요**: 핵심 주장의 정확한 텍스트를 keyClaims에 기록합니다
 
 ## 7단계: 종합 점수 산정 및 근거 제시
@@ -163,7 +188,7 @@ ${request.content}
     "level": "'trusted' | 'neutral' | 'caution' | 'unreliable' 중 하나",
     "domain": "${new URL(request.url).hostname}",
     "reputation": {
-      "description": "출처에 대한 2-3문장의 간결한 설명",
+      "description": "출처에 대한 2-3문장의 간결한 설명 (Google 검색 결과 반영)",
       "factors": ["분석 근거가 된 요소들의 배열", "예: 주요 언론사", "사실 확인 시스템", "편집 원칙"],
       "historicalReliability": "0-100 사이의 정수. 과거 신뢰도",
       "expertiseArea": ["해당 출처의 전문 분야들"]
@@ -240,10 +265,10 @@ ${request.content}
     "consensus": "'agree' | 'disagree' | 'mixed' | 'insufficient'",
     "factCheckSources": [
       {
-        "organization": "팩트체크 기관명",
-        "url": "#fact-check-url",
+        "organization": "팩트체크 기관명 (Google 검색 기반)",
+        "url": "#fact-check-url (Google 검색 기반)",
         "verdict": "'true' | 'false' | 'mixed' | 'unverified'",
-        "summary": "팩트체크 결과 요약"
+        "summary": "팩트체크 결과 요약 (Google 검색 기반)"
       }
     ]
   },
@@ -295,6 +320,11 @@ ${request.content}
     ❌ 따옴표나 특수문자 임의 추가/제거 금지
     ❌ 100글자 이상의 긴 문장 추출 금지
     ❌ 3글자 미만의 짧은 단어 추출 금지
+
+11. **Google 검색 활용**:
+    🔎 제공된 Google 검색 도구를 활용하여 'sourceCredibility' (출처 신뢰도) 및 'keyClaims' (핵심 주장)의 팩트체크를 수행하세요.
+    🔎 출처의 평판, 전문성, 과거 이력 등을 검색하여 \`sourceCredibility.reputation.description\`에 반영하세요.
+    🔎 팩트체크가 필요한 주장에 대한 검증 결과를 \`crossReference\` 섹션에 반영하세요.
 
 `;
   }
@@ -451,8 +481,6 @@ ${request.content}
       throw new Error("biasAnalysis가 누락되었습니다");
     }
 
-    // highlightedTexts는 더 이상 사용하지 않음 (deprecated)
-
     if (!analysis.advertisementAnalysis) {
       throw new Error("advertisementAnalysis가 누락되었습니다");
     }
@@ -476,8 +504,6 @@ ${request.content}
   }
 
   private postProcessHighlights(analysis: TrustAnalysis): void {
-    // highlightedTexts는 더 이상 사용하지 않음 (deprecated)
-
     // 논리적 오류의 affectedText 정리
     if (analysis.logicalFallacies) {
       analysis.logicalFallacies = analysis.logicalFallacies
@@ -831,11 +857,12 @@ ${request.content}
 
   /**
    * 유튜브 비디오 분석
-   * 
+   *
    * Gemini 멀티모달 기능을 활용하여 유튜브 URL을 직접 분석
    * - 비디오 내용 및 자막 자동 추출
    * - 타임스탬프 기반 분석
    * - 편향, 광고, 논리오류 시간대별로 식별
+   * - Google 검색 그라운딩으로 할루시네이션 방지
    */
   async analyzeYoutubeVideo(url: string): Promise<YoutubeTrustAnalysis> {
     console.log("🎬 유튜브 비디오 분석 시작:", url);
@@ -846,25 +873,70 @@ ${request.content}
       throw new Error("유효하지 않은 유튜브 URL입니다.");
     }
 
-    const prompt = this.buildYoutubeAnalysisPrompt(url);
-
     try {
       console.log("🤖 Gemini API 호출 중 (유튜브 분석)...");
+      console.log("🔗 Video ID:", videoId);
 
-      // 유튜브 URL을 직접 처리
+      // Google Search 그라운딩 설정
+      const groundingTool = {
+        googleSearch: {},
+      };
+
+      const config = {
+        tools: [groundingTool],
+        temperature: 0.1,
+        topK: 1,
+        topP: 1,
+      };
+
+      // YouTube URL과 분석 프롬프트를 함께 전달
       const response = await this.ai.models.generateContent({
         model: "gemini-2.5-flash",
-        contents: prompt,
-        config: {
-          temperature: 0.1, // 일관된 분석
-          topK: 1,
-          topP: 1,
-        },
+        contents: [
+          {
+            role: "user",
+            parts: [
+              {
+                text: this.buildYoutubeAnalysisPrompt(url),
+              },
+              {
+                fileData: {
+                  fileUri: url,
+                  mimeType: "video/*",
+                },
+              },
+            ],
+          },
+        ],
+        config,
       });
 
       console.log("✅ Gemini API 응답 성공");
 
+      // 그라운딩 메타데이터 확인
+      if (response.candidates?.[0]?.groundingMetadata) {
+        const metadata = response.candidates[0].groundingMetadata;
+        console.log("🔍 그라운딩 검색어:", metadata.webSearchQueries);
+        console.log(
+          "📚 그라운딩 소스 개수:",
+          metadata.groundingChunks?.length || 0
+        );
+
+        // 그라운딩 소스 상세 정보
+        if (metadata.groundingChunks && metadata.groundingChunks.length > 0) {
+          console.log("📄 그라운딩 소스들:");
+          metadata.groundingChunks.forEach((chunk: any, index: number) => {
+            if (chunk.web) {
+              console.log(`  ${index + 1}. ${chunk.web.title || "No title"}`);
+              console.log(`     ${chunk.web.uri}`);
+            }
+          });
+        }
+      }
+
       const responseText = response.text;
+      console.log("🔍 유튜브 분석 응답 길이:", responseText?.length || 0);
+
       if (!responseText) {
         throw new Error("AI 응답이 비어있습니다.");
       }
@@ -874,10 +946,11 @@ ${request.content}
       console.error("❌ 유튜브 분석 오류:", error);
       const errorMessage =
         error instanceof Error ? error.message : "알 수 없는 오류";
-      throw new Error(`유튜브 비디오 분석 중 오류가 발생했습니다: ${errorMessage}`);
+      throw new Error(
+        `유튜브 비디오 분석 중 오류가 발생했습니다: ${errorMessage}`
+      );
     }
   }
-
   /**
    * URL에서 유튜브 비디오 ID 추출
    */
@@ -897,7 +970,10 @@ ${request.content}
       }
 
       // youtube.com/shorts/VIDEO_ID
-      if (hostname.includes("youtube.com") && urlObj.pathname.startsWith("/shorts/")) {
+      if (
+        hostname.includes("youtube.com") &&
+        urlObj.pathname.startsWith("/shorts/")
+      ) {
         const parts = urlObj.pathname.split("/");
         return parts[2] || null;
       }
@@ -911,81 +987,163 @@ ${request.content}
 
   /**
    * 유튜브 분석 프롬프트 생성
+   *
+   * 릴리스 AI 수준의 상세한 분석을 위한 프롬프트
+   * - 타임스탬프 기반 세밀한 분석
+   * - 영상 내용 정확성 우선
+   * - 구조화된 JSON 출력
    */
   private buildYoutubeAnalysisPrompt(url: string): string {
     return `
-# MISSION
-당신은 세계 최고의 유튜브 콘텐츠 분석 전문가이자, 비판적 미디어 리터러시 AI 'Criti.AI'입니다.
+# MISSION: 유튜브 비디오 전문 분석 AI
+
+당신은 세계 최고의 **유튜브 콘텐츠 전문 분석가**이자 **미디어 리터러시 AI 'Criti.AI'**입니다.
 
 당신의 목표는 유튜브 비디오의 신뢰도를 **타임라인 기반**으로 다차원 분석하여, 사용자가 비판적 사고를 기를 수 있도록 돕는 것입니다.
 
 **분석 대상 유튜브 URL**: ${url}
 
+# 🎯 핵심 분석 원칙
+
+⚡ **정확성 최우선**: 실제 영상 내용에 기반한 분석만 제공
+🕐 **타임스탬프 필수**: 모든 분석 항목에 정확한 시간대 명시
+🎬 **영상 전체 이해**: 자막과 비주얼을 종합적으로 분석
+🔍 **세밀한 관찰**: 편향, 광고, 논리오류를 시간대별로 포착
+📊 **구조화된 출력**: JSON 형식의 명확한 분석 결과
+
 # 📊 분석 차원 (타임스탬프 필수)
 
 ## 1. 비디오 기본 정보 추출
-- 제목, 채널명, 길이, 조회수 (가능한 범위에서)
-- 쇼츠 여부 판단 (60초 미만)
+- **제목 분석**: 클릭베이트 요소, 과장 표현
+- **채널 정보**: 구독자 수, 인증 상태, 전문성
+- **비디오 메타데이터**: 길이, 조회수, 좋아요, 게시일
+- **쇼츠 여부**: 60초 미만이면 true
 
-## 2. 채널 신뢰도 평가
-- 채널의 전문성 및 신뢰도 평가
-- 구독자 수, 인증 여부 (확인 가능한 경우)
-- 콘텐츠 일관성 및 품질
+## 2. 채널 신뢰도 평가 (0-100점)
+- **전문성 평가**: 해당 분야에서의 전문성
+- **콘텐츠 품질**: 일관성, 정보의 정확성
+- **구독자 신뢰도**: 규모와 참여도
+- **인증 상태**: 공식 인증 여부
 
-## 3. 제목 및 썸네일 분석
-- **클릭베이트 요소 탐지**:
-  - 호기심 갭 (정보를 숨기고 클릭 유도)
-  - 감정 트리거 (충격, 분노, 공포 유발)
-  - 긴급성 강조 ("지금 당장", "빨리")
-  - 최상급 표현 ("최고", "최악", "역대급")
-- **썸네일과 실제 내용의 일치도** 평가
+## 3. 자막 및 내용 추출
+- **전체 자막 수집**: 시간대별 세그먼트 (start, duration, text)
+- **주요 메시지 파악**: 영상이 전달하려는 핵심 메시지
+- **언어 감지**: 주 사용 언어
 
-## 4. 타임라인 기반 내용 분석 ⭐ (핵심)
+## 4. 타임라인 기반 편향성 분석 ⭐ (핵심)
 
 영상의 **시간대별**로 다음 요소들을 분석하세요:
 
-### 4-1. 편향성 분석
-- **감정 조작 표현**: 특정 시간대(초)에 나타나는 과장, 선동, 공포 유발 표현
-- **정치적/이념적 편향**: 특정 관점으로 치우친 표현의 시간대
-- **타임스탬프 형식**: 정수 (초 단위)
+### 4-1. 감정 조작 표현 (타임스탬프 필수)
+- **과장 표현**: "최고", "역대급", "충격" 등의 시간대
+- **선동적 언어**: 특정 감정을 자극하는 표현의 발생 시점
+- **긴급성 유도**: "지금 당장", "빨리" 등의 타임스탬프
+- **공포 조장**: 불안이나 두려움을 유발하는 구간
 
-### 4-2. 광고성 분석
-- **제품/서비스 언급**: 몇 초에 어떤 제품이 언급되는지
-- **협찬 콘텐츠**: 특정 브랜드 홍보 구간
-- **구매 유도**: "링크는 설명란에", "할인 코드" 등의 시간대
-- **제휴 마케팅**: 추천 링크나 프로모션 구간
+**중요**: 각 표현의 정확한 발생 시간(초)과 주변 문맥 제공
 
-### 4-3. 논리적 오류
-- **성급한 일반화**: "한 사례만으로 전체 판단" - 몇 초에 발생
-- **흑백논리**: "A 아니면 B" 식 단순화 - 발생 시간
-- **인과관계 오류**: 잘못된 인과 추론 - 시간대
-- **권위 호소**: 근거 없이 권위에 의존 - 발생 구간
+### 4-2. 제목 및 썸네일 클릭베이트 분석
+- **호기심 갭**: 정보를 숨기고 클릭 유도
+- **감정 트리거**: 분노, 놀람, 공포 유발
+- **최상급 표현**: "최고의", "절대", "유일한"
+- **긴급성 강조**: 시간 제한 암시
 
-### 4-4. 핵심 주장
-- 영상의 주요 메시지와 주장들
-- 각 주장이 나타나는 **정확한 타임스탬프 (초 단위)**
-- 팩트체크가 필요한 주장 식별
+**타임스탬프**: 제목/썸네일은 0초로 표시
 
-## 5. 종합 평가
-- 전체 신뢰도 점수 (0-100)
-- 타임라인 하이라이트 (주요 문제 발생 시점)
-- 시청 시 주의해야 할 구간
+### 4-3. 정치적/이념적 편향 (시간대 명시)
+- **특정 관점 편향**: 한쪽 관점만 제시하는 구간
+- **대립 구도 조장**: 갈등을 부추기는 시간대
+- **타임스탬프**: 편향이 드러나는 정확한 시점
 
-# ⚠️ 중요: 타임스탬프 지침
+## 5. 타임라인 기반 광고성 분석 ⭐ (매우 중요)
 
-1. **모든 분석 항목에 타임스탬프 필수**: 
+### 5-1. 제품/서비스 언급 (타임스탬프 필수)
+- **직접 광고**: 제품명/브랜드 직접 언급 시간
+- **간접 광고**: 제품이 화면에 노출되는 구간
+- **협찬 표시**: 협찬 공지 시점
+- **제휴 링크**: "설명란 링크" 언급 시간
+
+### 5-2. 구매 유도 (타임스탬프 필수)
+- **CTA (Call-to-Action)**: "지금 구매", "할인 코드" 발생 시점
+- **긴급성 유도**: "한정 수량", "오늘만" 등의 시간대
+- **추천 링크**: 제휴 마케팅 언급 구간
+
+### 5-3. 협찬 세그먼트
+- **협찬 구간 범위**: start(초) ~ end(초)
+- **협찬 유형**: sponsored, product_placement, affiliate
+
+**중요**: 모든 광고성 표현의 정확한 타임스탬프와 증거 텍스트 제공
+
+## 6. 타임라인 기반 논리적 오류 분석
+
+### 6-1. 주요 논리적 오류 탐지 (타임스탬프 필수)
+- **성급한 일반화**: 불충분한 근거로 결론 - 발생 시간
+- **흑백논리**: A 아니면 B 식 단순화 - 시간대
+- **인과관계 오류**: 잘못된 인과 추론 - 발생 구간
+- **권위 호소**: 근거 없이 권위에 의존 - 타임스탬프
+- **인신공격**: 논리 대신 인격 공격 - 시간대
+
+**형식**: 각 오류에 대해
+- 오류 유형
+- 발생 시간 (start, end)
+- 해당 자막 텍스트
+- 왜 오류인지 설명
+- 심각도 (low/medium/high)
+
+## 7. 핵심 주장 및 팩트체크 필요 항목
+
+### 7-1. 주요 주장 추출 (타임스탬프 필수)
+- 영상에서 제시하는 주요 주장들
+- 각 주장의 정확한 발생 시간
+- 팩트체크 필요 여부 판단
+- 검증용 키워드 제시
+
+### 7-2. 의심스러운 정보
+- 출처 불명의 통계나 데이터
+- 검증 필요한 주장들
+- 오해의 소지가 있는 표현
+
+## 8. 종합 평가 및 타임라인 하이라이트
+
+### 8-1. 신뢰도 점수 (0-100)
+- **전체 점수**: 종합 신뢰도
+- **채널 점수**: 채널 신뢰도
+- **객관성 점수**: 편향성 역산
+- **논리성 점수**: 논리적 타당성
+- **광고성 점수**: 높을수록 덜 광고적
+- **근거 점수**: 주장의 근거 충실도
+- **썸네일 일치도**: 제목/썸네일과 내용 일치 정도
+
+### 8-2. 타임라인 하이라이트
+주요 문제 발생 시점을 리스트로 제공:
+- 타임스탬프
+- 문제 유형 (bias/fallacy/advertisement/claim)
+- 심각도 (low/medium/high)
+- 설명
+
+### 8-3. 시청 경고
+- 높은 편향성, 다수의 논리적 오류, 신뢰할 수 없는 출처, 과도한 광고, 오해의 소지 데이터 등에 대한 경고
+- 심각도별 권장 조치
+
+# 🚨 중요: 타임스탬프 지침
+
+1. **모든 분석 항목에 타임스탬프 필수**:
    - 편향적 표현 → 몇 초에 나오는지
    - 광고성 멘트 → 몇 초에 시작하는지
    - 논리적 오류 → 몇 초에 발생하는지
 
 2. **타임스탬프 형식**:
-   - 정수형 (초 단위): 125 (2분 5초)
+   - 정수형 (초 단위): 125 (2분 5초를 의미)
    - 범위로 표현 가능: start=125, end=140
 
-3. **정확성**:
+3. **정확성 최우선**:
    - 실제 영상에서 해당 시간대에 문제가 나타나야 함
    - 추측하지 말고 명확한 경우만 기록
    - 자막이나 음성 내용을 정확히 인용
+
+4. **원문 정확성**:
+   - 모든 증거 텍스트는 자막이나 음성과 정확히 일치
+   - 임의로 생성하거나 변형하지 말 것
 
 # REQUIRED JSON OUTPUT FORMAT
 
@@ -997,7 +1155,7 @@ ${request.content}
     "title": "비디오 제목",
     "channelName": "채널명",
     "channelId": "채널 ID (확인 가능한 경우)",
-    "duration": 123, // 초 단위
+    "duration": 123,
     "viewCount": 12345,
     "likeCount": 567,
     "publishedAt": "게시일 (ISO 형식)",
@@ -1010,8 +1168,8 @@ ${request.content}
     "segments": [
       {
         "text": "자막 텍스트",
-        "start": 0, // 시작 시간 (초)
-        "duration": 3 // 지속 시간 (초)
+        "start": 0,
+        "duration": 3
       }
     ],
     "fullText": "전체 자막을 합친 텍스트",
@@ -1040,7 +1198,7 @@ ${request.content}
       "manipulativeWords": [
         {
           "word": "충격적인",
-          "timestamp": 45, // 초 단위
+          "timestamp": 45,
           "category": "emotional | exaggeration | urgency | authority | fear",
           "impact": "low | medium | high",
           "explanation": "왜 이 표현이 조작적인지",
@@ -1058,7 +1216,7 @@ ${request.content}
       {
         "type": "curiosity_gap | emotional_trigger | urgency | superlative",
         "text": "클릭베이트 텍스트",
-        "timestamp": 0, // 제목의 경우 0
+        "timestamp": 0,
         "explanation": "왜 클릭베이트인지",
         "severity": "low | medium | high",
         "isInTitle": true,
@@ -1076,7 +1234,7 @@ ${request.content}
       {
         "type": "product_mention | affiliate_link | sponsored_content | promotional_language | call_to_action | brand_focus",
         "evidence": "광고성 표현 원문",
-        "timestamp": 120, // 초 단위
+        "timestamp": 120,
         "explanation": "왜 광고성인지",
         "weight": 8,
         "contextText": "주변 문맥"
@@ -1096,7 +1254,7 @@ ${request.content}
       "type": "성급한 일반화",
       "description": "오류에 대한 설명",
       "affectedText": "오류가 포함된 정확한 텍스트",
-      "timestamp": 150, // 초 단위
+      "timestamp": 150,
       "endTime": 165,
       "severity": "low | medium | high",
       "explanation": "초등학생도 이해할 수 있는 설명",
@@ -1107,7 +1265,7 @@ ${request.content}
   "keyClaims": [
     {
       "claim": "핵심 주장 텍스트",
-      "timestamp": 200, // 초 단위
+      "timestamp": 200,
       "needsFactCheck": true,
       "verificationKeywords": ["검증용 키워드들"]
     }
@@ -1119,7 +1277,7 @@ ${request.content}
     "logicScore": 70,
     "advertisementScore": 50,
     "evidenceScore": 75,
-    "thumbnailAccuracy": 40 // 썸네일과 내용 일치도
+    "thumbnailAccuracy": 40
   },
   
   "warnings": [
@@ -1145,32 +1303,38 @@ ${request.content}
 
 ⚠️ **반드시 준수해야 할 사항들**:
 
-1. **JSON ONLY**: 응답은 반드시 위의 형식을 완전히 준수하는 JSON 객체여야 합니다. 
-   - JSON 앞뒤로 \`\`\`json 마크다운이나 다른 설명을 붙이지 마세요.
-   - 순수 JSON만 반환하세요.
+1. **JSON ONLY**: 
+   - 순수 JSON만 반환
+   - 마크다운 코드 블록 사용하지 말 것
+   - 다른 설명 없이 JSON만
 
 2. **타임스탬프 정확성**: 
    - 모든 타임스탬프는 정수형 (초 단위)
-   - 실제 영상 내용과 일치해야 함
+   - 실제 영상 내용과 일치
    - 추측하지 말고 확실한 경우만 기록
 
 3. **원문 정확성**:
-   - affectedText, evidence, claim 등은 실제 자막이나 음성 내용과 일치
+   - affectedText, evidence, claim 등은 실제 자막이나 음성과 일치
    - 임의로 생성하지 말 것
 
-4. **한국어 응답**: 모든 설명과 분석은 자연스러운 한국어로 작성
+4. **한국어 응답**: 
+   - 모든 설명과 분석은 자연스러운 한국어
 
 5. **비디오 정보 수집**: 
-   - Gemini가 접근 가능한 비디오 메타데이터를 최대한 수집
-   - 접근 불가능한 정보는 빈 문자열이나 0으로 처리
+   - Gemini가 접근 가능한 메타데이터 최대한 수집
+   - 접근 불가능한 정보는 빈 문자열이나 0
 
 6. **분석 불가능 시**: 
-   - 비디오 접근 불가 시 overallScore를 -1로 설정
+   - 비디오 접근 불가 시 overallScore를 -1
    - analysisSummary에 접근 불가 사유 작성
 
 7. **타임라인 하이라이트 우선순위**:
-   - 높은 심각도(high severity) 항목을 timelineHighlights에 포함
+   - 높은 심각도(high severity) 항목을 포함
    - 사용자가 주의 깊게 봐야 할 구간 명시
+
+8. **Google 검색 그라운딩 활용**:
+   - 팩트체크가 필요한 주장은 Google 검색으로 검증
+   - 출처를 명확히 밝히고 신뢰도 평가
 
 이제 위 유튜브 URL을 철저히 분석하여 JSON으로 응답해주세요.
 `;
@@ -1179,7 +1343,9 @@ ${request.content}
   /**
    * 유튜브 분석 결과 파싱
    */
-  private parseYoutubeAnalysisResult(analysisText: string): YoutubeTrustAnalysis {
+  private parseYoutubeAnalysisResult(
+    analysisText: string
+  ): YoutubeTrustAnalysis {
     try {
       console.log("🔍 유튜브 분석 응답 길이:", analysisText.length);
       console.log("🔍 응답 시작:", analysisText.substring(0, 300));
@@ -1218,12 +1384,10 @@ ${request.content}
     } catch (error) {
       console.error("❌ 유튜브 분석 JSON 파싱 오류:", error);
       console.error("📄 원본 응답:", analysisText.substring(0, 500));
-      
+
       const errorMessage =
         error instanceof Error ? error.message : "알 수 없는 오류";
-      throw new Error(
-        `유튜브 분석 결과 파싱 실패 - 원인: ${errorMessage}`
-      );
+      throw new Error(`유튜브 분석 결과 파싱 실패 - 원인: ${errorMessage}`);
     }
   }
 }
