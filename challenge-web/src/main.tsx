@@ -1,6 +1,8 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { ChallengePage } from './pages/ChallengePage'
+import YoutubeAnalysisPage from './pages/YoutubeAnalysisPage'
 
 // 전역 스타일 리셋
 const globalStyles = `
@@ -59,7 +61,14 @@ document.head.appendChild(styleSheet);
 
 // 메인 앱 컴포넌트
 export const App: React.FC = () => {
-  return <ChallengePage />;
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<ChallengePage />} />
+        <Route path="/youtube" element={<YoutubeAnalysisPage />} />
+      </Routes>
+    </BrowserRouter>
+  );
 };
 
 // React 앱 마운트

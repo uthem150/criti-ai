@@ -3,6 +3,8 @@ import type {
   ApiResponse,
   UserProgress,
   ChallengeResponse,
+  YoutubeTrustAnalysis,
+  YoutubeAnalysisRequest,
 } from "@criti-ai/shared";
 
 const API_BASE_URL = import.meta.env.PROD
@@ -226,6 +228,87 @@ class ChallengeApiService {
     } catch (error) {
       console.error("백엔드 헬스 체크 실패:", error);
       return false;
+    }
+  }
+
+  /**
+   * 유튜브 영상 분석 (빠른 방식)
+   */
+  async analyzeYoutube(
+    url: string
+  ): Promise<ApiResponse<YoutubeTrustAnalysis>> {
+    try {
+      console.log("🎬 유튜브 영상 분석 시작:", url);
+
+      const response = await fetch(`${this.baseUrl}/youtube/analyze-fast`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          url,
+        } as YoutubeAnalysisRequest),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(
+          errorData.error || `API 요청 실패: ${response.status}`
+        );
+      }
+
+      const data: ApiResponse<YoutubeTrustAnalysis> = await response.json();
+
+      if (!data.success) {
+        throw new Error(data.error || "유튜브 영상 분석 실패");
+      }
+
+      console.log("✅ 유튜브 영상 분석 성공");
+      return data;
+    } catch (error) {
+      console.error("❌ 유튜브 영상 분석 실패:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * 유튜브 URL 유효성 검사
+   */
+  async validateYoutubeUrl(url: string): Promise<{
+    valid: boolean;
+    normalizedUrl?: string;
+    message?: string;
+  }> {
+    try {
+      const response = await fetch(
+        `${this.baseUrl}/youtube/validate?url=${encodeURIComponent(url)}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) {
+        return {
+          valid: false,
+          message: "URL 검증 중 오류가 발생했습니다.",
+        };
+      }
+
+      const data = await response.json();
+      return {
+        valid: data.valid || false,
+        normalizedUrl: data.normalizedUrl,
+        message: data.message,
+      };
+    } catch (error) {
+      console.error("URL 검증 실패:", error);
+      return {
+        valid: false,
+        message: "URL 검증 중 오류가 발생했습니다.",
+      };
     }
   }
 

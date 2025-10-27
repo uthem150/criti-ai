@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import type { Challenge, UserProgress } from "@criti-ai/shared";
 import { challengeApiService } from "../services/challengeApiService";
 import {
@@ -6,6 +7,8 @@ import {
   Header,
   HeaderTitle,
   HeaderSubtitle,
+  NavButtonContainer,
+  NavButton,
   StatsBar,
   StatItem,
   StatLabel,
@@ -38,6 +41,7 @@ interface LoadingState {
 export const ChallengePage: React.FC<ChallengePageProps> = ({
   onNavigateBack: _onNavigateBack,
 }) => {
+  const navigate = useNavigate();
   // 상태 관리
   const [challenges, setChallenges] = useState<Challenge[]>([]);
   const [currentChallenge, setCurrentChallenge] = useState<Challenge | null>(null);
@@ -357,6 +361,14 @@ export const ChallengePage: React.FC<ChallengePageProps> = ({
         <HeaderTitle>🎯 Criti 챌린지</HeaderTitle>
         <HeaderSubtitle>AI와 함께하는 비판적 사고 훈련</HeaderSubtitle>
       </Header>
+
+      {/* 네비게이션 버튼 */}
+      <NavButtonContainer>
+        <NavButton onClick={() => navigate('/youtube')}>
+          <span>🎬</span>
+          유튜브 영상 분석
+        </NavButton>
+      </NavButtonContainer>
 
       {/* 사용자 진행도 */}
       {userProgress && (

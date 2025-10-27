@@ -36,6 +36,43 @@ export const HeaderSubtitle = styled.p`
   font-weight: ${typography.fontWeight.normal};
 `;
 
+export const NavButtonContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  gap: ${spacing[3]};
+  margin-bottom: ${spacing[6]};
+`;
+
+export const NavButton = styled.button`
+  padding: ${spacing[3]} ${spacing[6]};
+  background: linear-gradient(135deg, ${colors.primary[500]}, ${colors.primary[600]});
+  color: white;
+  border: none;
+  border-radius: ${borderRadius.lg};
+  font-size: ${typography.fontSize.base};
+  font-weight: ${typography.fontWeight.semibold};
+  cursor: pointer;
+  transition: ${animations.transition.normal};
+  box-shadow: ${shadows.md};
+  display: flex;
+  align-items: center;
+  gap: ${spacing[2]};
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: ${shadows.lg};
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  @media (max-width: 768px) {
+    padding: ${spacing[2]} ${spacing[4]};
+    font-size: ${typography.fontSize.sm};
+  }
+`;
+
 export const StatsBar = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
