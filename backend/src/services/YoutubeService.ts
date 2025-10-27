@@ -115,7 +115,7 @@ export class YoutubeService {
         "--write-auto-subs",
         "--write-subs",
         "--sub-lang",
-        "ko,en",
+        "ko",
         "--sub-format",
         "json3",
         "--output",
