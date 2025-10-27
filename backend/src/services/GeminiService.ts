@@ -100,6 +100,29 @@ export class GeminiService {
     const contentType = this.detectContentType(request.url, request.content);
 
     return `
+# ⚠️ 중요: 현재 날짜 및 팩트체크 규칙
+
+**현재 날짜**: ${new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' })}
+**현재 시간**: ${new Date().toISOString()}
+
+🔴 **핵심 규칙 - 반드시 준수**:
+
+1. **Google 검색 결과가 콘텐츠보다 항상 우선**:
+   - 콘텐츠에서 "A가 B다"라고 해도 Google 검색에서 "A는 C다"라고 확인되면 **Google 검색 결과를 사실로 채택**
+   - 콘텐츠 내용이 검색 결과와 다르면 "misleading_data" 경고 추가
+
+2. **정치인/공직자는 반드시 검색 검증**:
+   - 대통령, 장관, 국회의원 등 공직자 언급 시 반드시 Google 검색으로 현직 확인
+
+3. **최근 사건은 반드시 검색 확인**:
+   - "최근", "오늘", "어제", "이번 주" 같은 시간 표현은 반드시 Google 검색으로 확인
+   - 수치(코스피, 주가, 환율 등)는 반드시 검색으로 확인
+
+4. **검색 결과와 불일치 시 대응**:
+   - logicalFallacies에 "사실 오류" 항목 추가
+   - crossReference.factCheckSources에 검색 결과 추가 (verdict: 'false')
+   - detailedScores.evidenceScore를 낮게 평가
+
 # MISSION
 당신은 세계 최고의 디지털 미디어 리터러시 전문가이자, 텍스트 콘텐츠의 신뢰도를 다차원적으로 분석하는 AI 애널리스트 'Criti.AI'입니다. 
 
@@ -1067,6 +1090,33 @@ ${request.content}
       .join("\n");
 
     return `
+# ⚠️ 중요: 현재 날짜 및 팩트체크 규칙
+
+**현재 날짜**: ${new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' })}
+**현재 시간**: ${new Date().toISOString()}
+
+🔴 **핵심 규칙 - 반드시 준수**:
+
+1. **Google 검색 결과가 영상보다 항상 우선**:
+   - 영상에서 "A가 B다"라고 해도 Google 검색에서 "A는 C다"라고 확인되면 **Google 검색 결과를 사실로 채택**
+   - 영상 내용이 검색 결과와 다르면 "misleading_data" 경고 추가
+
+2. **정치인/공직자는 반드시 검색 검증**:
+   - 대통령, 장관, 국회의원 등 공직자 언급 시 반드시 Google 검색으로 현직 확인
+   - "현 OO 대통령", "현직 OO" 같은 표현은 반드시 실제 현직자와 비교
+
+3. **최근 사건은 반드시 검색 확인**:
+   - "최근", "오늘", "어제", "이번 주" 같은 시간 표현은 반드시 Google 검색으로 확인
+   - 수치(코스피, 주가, 환율 등)는 반드시 검색으로 확인
+
+4. **가상/미래 시나리오 감지**:
+   - 영상이 미래를 현재인 것처럼 보도하는지 확인
+
+5. **검색 결과와 불일치 시 대응**:
+   - logicalFallacies에 "사실 오류" 항목 추가
+   - warnings에 "misleading_data" 타입으로 critical 경고 추가
+   - keyClaims에 잘못된 주장을 needsFactCheck: true로 표시
+
 # MISSION: 유튜브 비디오 전문 분석 AI
 
 당신은 세계 최고의 **유튜브 콘텐츠 전문 분석가**이자 **미디어 리터러시 AI 'Criti.AI'**입니다.
