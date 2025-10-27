@@ -1,4 +1,5 @@
 import { GoogleGenAI } from "@google/genai";
+import { jsonrepair } from "jsonrepair";
 import type {
   TrustAnalysis,
   YoutubeTrustAnalysis,
@@ -49,6 +50,9 @@ export class GeminiService {
         temperature: 0.1, // 일관된 분석을 위해 낮은 temperature
         topK: 1,
         topP: 1,
+        generationConfig: {
+          responseMimeType: "application/json",
+        },
       };
 
       const response = await this.ai.models.generateContent({
@@ -393,39 +397,50 @@ ${request.content}
     return "일반 웹 콘텐츠";
   }
 
+  /**
+   * JSON 블록 추출 (코드펜스 및 불필요한 텍스트 제거)
+   */
+  private extractJsonObject(raw: string): string {
+    // 1) 코드펜스 제거
+    const cleaned = raw
+      .replace(/```(?:json)?/gi, "")
+      .replace(/```/g, "")
+      .trim();
+
+    // 2) 이미 순수 JSON이면 빠른 반환
+    if (cleaned.startsWith("{") && cleaned.endsWith("}")) {
+      return cleaned;
+    }
+
+    // 3) {} 블록 추출
+    const first = cleaned.indexOf("{");
+    const last = cleaned.lastIndexOf("}");
+
+    if (first === -1 || last === -1 || first >= last) {
+      throw new Error(
+        `JSON 블록을 찾지 못했습니다. 원본: ${raw.substring(0, 100)}...`
+      );
+    }
+
+    return cleaned.slice(first, last + 1);
+  }
+
   private parseAnalysisResult(analysisText: string): TrustAnalysis {
     try {
       console.log("🔍 원본 Gemini 응답 길이:", analysisText.length);
       console.log("🔍 원본 응답 시작:", analysisText.substring(0, 300));
 
-      // 다양한 방식으로 JSON 추출 시도
-      let jsonString = "";
+      // 1) JSON 추출
+      const jsonSlice = this.extractJsonObject(analysisText);
+      console.log("🔍 추출된 JSON 길이:", jsonSlice.length);
+      console.log("🔍 JSON 시작:", jsonSlice.substring(0, 300));
 
-      // 1. 마크다운 코드 블록 제거
-      const cleanText = analysisText
-        .replace(/```json\s*/g, "")
-        .replace(/```\s*/g, "");
+      // 2) jsonrepair로 복구
+      const repaired = jsonrepair(jsonSlice);
+      console.log("🔧 JSON 복구 완료");
 
-      // 2. 첫 번째 { 부터 마지막 } 까지 추출
-      const firstBrace = cleanText.indexOf("{");
-      const lastBrace = cleanText.lastIndexOf("}");
-
-      if (firstBrace !== -1 && lastBrace !== -1 && firstBrace < lastBrace) {
-        jsonString = cleanText.substring(firstBrace, lastBrace + 1);
-      } else {
-        // 3. 백업: 정규식으로 JSON 바디 얻기
-        const jsonMatch = cleanText.match(/\{[\s\S]*\}/);
-        if (jsonMatch) {
-          jsonString = jsonMatch[0];
-        } else {
-          throw new Error("JSON 형식의 응답을 찾을 수 없습니다.");
-        }
-      }
-
-      console.log("🔍 추출된 JSON 길이:", jsonString.length);
-      console.log("🔍 JSON 시작:", jsonString.substring(0, 300));
-
-      const parsed = JSON.parse(jsonString) as TrustAnalysis;
+      // 3) 파싱
+      const parsed = JSON.parse(repaired) as TrustAnalysis;
 
       // 분석 결과 검증
       this.validateAnalysisResult(parsed);
@@ -887,6 +902,9 @@ ${request.content}
         temperature: 0.1,
         topK: 1,
         topP: 1,
+        generationConfig: {
+          responseMimeType: "application/json",
+        },
       };
 
       // YouTube URL과 분석 프롬프트를 함께 전달
@@ -982,6 +1000,9 @@ ${request.content}
         temperature: 0.1,
         topK: 1,
         topP: 1,
+        generationConfig: {
+          responseMimeType: "application/json",
+        },
       };
 
       // 텍스트 기반 분석 프롬프트
@@ -1399,6 +1420,20 @@ ${transcript.fullText.substring(0, 5000)}${transcript.fullText.length > 5000 ? "
    - 팩트체크가 필요한 주장은 Google 검색으로 검증
    - 출처를 명확히 밝히고 신뢰도 평가
 
+   # CRITICAL JSON FORMATTING RULES (절대 준수!)
+
+⚠️ **JSON 생성 시 필수 규칙**:
+
+1. **영어 큰따옴표만 사용**: "
+   - ❌ 한국어 따옴표 사용 금지: " " ' '
+   - ✅ 영어 따옴표만 사용: " '
+
+2. **문자열 내부의 따옴표는 이스케이프**:
+
+3. **JSON 포맷 검증**:
+   - JSON.parse()로 파싱 가능한 형식
+   - 마크다운 코드 블록 없이 순수 JSON만
+
 이제 위 유튜브 URL을 철저히 분석하여 JSON으로 응답해주세요.
 `;
   }
@@ -1802,51 +1837,17 @@ ${transcript.fullText.substring(0, 5000)}${transcript.fullText.length > 5000 ? "
       console.log("🔍 유튜브 분석 응답 길이:", analysisText.length);
       console.log("🔍 응답 시작:", analysisText.substring(0, 300));
 
-      // 1단계: 마크다운 코드 블록 제거 (더 강력하게)
-      let cleanText = analysisText;
+      // 1) JSON 추출
+      const jsonSlice = this.extractJsonObject(analysisText);
+      console.log("🔍 추출된 JSON 길이:", jsonSlice.length);
+      console.log("🔍 JSON 시작:", jsonSlice.substring(0, 200));
 
-      // ```json\n{...}\n``` 형태 제거
-      cleanText = cleanText.replace(/^```json\s*\n/gm, "");
-      cleanText = cleanText.replace(/^```\s*\n/gm, "");
-      cleanText = cleanText.replace(/\n```$/gm, "");
+      // 2) jsonrepair로 복구
+      const repaired = jsonrepair(jsonSlice);
+      console.log("🔧 JSON 복구 완료");
 
-      // 남아있는 ``` 제거
-      cleanText = cleanText.replace(/```/g, "");
-
-      console.log("🧹 마크다운 제거 후 시작:", cleanText.substring(0, 200));
-
-      // 2단계: JSON 추출
-      let jsonString = "";
-      const firstBrace = cleanText.indexOf("{");
-      const lastBrace = cleanText.lastIndexOf("}");
-
-      if (firstBrace !== -1 && lastBrace !== -1 && firstBrace < lastBrace) {
-        jsonString = cleanText.substring(firstBrace, lastBrace + 1).trim();
-      } else {
-        const jsonMatch = cleanText.match(/\{[\s\S]*\}/);
-        if (jsonMatch) {
-          jsonString = jsonMatch[0].trim();
-        } else {
-          throw new Error("JSON 형식의 응답을 찾을 수 없습니다.");
-        }
-      }
-
-      console.log("🔍 추출된 JSON 길이:", jsonString.length);
-      console.log("🔍 추출된 JSON 시작:", jsonString.substring(0, 200));
-
-      // 3단계: JSON 파싱
-      let parsed;
-      try {
-        parsed = JSON.parse(jsonString);
-      } catch (parseError) {
-        console.error("❌ 첫 번째 파싱 시도 실패, fixJsonQuotes 적용...");
-
-        // JSON 내부 큰따옴표 수정 시도
-        const fixedJsonString = this.fixJsonQuotes(jsonString);
-        console.log("🔧 수정된 JSON 시작:", fixedJsonString.substring(0, 200));
-
-        parsed = JSON.parse(fixedJsonString);
-      }
+      // 3) 파싱
+      const parsed = JSON.parse(repaired) as YoutubeTrustAnalysis;
 
       // 기본 검증
       if (typeof parsed.overallScore !== "number") {
@@ -1865,98 +1866,6 @@ ${transcript.fullText.substring(0, 5000)}${transcript.fullText.length > 5000 ? "
       const errorMessage =
         error instanceof Error ? error.message : "알 수 없는 오류";
       throw new Error(`유튜브 분석 결과 파싱 실패 - 원인: ${errorMessage}`);
-    }
-  }
-
-  /**
-   * JSON 문자열 내부의 큰따옴표 수정
-   *
-   * Gemini가 제목이나 설명에 큰따옴표를 제대로 이스케이프하지 않을 때 대응
-   */
-  private fixJsonQuotes(jsonString: string): string {
-    try {
-      // 문제가 되는 필드들을 처리
-      const fieldsToFix = [
-        "title",
-        "description",
-        "text",
-        "claim",
-        "evidence",
-        "word",
-        "explanation",
-        "message",
-      ];
-
-      for (const field of fieldsToFix) {
-        jsonString = this.fixFieldQuotes(jsonString, field);
-      }
-
-      return jsonString;
-    } catch (error) {
-      console.warn("⚠️ JSON 큰따옴표 수정 실패, 원본 반환:", error);
-      return jsonString;
-    }
-  }
-
-  /**
-   * 특정 필드의 큰따옴표를 이스케이프
-   * 예: "title": "이것은 "큰따옴표" 문제" → "title": "이것은 \"큰따옴표\" 문제"
-   */
-  private fixFieldQuotes(jsonString: string, fieldName: string): string {
-    try {
-      // "fieldName": "value" 형태를 찾되, value 안의 큰따옴표를 처리
-      // 탐욕적이지 않은 매칭으로 가장 가까운 닫는 따옴표를 찾음
-      const pattern = new RegExp(`"${fieldName}"\\s*:\\s*"`, "g");
-
-      let result = jsonString;
-      let match;
-      let offset = 0;
-
-      // 각 필드 발생을 찾아서 처리
-      while ((match = pattern.exec(jsonString)) !== null) {
-        const startIndex = match.index + match[0].length; // 값 시작 위치
-        let endIndex = startIndex;
-        let inEscape = false;
-        let foundEnd = false;
-
-        // 값의 끝을 찾음 (이스케이프되지 않은 큰따옴표)
-        for (let i = startIndex; i < jsonString.length; i++) {
-          const char = jsonString[i];
-
-          if (char === "\\" && !inEscape) {
-            inEscape = true;
-            continue;
-          }
-
-          if (char === '"' && !inEscape) {
-            endIndex = i;
-            foundEnd = true;
-            break;
-          }
-
-          inEscape = false;
-        }
-
-        if (!foundEnd) continue;
-
-        // 값 추출 및 큰따옴표 이스케이프
-        const originalValue = jsonString.substring(startIndex, endIndex);
-        // 이미 이스케이프된 것은 놔두고, 이스케이프되지 않은 큰따옴표만 처리
-        const fixedValue = originalValue.replace(/(?<!\\)"/g, '\\"');
-
-        if (originalValue !== fixedValue) {
-          result =
-            result.substring(0, startIndex + offset) +
-            fixedValue +
-            result.substring(endIndex + offset);
-          offset += fixedValue.length - originalValue.length;
-        }
-      }
-
-      return result;
-    } catch (error) {
-      console.warn(`⚠️ ${fieldName} 필드 수정 실패:`, error);
-      return jsonString;
     }
   }
 }
