@@ -9,6 +9,14 @@
       "destination": "/api/proxy?apiPath=/challenge/$1"
     },
     {
+      "source": "/api/youtube/(.*)",
+      "destination": "/api/proxy?apiPath=/youtube/$1"
+    },
+    {
+      "source": "/api/analysis/(.*)",
+      "destination": "/api/proxy?apiPath=/analysis/$1"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

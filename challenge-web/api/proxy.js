@@ -41,7 +41,15 @@ export default async function handler(req, res) {
       targetPath = '/api' + targetPath;
     }
     
-    const backendUrl = `${BACKEND_URL}${targetPath}`;
+    // GET 요청의 경우 쿼리 파라미터도 포함
+    const queryParams = new URLSearchParams();
+    Object.keys(req.query).forEach(key => {
+      if (key !== 'apiPath') {
+        queryParams.append(key, req.query[key]);
+      }
+    });
+    const queryString = queryParams.toString();
+    const backendUrl = `${BACKEND_URL}${targetPath}${queryString ? '?' + queryString : ''}`;
 
     console.log(`Proxying ${req.method} ${req.url} to ${backendUrl}`);
 
