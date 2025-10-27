@@ -481,7 +481,7 @@ export const ItemDescription = styled.p`
   margin: 0.5rem 0 0 0;
 `;
 
-export const Badge = styled.span<{ severity?: 'low' | 'medium' | 'high' }>`
+export const Badge = styled.span<{ severity?: 'low' | 'medium' | 'high' | 'critical' }>`
   display: inline-block;
   padding: 0.25rem 0.625rem;
   border-radius: 4px;
@@ -490,6 +490,7 @@ export const Badge = styled.span<{ severity?: 'low' | 'medium' | 'high' }>`
   text-transform: uppercase;
   background: ${props => {
     switch (props.severity) {
+      case 'critical': return '#7f1d1d';
       case 'high': return '#fee2e2';
       case 'medium': return '#fef3c7';
       case 'low': return '#dbeafe';
@@ -498,6 +499,7 @@ export const Badge = styled.span<{ severity?: 'low' | 'medium' | 'high' }>`
   }};
   color: ${props => {
     switch (props.severity) {
+      case 'critical': return '#ffffff';
       case 'high': return '#dc2626';
       case 'medium': return '#f59e0b';
       case 'low': return '#3b82f6';
