@@ -17,7 +17,7 @@ NC='\033[0m'
 print_header() {
     echo -e "${PURPLE}"
     echo "╔══════════════════════════════════════════════════════════════════╗"
-    echo "║                    🚀 Criti.AI Oracle Micro 배포                 ║"
+    echo "║                    🚀 Criti.AI Home Server  배포                 ║"
     echo "║                   완전 자동화 설치 스크립트                        ║"
     echo "╚══════════════════════════════════════════════════════════════════╝"
     echo -e "${NC}"
@@ -172,15 +172,14 @@ EOF
 setup_firewall() {
     print_step 4 10 "방화벽 설정"
     
-    sudo ufw --force reset >/dev/null 2>&1
-    sudo ufw default deny incoming >/dev/null 2>&1
-    sudo ufw default allow outgoing >/dev/null 2>&1
-    sudo ufw allow 22/tcp >/dev/null 2>&1
+    # 이 앱(Nginx)에 필요한 포트만 추가
     sudo ufw allow 80/tcp >/dev/null 2>&1
     sudo ufw allow 443/tcp >/dev/null 2>&1
+
+    # 방화벽을 활성화합니다.
     sudo ufw --force enable >/dev/null 2>&1
     
-    print_success "방화벽 설정 완료 (22, 80, 443 포트 개방)"
+    print_success "방화벽 설정 완료 (80, 443 포트 개방)"
 }
 
 # 프로젝트 코드 준비
