@@ -1,5 +1,12 @@
-import styled from '@emotion/styled';
-import { colors, typography, spacing, borderRadius, shadows, animations } from '../../styles/style';
+import styled from "@emotion/styled";
+import {
+  colors,
+  typography,
+  spacing,
+  borderRadius,
+  shadows,
+  animations,
+} from "../../styles/design-system";
 
 // 전체 컨테이너
 export const Container = styled.div`
@@ -127,8 +134,8 @@ export const SubmitButton = styled.button<{ disabled?: boolean }>`
   border: none;
   border-radius: ${borderRadius.md};
   ${typography.styles.title5};
-  cursor: ${props => props.disabled ? 'not-allowed' : 'pointer'};
-  opacity: ${props => props.disabled ? 0.6 : 1};
+  cursor: ${(props) => (props.disabled ? "not-allowed" : "pointer")};
+  opacity: ${(props) => (props.disabled ? 0.6 : 1)};
   transition: ${animations.transition.normal};
   display: flex;
   align-items: center;
@@ -273,7 +280,7 @@ export const ScoreValue = styled.div<{ score: number }>`
   font-size: 4rem;
   font-weight: ${typography.fontWeight.bold};
   font-family: ${typography.fontFamily.primary};
-  color: ${props => {
+  color: ${(props) => {
     if (props.score >= 70) return colors.status.success;
     if (props.score >= 50) return colors.status.warning;
     return colors.status.error;
@@ -317,7 +324,7 @@ export const ChartLabelText = styled.span`
 `;
 
 export const ChartLabelValue = styled.span<{ score: number }>`
-  color: ${props => {
+  color: ${(props) => {
     if (props.score >= 70) return colors.status.success;
     if (props.score >= 50) return colors.status.warning;
     return colors.status.error;
@@ -334,9 +341,9 @@ export const ChartBarBackground = styled.div`
 `;
 
 export const ChartBarFill = styled.div<{ width: number; color: string }>`
-  width: ${props => props.width}%;
+  width: ${(props) => props.width}%;
   height: 100%;
-  background: ${props => props.color};
+  background: ${(props) => props.color};
   border-radius: ${borderRadius.base};
   transition: width 0.5s ease;
 `;
@@ -367,15 +374,15 @@ export const CollapsibleTitle = styled.h3`
 `;
 
 export const CollapsibleIcon = styled.span<{ isOpen: boolean }>`
-  transform: ${props => props.isOpen ? 'rotate(180deg)' : 'rotate(0deg)'};
+  transform: ${(props) => (props.isOpen ? "rotate(180deg)" : "rotate(0deg)")};
   transition: ${animations.transition.normal};
 `;
 
 export const CollapsibleContent = styled.div<{ isOpen: boolean }>`
-  max-height: ${props => props.isOpen ? '500px' : '0'};
+  max-height: ${(props) => (props.isOpen ? "500px" : "0")};
   overflow: hidden;
   transition: max-height 0.3s ease;
-  margin-top: ${props => props.isOpen ? spacing[4] : '0'};
+  margin-top: ${(props) => (props.isOpen ? spacing[4] : "0")};
 `;
 
 export const SourceInfo = styled.div`
@@ -486,29 +493,41 @@ export const ItemDescription = styled.p`
   margin: ${spacing[2]} 0 0 0;
 `;
 
-export const Badge = styled.span<{ severity?: 'low' | 'medium' | 'high' | 'critical' }>`
+export const Badge = styled.span<{
+  severity?: "low" | "medium" | "high" | "critical";
+}>`
   display: inline-block;
   padding: ${spacing[1]} ${spacing[2]};
   border-radius: ${borderRadius.base};
   ${typography.styles.body4};
   font-weight: ${typography.fontWeight.bold};
   text-transform: uppercase;
-  background: ${props => {
+  background: ${(props) => {
     switch (props.severity) {
-      case 'critical': return colors.status.error;
-      case 'high': return `${colors.status.error}20`;
-      case 'medium': return `${colors.status.warning}20`;
-      case 'low': return `${colors.status.info}20`;
-      default: return colors.background.tertiary;
+      case "critical":
+        return colors.status.error;
+      case "high":
+        return `${colors.status.error}20`;
+      case "medium":
+        return `${colors.status.warning}20`;
+      case "low":
+        return `${colors.status.info}20`;
+      default:
+        return colors.background.tertiary;
     }
   }};
-  color: ${props => {
+  color: ${(props) => {
     switch (props.severity) {
-      case 'critical': return colors.text.inverse;
-      case 'high': return colors.status.error;
-      case 'medium': return colors.status.warning;
-      case 'low': return colors.status.info;
-      default: return colors.text.secondary;
+      case "critical":
+        return colors.text.inverse;
+      case "high":
+        return colors.status.error;
+      case "medium":
+        return colors.status.warning;
+      case "low":
+        return colors.status.info;
+      default:
+        return colors.text.secondary;
     }
   }};
 `;

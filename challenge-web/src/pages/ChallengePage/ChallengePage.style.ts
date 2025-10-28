@@ -1,5 +1,12 @@
 import styled from "@emotion/styled";
-import { colors, spacing, borderRadius, shadows, typography, animations } from "../../styles/style";
+import {
+  colors,
+  spacing,
+  borderRadius,
+  shadows,
+  typography,
+  animations,
+} from "../../styles/design-system";
 
 export const PageContainer = styled.div`
   max-width: 1200px;
@@ -17,7 +24,11 @@ export const Header = styled.header`
   text-align: center;
   margin-bottom: ${spacing[8]};
   padding: ${spacing[8]} 0;
-  background: linear-gradient(135deg, ${colors.primary}, ${colors.palette.purple});
+  background: linear-gradient(
+    135deg,
+    ${colors.primary},
+    ${colors.palette.purple}
+  );
   border-radius: ${borderRadius.xl};
   color: ${colors.text.inverse};
   box-shadow: ${shadows.md};
@@ -54,7 +65,11 @@ export const NavButtonContainer = styled.div`
 
 export const NavButton = styled.button`
   padding: ${spacing[3]} ${spacing[6]};
-  background: linear-gradient(135deg, ${colors.primary}, ${colors.palette.blue});
+  background: linear-gradient(
+    135deg,
+    ${colors.primary},
+    ${colors.palette.blue}
+  );
   color: ${colors.text.inverse};
   border: none;
   border-radius: ${borderRadius.lg};
@@ -220,9 +235,11 @@ interface OptionButtonProps {
 
 export const OptionButton = styled.button<OptionButtonProps>`
   padding: ${spacing[4]};
-  border: 2px solid ${props => props.selected ? colors.primary : colors.border.primary};
-  background: ${props => props.selected ? `${colors.primary}15` : colors.background.primary};
-  color: ${props => props.selected ? colors.primary : colors.text.primary};
+  border: 2px solid
+    ${(props) => (props.selected ? colors.primary : colors.border.primary)};
+  background: ${(props) =>
+    props.selected ? `${colors.primary}15` : colors.background.primary};
+  color: ${(props) => (props.selected ? colors.primary : colors.text.primary)};
   border-radius: ${borderRadius.lg};
   cursor: pointer;
   transition: all ${animations.transition.normal};
@@ -234,7 +251,8 @@ export const OptionButton = styled.button<OptionButtonProps>`
 
   &:hover {
     border-color: ${colors.primary};
-    background: ${props => props.selected ? `${colors.primary}25` : `${colors.primary}10`};
+    background: ${(props) =>
+      props.selected ? `${colors.primary}25` : `${colors.primary}10`};
     transform: translateY(-2px);
     box-shadow: ${shadows.md};
   }
@@ -302,7 +320,8 @@ interface ResultTextProps {
 
 export const ResultText = styled.div<ResultTextProps>`
   ${typography.styles.title1};
-  color: ${props => props.isCorrect ? colors.status.success : colors.status.error};
+  color: ${(props) =>
+    props.isCorrect ? colors.status.success : colors.status.error};
   margin-bottom: ${spacing[4]};
   text-align: center;
 `;

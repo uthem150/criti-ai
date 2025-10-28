@@ -1,112 +1,174 @@
 // 색상 팔레트
 export const colors = {
   // Primary Colors (브랜드 컬러)
-  primary: {
-    25: "#f8fafc",
-    50: "#f0f9ff",
-    100: "#e0f2fe",
-    200: "#bae6fd",
-    300: "#7dd3fc",
-    400: "#38bdf8",
-    500: "#0ea5e9", // Main brand color
-    600: "#0284c7",
-    700: "#0369a1",
-    800: "#075985",
-    900: "#0c4a6e",
+  primary: "#6B8AFF",
+
+  // Grayscale
+  grayscale: {
+    90: "#191F2B",
+    80: "#333D4B",
+    70: "#4E5968",
+    60: "#6B7684",
+    50: "#8B95A1",
+    40: "#B0B8C1",
+    30: "#D0D8DE",
+    20: "#E2E7EB",
+    10: "#EEF0F2",
+    5: "#F9FAFB",
+    0: "#FFFFFF",
   },
 
-  // Secondary Colors (보조 컬러)
-  secondary: {
-    50: "#fafaf9",
-    100: "#f5f5f4",
-    200: "#e7e5e4",
-    300: "#d6d3d1",
-    400: "#a8a29e",
-    500: "#78716c",
-    600: "#57534e",
-    700: "#44403c",
-    800: "#292524",
-    900: "#1c1917",
-  },
-
-  // 신뢰도 레벨 컬러
-  trust: {
-    trusted: "#10b981", // 초록 - 신뢰
-    neutral: "#f59e0b", // 노랑 - 중립
-    caution: "#f97316", // 주황 - 주의
-    dangerous: "#ef4444", // 빨강 - 위험
+  // 전체 색상 팔레트 (image_4bd869.png)
+  palette: {
+    red: "#FF5E5E",
+    orange: "#FF7700",
+    yellow: "#FAB007",
+    mint: "#00B29A",
+    blue: "#6B8AFF", // primary와 동일
+    purple: "#505CFF",
+    pink: "#FF3064",
+    gray: "#576578", // grayscale과 별도
   },
 
   // 상태 컬러
   status: {
-    success: "#10b981",
-    warning: "#f59e0b",
-    error: "#ef4444",
-    info: "#3b82f6",
+    success: "#00B26C",
+    error: "#FF5E5E",
+    warning: "#FF7700", // palette.orange에서 매핑
+    info: "#6B8AFF", // primary에서 매핑
   },
 
-  // 텍스트 컬러
+  // 텍스트 컬러 (grayscale 기반 정의)
   text: {
-    primary: "#111827",
-    secondary: "#6b7280",
-    disabled: "#9ca3af",
-    inverse: "#ffffff",
+    primary: "#191F2B", // grayscale[90]
+    secondary: "#4E5968", // grayscale[70]
+    disabled: "#B0B8C1", // grayscale[40]
+    inverse: "#FFFFFF", // grayscale[0]
   },
 
-  // 배경 컬러
+  // 배경 컬러 (grayscale 기반 정의)
   background: {
-    primary: "#ffffff",
-    secondary: "#f9fafb",
-    tertiary: "#f3f4f6",
-    dark: "#1f2937",
+    primary: "#FFFFFF", // grayscale[0]
+    secondary: "#F9FAFB", // grayscale[5]
+    tertiary: "#EEF0F2", // grayscale[10]
   },
 
-  // 테두리 컬러
+  // 테두리 컬러 (grayscale 기반 정의)
   border: {
-    primary: "#e5e7eb",
-    secondary: "#d1d5db",
-    focus: "#3b82f6",
+    primary: "#E2E7EB", // grayscale[20]
+    secondary: "#D0D8DE", // grayscale[30]
+    focus: "#6B8AFF", // primary
   },
 } as const;
 
-// 타이포그래피
+// 타이포그래피 (첨부 이미지 및 'Pretendard' 폰트 기준)
 export const typography = {
   fontFamily: {
     primary:
-      "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif",
+      "'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'Noto Sans KR', sans-serif",
     code: "'JetBrains Mono', 'Fira Code', 'Consolas', monospace",
   },
 
-  fontSize: {
-    xs: "0.75rem", // 12px
-    sm: "0.875rem", // 14px
-    base: "1rem", // 16px
-    lg: "1.125rem", // 18px
-    xl: "1.25rem", // 20px
-    "2xl": "1.5rem", // 24px
-    "3xl": "1.875rem", // 30px
-    "4xl": "2.25rem", // 36px
-  },
-
+  // 폰트 굵기
   fontWeight: {
     light: 300,
-    normal: 400,
-    medium: 500,
+    regular: 400,
     semibold: 600,
     bold: 700,
-    extrabold: 800,
   },
 
-  lineHeight: {
-    tight: 1.25,
-    normal: 1.5,
-    relaxed: 1.75,
-  },
-
-  letterSpacing: {
-    tight: "-0.025em",
-    normal: "0",
-    wide: "0.025em",
+  // 타이포그래피 스타일
+  styles: {
+    headline1: {
+      fontSize: "3rem", // 48px
+      fontWeight: 700,
+      lineHeight: 1.4, // 140%
+      letterSpacing: "-0.075rem",
+    },
+    headline2: {
+      fontSize: "2rem", // 32px
+      fontWeight: 700,
+      lineHeight: 1.4, // 140%
+      letterSpacing: "-0.05rem",
+    },
+    title1: {
+      fontSize: "1.5rem", // 24px
+      fontWeight: 600,
+      lineHeight: 1.4, // 140%
+      letterSpacing: "-0.03rem",
+    },
+    title2: {
+      fontSize: "1.25rem", // 20px
+      fontWeight: 600,
+      lineHeight: 1.4, // 140%
+      letterSpacing: "-0.025rem",
+    },
+    title3: {
+      fontSize: "1.125rem", // 18px
+      fontWeight: 600,
+      lineHeight: 1.4, // 140%
+      letterSpacing: "-0.0225rem",
+    },
+    title4: {
+      fontSize: "1rem", // 16px
+      fontWeight: 600,
+      lineHeight: 1.4, // 140%
+      letterSpacing: "-0.02rem",
+    },
+    title5: {
+      fontSize: "0.875rem", // 14px
+      fontWeight: 600,
+      lineHeight: 1.4, // 140%
+      letterSpacing: "-0.0175rem",
+    },
+    body1: {
+      fontSize: "1.125rem", // 18px
+      fontWeight: 300,
+      lineHeight: 1.6, // 160%
+      letterSpacing: "-0.0225rem",
+    },
+    body2: {
+      fontSize: "1rem", // 16px
+      fontWeight: 300,
+      lineHeight: 1.6, // 160%
+      letterSpacing: "-0.02rem",
+    },
+    body3: {
+      fontSize: "0.875rem", // 14px
+      fontWeight: 300,
+      lineHeight: 1.6, // 160%
+      letterSpacing: "-0.02625rem",
+    },
+    body4: {
+      fontSize: "0.75rem", // 12px
+      fontWeight: 300,
+      lineHeight: 1.6, // 160%
+      letterSpacing: "-0.0225rem",
+    },
+    caption1: {
+      fontSize: "1.125rem", // 18px
+      fontWeight: 400,
+      lineHeight: 1.6, // 160%
+      letterSpacing: "-0.0225rem",
+    },
+    caption2: {
+      fontSize: "1rem", // 16px
+      fontWeight: 400,
+      lineHeight: 1.6, // 160%
+      letterSpacing: "-0.02rem",
+    },
+    caption3: {
+      fontSize: "0.875rem", // 14px
+      fontWeight: 400,
+      lineHeight: 1.6, // 160%
+      letterSpacing: "-0.0175rem",
+    },
+    caption4: {
+      fontSize: "0.75rem", // 12px
+      fontWeight: 400,
+      lineHeight: 1.6, // 160%
+      letterSpacing: "-0.015rem",
+    },
   },
 } as const;
 

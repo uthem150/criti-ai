@@ -1,5 +1,10 @@
-import styled from '@emotion/styled';
-import { colors, typography, spacing, borderRadius } from '../../styles/style';
+import styled from "@emotion/styled";
+import {
+  colors,
+  typography,
+  spacing,
+  borderRadius,
+} from "../../styles/design-system";
 
 export const LoadingContainer = styled.div`
   display: flex;

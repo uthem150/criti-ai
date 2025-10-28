@@ -1,22 +1,24 @@
-import { css, Global } from '@emotion/react';
-import { colors, typography, spacing } from './style';
+import { css, Global } from "@emotion/react";
+import { colors, typography, spacing } from "./design-system";
 
 export const GlobalStyles = () => (
   <Global
     styles={css`
       /* CSS Reset & Base Styles */
-      *, *::before, *::after {
+      *,
+      *::before,
+      *::after {
         box-sizing: border-box;
         margin: 0;
         padding: 0;
       }
-      
+
       html {
         font-size: 16px;
         scroll-behavior: smooth;
         -webkit-text-size-adjust: 100%;
       }
-      
+
       body {
         margin: 0;
         padding: 0;
@@ -28,7 +30,7 @@ export const GlobalStyles = () => (
         -moz-osx-font-smoothing: grayscale;
         overflow-x: hidden;
       }
-      
+
       #root {
         min-height: 100vh;
         width: 100%;
@@ -37,7 +39,12 @@ export const GlobalStyles = () => (
       }
 
       /* Typography */
-      h1, h2, h3, h4, h5, h6 {
+      h1,
+      h2,
+      h3,
+      h4,
+      h5,
+      h6 {
         margin: 0;
         font-weight: ${typography.fontWeight.semibold};
       }
@@ -66,20 +73,24 @@ export const GlobalStyles = () => (
       }
 
       /* Input */
-      input, textarea, select {
+      input,
+      textarea,
+      select {
         font-family: ${typography.fontFamily.primary};
       }
-      
+
       /* Accessibility */
       @media (prefers-reduced-motion: reduce) {
-        *, *::before, *::after {
+        *,
+        *::before,
+        *::after {
           animation-duration: 0.01ms !important;
           animation-iteration-count: 1 !important;
           transition-duration: 0.01ms !important;
           scroll-behavior: auto !important;
         }
       }
-      
+
       /* Focus Styles */
       *:focus-visible {
         outline: 2px solid ${colors.border.focus};
@@ -91,7 +102,7 @@ export const GlobalStyles = () => (
         outline: 2px solid ${colors.primary};
         outline-offset: 2px;
       }
-      
+
       /* Selection */
       ::selection {
         background-color: ${colors.primary}30;
