@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import type { Challenge, UserProgress } from "@criti-ai/shared";
-import { challengeApiService } from "../services/challengeApiService";
+import { challengeApiService } from "../../services/challengeApiService";
 import {
   PageContainer,
   Header,
@@ -38,13 +38,15 @@ interface LoadingState {
   error: string | null;
 }
 
-export const ChallengePage: React.FC<ChallengePageProps> = ({
+const ChallengePage: React.FC<ChallengePageProps> = ({
   onNavigateBack: _onNavigateBack,
 }) => {
   const navigate = useNavigate();
   // 상태 관리
   const [challenges, setChallenges] = useState<Challenge[]>([]);
-  const [currentChallenge, setCurrentChallenge] = useState<Challenge | null>(null);
+  const [currentChallenge, setCurrentChallenge] = useState<Challenge | null>(
+    null
+  );
   const [challengeIndex, setChallengeIndex] = useState(0);
   const [userAnswers, setUserAnswers] = useState<string[]>([]);
   const [showResult, setShowResult] = useState(false);
@@ -52,7 +54,7 @@ export const ChallengePage: React.FC<ChallengePageProps> = ({
   const [userProgress, setUserProgress] = useState<UserProgress | null>(null);
   const [loadingState, setLoadingState] = useState<LoadingState>({
     isLoading: true,
-    error: null
+    error: null,
   });
   const [submitLoading, setSubmitLoading] = useState(false);
   const [startTime, setStartTime] = useState<number>(Date.now());
@@ -75,37 +77,41 @@ export const ChallengePage: React.FC<ChallengePageProps> = ({
    */
   const loadInitialData = async () => {
     setLoadingState({ isLoading: true, error: null });
-    
+
     try {
-      console.log('🚀 초기 데이터 로드 시작');
-      
+      console.log("🚀 초기 데이터 로드 시작");
+
       // 백엔드 연결 확인
       const isHealthy = await challengeApiService.healthCheck();
       if (!isHealthy) {
-        throw new Error('백엔드 서버에 연결할 수 없습니다. 서버가 실행 중인지 확인해주세요.');
+        throw new Error(
+          "백엔드 서버에 연결할 수 없습니다. 서버가 실행 중인지 확인해주세요."
+        );
       }
 
       // 오늘의 챌린지 로드
       const todaysChallenges = await challengeApiService.getTodaysChallenges();
-      console.log('✅ 오늘의 챌린지 로드 완료:', todaysChallenges.length, '개');
-      
+      console.log("✅ 오늘의 챌린지 로드 완료:", todaysChallenges.length, "개");
+
       if (todaysChallenges.length === 0) {
-        throw new Error('오늘의 챌린지가 없습니다. 잠시 후 다시 시도해주세요.');
+        throw new Error("오늘의 챌린지가 없습니다. 잠시 후 다시 시도해주세요.");
       }
 
       // 사용자 진행도 로드
       const progress = await challengeApiService.getUserProgress();
-      console.log('✅ 사용자 진행도 로드 완료');
+      console.log("✅ 사용자 진행도 로드 완료");
 
       setChallenges(todaysChallenges);
       setUserProgress(progress);
       setLoadingState({ isLoading: false, error: null });
-      
     } catch (error) {
-      console.error('❌ 초기 데이터 로드 실패:', error);
-      setLoadingState({ 
-        isLoading: false, 
-        error: error instanceof Error ? error.message : '데이터를 불러오는 중 오류가 발생했습니다.'
+      console.error("❌ 초기 데이터 로드 실패:", error);
+      setLoadingState({
+        isLoading: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : "데이터를 불러오는 중 오류가 발생했습니다.",
       });
     }
   };
@@ -128,10 +134,10 @@ export const ChallengePage: React.FC<ChallengePageProps> = ({
     if (!currentChallenge || submitLoading) return;
 
     setSubmitLoading(true);
-    
+
     try {
       const timeSpent = Math.floor((Date.now() - startTime) / 1000); // 초 단위
-      console.log('📝 답안 제출:', { userAnswers, timeSpent });
+      console.log("📝 답안 제출:", { userAnswers, timeSpent });
 
       const result = await challengeApiService.submitChallenge(
         currentChallenge.id,
@@ -142,23 +148,26 @@ export const ChallengePage: React.FC<ChallengePageProps> = ({
       if (result) {
         setIsCorrect(result.isCorrect);
         setShowResult(true);
-        
+
         // 사용자 진행도 업데이트 (점수 반영)
         if (userProgress && result.isCorrect) {
           setUserProgress({
             ...userProgress,
             totalPoints: userProgress.totalPoints + result.score,
-            completedChallenges: [...userProgress.completedChallenges, currentChallenge.id]
+            completedChallenges: [
+              ...userProgress.completedChallenges,
+              currentChallenge.id,
+            ],
           });
         }
-        
-        console.log('✅ 답안 제출 완료:', result.isCorrect ? '정답' : '오답');
+
+        console.log("✅ 답안 제출 완료:", result.isCorrect ? "정답" : "오답");
       } else {
-        throw new Error('답안 제출에 실패했습니다.');
+        throw new Error("답안 제출에 실패했습니다.");
       }
     } catch (error) {
-      console.error('❌ 답안 제출 실패:', error);
-      alert('답안 제출 중 오류가 발생했습니다. 다시 시도해주세요.');
+      console.error("❌ 답안 제출 실패:", error);
+      alert("답안 제출 중 오류가 발생했습니다. 다시 시도해주세요.");
     } finally {
       setSubmitLoading(false);
     }
@@ -205,85 +214,85 @@ export const ChallengePage: React.FC<ChallengePageProps> = ({
           title: "성급한 일반화",
           description: "적은 사례로 모든 경우에 적용하는 오류",
           example: "예: 학생 한 명이 처벌받았으니 모든 학생이 문제이다",
-          emoji: "📈"
+          emoji: "📈",
         },
         {
           id: "허위 이분법",
           title: "허위 이분법",
           description: "복잡한 문제를 단순히 둘 중 하나로만 나누는 오류",
           example: "예: 찬성 또는 반대, 둘 중 하나만 선택하라",
-          emoji: "⚖️"
+          emoji: "⚖️",
         },
         {
           id: "인신공격",
           title: "인신공격",
           description: "논리대신 사람을 비난하는 오류",
           example: "예: 그 언론인은 예전에 거짓말했으니 말을 믿을 수 없다",
-          emoji: "💭"
+          emoji: "💭",
         },
         {
           id: "권위에 호소",
           title: "권위에 호소",
           description: "근거 없이 권위를 내세우는 오류",
           example: "예: 전문가가 말했으니 무조건 맞다",
-          emoji: "👑"
+          emoji: "👑",
         },
         {
           id: "감정적 편향",
           title: "감정적 편향",
           description: "이성적 판단보다 감정에 호소하는 표현",
           example: "예: 충격적이다, 분노한다, 끝날 뜻하다",
-          emoji: "😡"
+          emoji: "😡",
         },
         {
           id: "과장된 표현",
           title: "과장된 표현",
           description: "사실보다 과도하게 부풀리거나 축소되는 표현",
           example: "예: 모든 사람, 절대로, 전혀, 반드시",
-          emoji: "📈"
+          emoji: "📈",
         },
         {
           id: "허수아비 공격",
           title: "허수아비 공격",
           description: "상대방 주장을 왜곡해서 공격하는 오류",
           example: "예: 그들은 완전히 방두하자고 한다 (왜곡된 해석)",
-          emoji: "🧙"
+          emoji: "🧙",
         },
         {
           id: "순환논리",
           title: "순환논리",
           description: "증명할 것을 근거로 사용하는 오류",
           example: "예: A가 옮다. 왜냐? A기 때문이다",
-          emoji: "🔄"
+          emoji: "🔄",
         },
         {
           id: "광고성 콘텐츠",
           title: "광고성 콘텐츠",
           description: "상품이나 서비스를 홍보하려는 의도가 숨어있음",
           example: "예: 상품명 언급, 할인 정보, 연예인 추천",
-          emoji: "📺"
+          emoji: "📺",
         },
         {
           id: "긴급성 유도",
           title: "긴급성 유도",
           description: "시간 압박을 가해 성급한 판단을 유도하는 표현",
           example: "예: 지금 당장, 마지막 기회, 더 이상 망설이지 마라",
-          emoji: "⏰"
+          emoji: "⏰",
         },
         {
           id: "과장된 수치",
           title: "과장된 수치",
           description: "근거 없거나 의심스러운 통계나 수치",
           example: "예: 98% 만족, 10명 중 9명 추천 (출처 불분명)",
-          emoji: "📉"
+          emoji: "📉",
         },
         {
           id: "선동적 언어",
           title: "선동적 언어",
           description: "감정을 자극해 특정 의견을 유도하는 언어",
           example: "예: 배신, 학살, 대참사, 유전의 진실",
-          emoji: "🗣️"
-        }
+          emoji: "🗣️",
+        },
       ];
     }
     return [];
@@ -299,10 +308,12 @@ export const ChallengePage: React.FC<ChallengePageProps> = ({
         </Header>
         <ChallengeContainer>
           <ChallengeCard>
-            <div style={{ textAlign: 'center', padding: '40px' }}>
-              <div style={{ fontSize: '24px', marginBottom: '16px' }}>⏳</div>
+            <div style={{ textAlign: "center", padding: "40px" }}>
+              <div style={{ fontSize: "24px", marginBottom: "16px" }}>⏳</div>
               <div>오늘의 챌린지를 불러오는 중...</div>
-              <div style={{ fontSize: '14px', color: '#666', marginTop: '8px' }}>
+              <div
+                style={{ fontSize: "14px", color: "#666", marginTop: "8px" }}
+              >
                 잠시만 기다려주세요
               </div>
             </div>
@@ -322,12 +333,10 @@ export const ChallengePage: React.FC<ChallengePageProps> = ({
         </Header>
         <ChallengeContainer>
           <ChallengeCard>
-            <div style={{ textAlign: 'center', padding: '40px' }}>
-              <div style={{ fontSize: '24px', marginBottom: '16px' }}>❌</div>
-              <div style={{ marginBottom: '16px' }}>{loadingState.error}</div>
-              <ActionButton onClick={loadInitialData}>
-                다시 시도
-              </ActionButton>
+            <div style={{ textAlign: "center", padding: "40px" }}>
+              <div style={{ fontSize: "24px", marginBottom: "16px" }}>❌</div>
+              <div style={{ marginBottom: "16px" }}>{loadingState.error}</div>
+              <ActionButton onClick={loadInitialData}>다시 시도</ActionButton>
             </div>
           </ChallengeCard>
         </ChallengeContainer>
@@ -345,8 +354,8 @@ export const ChallengePage: React.FC<ChallengePageProps> = ({
         </Header>
         <ChallengeContainer>
           <ChallengeCard>
-            <div style={{ textAlign: 'center', padding: '40px' }}>
-              <div style={{ fontSize: '24px', marginBottom: '16px' }}>📭</div>
+            <div style={{ textAlign: "center", padding: "40px" }}>
+              <div style={{ fontSize: "24px", marginBottom: "16px" }}>📭</div>
               <div>현재 이용 가능한 챌린지가 없습니다.</div>
             </div>
           </ChallengeCard>
@@ -364,7 +373,7 @@ export const ChallengePage: React.FC<ChallengePageProps> = ({
 
       {/* 네비게이션 버튼 */}
       <NavButtonContainer>
-        <NavButton onClick={() => navigate('/youtube')}>
+        <NavButton onClick={() => navigate("/youtube")}>
           <span>🎬</span>
           유튜브 영상 분석
         </NavButton>
@@ -412,7 +421,8 @@ export const ChallengePage: React.FC<ChallengePageProps> = ({
       <ChallengeContainer>
         <ChallengeCard>
           <ChallengeTitle>
-            챌린지 {challengeIndex + 1}/{challenges.length}: {currentChallenge.title}
+            챌린지 {challengeIndex + 1}/{challenges.length}:{" "}
+            {currentChallenge.title}
           </ChallengeTitle>
           <ChallengeContent>{currentChallenge.content}</ChallengeContent>
 
@@ -426,17 +436,25 @@ export const ChallengePage: React.FC<ChallengePageProps> = ({
                     onClick={() => handleAnswerToggle(option.id)}
                     title={option.example}
                   >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span style={{ fontSize: '18px' }}>{option.emoji}</span>
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "8px",
+                      }}
+                    >
+                      <span style={{ fontSize: "18px" }}>{option.emoji}</span>
                       <div style={{ flex: 1 }}>
-                        <div style={{ fontWeight: '600', marginBottom: '2px' }}>
+                        <div style={{ fontWeight: "600", marginBottom: "2px" }}>
                           {option.title}
                         </div>
-                        <div style={{ 
-                          fontSize: '12px', 
-                          opacity: 0.8, 
-                          lineHeight: '1.3'
-                        }}>
+                        <div
+                          style={{
+                            fontSize: "12px",
+                            opacity: 0.8,
+                            lineHeight: "1.3",
+                          }}
+                        >
                           {option.description}
                         </div>
                       </div>
@@ -449,7 +467,7 @@ export const ChallengePage: React.FC<ChallengePageProps> = ({
                 onClick={handleSubmit}
                 disabled={userAnswers.length === 0 || submitLoading}
               >
-                {submitLoading ? '제출 중...' : '답안 제출'}
+                {submitLoading ? "제출 중..." : "답안 제출"}
               </ActionButton>
             </>
           )}
@@ -486,3 +504,5 @@ export const ChallengePage: React.FC<ChallengePageProps> = ({
     </PageContainer>
   );
 };
+
+export default ChallengePage;

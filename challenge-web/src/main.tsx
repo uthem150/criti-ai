@@ -1,113 +1,71 @@
-import React from 'react'
-import ReactDOM from 'react-dom/client'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import { ChallengePage } from './pages/ChallengePage'
-import YoutubeAnalysisPage from './pages/YoutubeAnalysisPage'
+import React, { Suspense } from "react";
+import ReactDOM from "react-dom/client";
+import { RouterProvider } from "react-router-dom";
+import { GlobalStyles } from "./styles/globalStyles";
+import { router } from "./routes/AppRouter";
+import { ErrorBoundary, LoadingFallback } from "./components";
 
-// 전역 스타일 리셋
-const globalStyles = `
-  *, *::before, *::after {
-    box-sizing: border-box;
-  }
-  
-  html {
-    font-size: 16px;
-    scroll-behavior: smooth;
-  }
-  
-  body {
-    margin: 0;
-    padding: 0;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-    line-height: 1.5;
-    color: #111827;
-    background-color: #f9fafb;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    overflow-x: hidden;
-  }
-  
-  #root {
-    min-height: 100vh;
-    width: 100%;
-  }
-  
-  /* 접근성 개선 */
-  @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after {
-      animation-duration: 0.01ms !important;
-      animation-iteration-count: 1 !important;
-      transition-duration: 0.01ms !important;
-    }
-  }
-  
-  /* 포커스 스타일 */
-  *:focus {
-    outline: 2px solid #3b82f6;
-    outline-offset: 2px;
-  }
-  
-  /* 선택 스타일 */
-  ::selection {
-    background-color: #bfdbfe;
-    color: #1e40af;
-  }
-`;
-
-// 전역 스타일 주입
-const styleSheet = document.createElement('style');
-styleSheet.textContent = globalStyles;
-document.head.appendChild(styleSheet);
-
-// 메인 앱 컴포넌트
-export const App: React.FC = () => {
+/**
+ * Main Application Component (App)
+ * 앱의 최상위 래퍼(Wrapper) 컴포넌트
+ */
+const App: React.FC = () => {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<ChallengePage />} />
-        <Route path="/youtube" element={<YoutubeAnalysisPage />} />
-      </Routes>
-    </BrowserRouter>
+    // ErrorBoundary: 앱 전역 오류 처리
+    // 자식 컴포넌트(GlobalStyles, Suspense, RouterProvider)에서
+    // 렌더링 중 오류가 발생하면, 앱이 죽는 대신 ErrorBoundary의 UI를 보여줌
+    <ErrorBoundary>
+      {/* GlobalStyles: 전역 스타일 적용 */}
+      {/* Reset CSS, 폰트, body 배경색 등 앱 전체에 적용될 스타일 */}
+      <GlobalStyles />
+
+      {/* Suspense: 코드 스플리팅(Lazy Loading) 지원 */}
+      {/* AppRouter 내부에서 lazy()로 불러오는 페이지가 로드될 때까지 
+          fallback으로 LoadingFallback 컴포넌트(스피너)를 보여줌 */}
+      <Suspense fallback={<LoadingFallback />}>
+        {/* RouterProvider: 라우팅 관리 */}
+        {/* router 객체의 설정에 따라 현재 URL에 맞는 페이지 렌더링 */}
+        <RouterProvider router={router} />
+      </Suspense>
+    </ErrorBoundary>
   );
 };
 
-// React 앱 마운트
-const container = document.getElementById('root');
-if (container) {
-  // 기존 로딩 상태 제거
-  container.innerHTML = '';
-  
+/**
+ * Application Initialization (initializeApp)
+ * 실제 앱을 DOM에 마운트하는 로직을 함수로 분리
+ */
+const initializeApp = (): void => {
+  // public/index.html에서 id="root"인 div를 찾음
+  const container = document.getElementById("root");
+
+  if (!container) {
+    console.error("❌ Root container not found");
+    return;
+  }
+
+  // React 18 방식으로 root를 생성
   const root = ReactDOM.createRoot(container);
-  root.render(<App />);
-  
-  console.log('✅ Criti.AI Challenge 웹앱 시작');
-} else {
-  console.error('❌ Root container not found');
-  // 에러 상황 대비
-  document.body.innerHTML = `
-    <div style="
-      display: flex; 
-      align-items: center; 
-      justify-content: center; 
-      height: 100vh; 
-      flex-direction: column; 
-      gap: 1rem; 
-      color: #dc2626;
-      font-family: system-ui;
-    ">
-      <h1>앱 로딩 실패</h1>
-      <p>root 요소를 찾을 수 없습니다.</p>
-      <button onclick="window.location.reload()" style="
-        padding: 0.75rem 1.5rem; 
-        background: #3b82f6; 
-        color: white; 
-        border: none; 
-        border-radius: 0.375rem; 
-        cursor: pointer;
-        font-size: 1rem;
-      ">
-        새로고침
-      </button>
-    </div>
-  `;
-}
+
+  // 생성된 root에 App 컴포넌트를 렌더링
+  root.render(
+    // React.StrictMode: 개발 모드에서 잠재적 문제를 감지하기 위한 래퍼
+    // (e.g., 부수 효과 두 번 실행, deprecated API 사용 경고 등)
+    <React.StrictMode>
+      <App />
+    </React.StrictMode>
+  );
+
+  // 개발 환경(development mode)일 때만 콘솔에 로그를 출력
+  // (import.meta.env.DEV는 Vite 환경 변수)
+  if (import.meta.env.DEV) {
+    console.log("✅ Criti.AI 웹앱 시작");
+    console.log("📍 환경:", import.meta.env.MODE);
+  }
+};
+
+// 4. 앱 실행
+initializeApp();
+
+// Export for testing
+export { App };

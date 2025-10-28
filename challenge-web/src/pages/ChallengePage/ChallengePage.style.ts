@@ -1,5 +1,5 @@
-import styled from '@emotion/styled';
-import { colors, spacing, borderRadius, shadows, typography, animations } from '../styles/design-system';
+import styled from "@emotion/styled";
+import { colors, spacing, borderRadius, shadows, typography, animations } from "../../styles/style";
 
 export const PageContainer = styled.div`
   max-width: 1200px;
@@ -17,23 +17,31 @@ export const Header = styled.header`
   text-align: center;
   margin-bottom: ${spacing[8]};
   padding: ${spacing[8]} 0;
-  background: linear-gradient(135deg, ${colors.primary[500]}, ${colors.primary[600]});
+  background: linear-gradient(135deg, ${colors.primary}, ${colors.palette.purple});
   border-radius: ${borderRadius.xl};
-  color: white;
+  color: ${colors.text.inverse};
+  box-shadow: ${shadows.md};
 `;
 
 export const HeaderTitle = styled.h1`
   margin: 0 0 ${spacing[2]} 0;
-  font-size: ${typography.fontSize['3xl']};
-  font-weight: ${typography.fontWeight.bold};
-  font-family: ${typography.fontFamily.primary};
+  ${typography.styles.headline1};
+  color: ${colors.text.inverse};
+
+  @media (max-width: 768px) {
+    ${typography.styles.headline2};
+  }
 `;
 
 export const HeaderSubtitle = styled.p`
   margin: 0;
-  font-size: ${typography.fontSize.lg};
-  opacity: 0.9;
-  font-weight: ${typography.fontWeight.normal};
+  ${typography.styles.title3};
+  opacity: 0.95;
+  color: ${colors.text.inverse};
+
+  @media (max-width: 768px) {
+    ${typography.styles.body1};
+  }
 `;
 
 export const NavButtonContainer = styled.div`
@@ -41,16 +49,16 @@ export const NavButtonContainer = styled.div`
   justify-content: center;
   gap: ${spacing[3]};
   margin-bottom: ${spacing[6]};
+  flex-wrap: wrap;
 `;
 
 export const NavButton = styled.button`
   padding: ${spacing[3]} ${spacing[6]};
-  background: linear-gradient(135deg, ${colors.primary[500]}, ${colors.primary[600]});
-  color: white;
+  background: linear-gradient(135deg, ${colors.primary}, ${colors.palette.blue});
+  color: ${colors.text.inverse};
   border: none;
   border-radius: ${borderRadius.lg};
-  font-size: ${typography.fontSize.base};
-  font-weight: ${typography.fontWeight.semibold};
+  ${typography.styles.title5};
   cursor: pointer;
   transition: ${animations.transition.normal};
   box-shadow: ${shadows.md};
@@ -61,6 +69,7 @@ export const NavButton = styled.button`
   &:hover {
     transform: translateY(-2px);
     box-shadow: ${shadows.lg};
+    opacity: 0.95;
   }
 
   &:active {
@@ -69,7 +78,7 @@ export const NavButton = styled.button`
 
   @media (max-width: 768px) {
     padding: ${spacing[2]} ${spacing[4]};
-    font-size: ${typography.fontSize.sm};
+    ${typography.styles.body3};
   }
 `;
 
@@ -92,18 +101,23 @@ export const StatItem = styled.div`
   text-align: center;
   box-shadow: ${shadows.sm};
   border: 1px solid ${colors.border.primary};
+  transition: ${animations.transition.normal};
+
+  &:hover {
+    box-shadow: ${shadows.md};
+    transform: translateY(-2px);
+  }
 `;
 
 export const StatLabel = styled.div`
-  font-size: ${typography.fontSize.sm};
+  ${typography.styles.body3};
   color: ${colors.text.secondary};
   margin-bottom: ${spacing[1]};
 `;
 
 export const StatValue = styled.div`
-  font-size: ${typography.fontSize.xl};
-  font-weight: ${typography.fontWeight.bold};
-  color: ${colors.primary[600]};
+  ${typography.styles.title2};
+  color: ${colors.primary};
 `;
 
 export const BadgeContainer = styled.div`
@@ -116,8 +130,7 @@ export const BadgeContainer = styled.div`
   h3 {
     margin: 0 0 ${spacing[4]} 0;
     color: ${colors.text.primary};
-    font-size: ${typography.fontSize.lg};
-    font-weight: ${typography.fontWeight.semibold};
+    ${typography.styles.title2};
   }
 
   display: flex;
@@ -133,18 +146,24 @@ export const Badge = styled.div`
   background: ${colors.background.secondary};
   border-radius: ${borderRadius.md};
   border: 1px solid ${colors.border.primary};
+  transition: ${animations.transition.normal};
+
+  &:hover {
+    box-shadow: ${shadows.sm};
+  }
 
   .icon {
-    font-size: ${typography.fontSize['2xl']};
+    ${typography.styles.headline2};
   }
 
   .name {
     font-weight: ${typography.fontWeight.semibold};
     color: ${colors.text.primary};
+    ${typography.styles.body2};
   }
 
   .description {
-    font-size: ${typography.fontSize.sm};
+    ${typography.styles.body3};
     color: ${colors.text.secondary};
   }
 `;
@@ -164,18 +183,21 @@ export const ChallengeCard = styled.div`
 export const ChallengeTitle = styled.h2`
   margin: 0 0 ${spacing[6]} 0;
   color: ${colors.text.primary};
-  font-size: ${typography.fontSize['2xl']};
-  font-weight: ${typography.fontWeight.bold};
+  ${typography.styles.headline2};
+
+  @media (max-width: 768px) {
+    ${typography.styles.title1};
+  }
 `;
 
 export const ChallengeContent = styled.div`
   background: ${colors.background.secondary};
   padding: ${spacing[6]};
   border-radius: ${borderRadius.md};
-  border-left: 4px solid ${colors.primary[500]};
+  border-left: 4px solid ${colors.primary};
   margin-bottom: ${spacing[8]};
-  line-height: ${typography.lineHeight.relaxed};
-  font-size: ${typography.fontSize.base};
+  line-height: 1.7;
+  ${typography.styles.body2};
   color: ${colors.text.primary};
   white-space: pre-line;
 `;
@@ -197,10 +219,10 @@ interface OptionButtonProps {
 }
 
 export const OptionButton = styled.button<OptionButtonProps>`
-  padding: ${spacing[4]} ${spacing[4]};
-  border: 2px solid ${props => props.selected ? colors.primary[500] : colors.border.primary};
-  background: ${props => props.selected ? colors.primary[50] : colors.background.primary};
-  color: ${props => props.selected ? colors.primary[700] : colors.text.primary};
+  padding: ${spacing[4]};
+  border: 2px solid ${props => props.selected ? colors.primary : colors.border.primary};
+  background: ${props => props.selected ? `${colors.primary}15` : colors.background.primary};
+  color: ${props => props.selected ? colors.primary : colors.text.primary};
   border-radius: ${borderRadius.lg};
   cursor: pointer;
   transition: all ${animations.transition.normal};
@@ -208,10 +230,11 @@ export const OptionButton = styled.button<OptionButtonProps>`
   min-height: 80px;
   display: flex;
   align-items: center;
+  ${typography.styles.body2};
 
   &:hover {
-    border-color: ${colors.primary[400]};
-    background: ${props => props.selected ? colors.primary[100] : colors.primary[25]};
+    border-color: ${colors.primary};
+    background: ${props => props.selected ? `${colors.primary}25` : `${colors.primary}10`};
     transform: translateY(-2px);
     box-shadow: ${shadows.md};
   }
@@ -220,26 +243,25 @@ export const OptionButton = styled.button<OptionButtonProps>`
     transform: translateY(0);
   }
 
-  /* 내부 텍스트 스타일링 */
   div {
     width: 100%;
   }
 `;
 
 export const ActionButton = styled.button`
-  background: ${colors.primary[500]};
-  color: white;
+  background: ${colors.primary};
+  color: ${colors.text.inverse};
   border: none;
   padding: ${spacing[3]} ${spacing[6]};
   border-radius: ${borderRadius.md};
-  font-size: ${typography.fontSize.base};
-  font-weight: ${typography.fontWeight.semibold};
+  ${typography.styles.title5};
   cursor: pointer;
   transition: all ${animations.transition.normal};
   min-width: 120px;
+  box-shadow: ${shadows.sm};
 
   &:hover:not(:disabled) {
-    background: ${colors.primary[600]};
+    opacity: 0.9;
     transform: translateY(-2px);
     box-shadow: ${shadows.lg};
   }
@@ -279,16 +301,15 @@ interface ResultTextProps {
 }
 
 export const ResultText = styled.div<ResultTextProps>`
-  font-size: ${typography.fontSize.xl};
-  font-weight: ${typography.fontWeight.bold};
+  ${typography.styles.title1};
   color: ${props => props.isCorrect ? colors.status.success : colors.status.error};
   margin-bottom: ${spacing[4]};
   text-align: center;
 `;
 
 export const ExplanationText = styled.div`
-  font-size: ${typography.fontSize.base};
-  line-height: ${typography.lineHeight.relaxed};
+  ${typography.styles.body2};
+  line-height: 1.7;
   color: ${colors.text.primary};
   margin-bottom: ${spacing[4]};
 
@@ -297,7 +318,7 @@ export const ExplanationText = styled.div`
   }
 
   strong {
-    color: ${colors.primary[600]};
+    color: ${colors.primary};
     font-weight: ${typography.fontWeight.semibold};
   }
 `;
@@ -311,7 +332,7 @@ export const NavigationButtons = styled.div`
 
   @media (max-width: 768px) {
     flex-direction: column;
-    
+
     > div {
       width: 100%;
       display: flex;
