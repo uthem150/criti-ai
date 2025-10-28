@@ -258,22 +258,22 @@ build_and_start() {
     
     # 기존 컨테이너 정리
     show_progress 1 5
-    docker-compose -f ./config/docker/docker-compose.micro.yml down >/dev/null 2>&1 || true
+    docker-compose -f ./config/docker/docker-compose.home.yml down || true
     
     # 이미지 빌드
     show_progress 2 5
     echo -e "\n${BLUE}Docker 이미지 빌드 중... (5-10분 소요)${NC}"
-    docker-compose -f ./config/docker/docker-compose.micro.yml build >/dev/null 2>&1
+    docker-compose -f ./config/docker/docker-compose.home.yml build
     
     # 데이터베이스 스키마 적용
     show_progress 3 5
     echo -e "\n${BLUE}데이터베이스 스키마 적용 중...${NC}"
     # 'backend' 서비스의 이미지를 사용해 'npx prisma db push'를 1회 실행
-    docker-compose -f ./config/docker/docker-compose.micro.yml run --rm backend npx prisma db push
+    docker-compose -f ./config/docker/docker-compose.home.yml run --rm backend npx prisma db push
 
     # 서비스 시작
     show_progress 4 5
-    docker-compose -f ./config/docker/docker-compose.micro.yml up -d >/dev/null 2>&1
+    docker-compose -f ./config/docker/docker-compose.home.yml up -d
     
     # 서비스 시작 대기
     show_progress 5 5
@@ -289,7 +289,7 @@ verify_deployment() {
     
     # 컨테이너 상태 확인
     show_progress 1 3
-    local containers_up=$(docker-compose -f ./config/docker/docker-compose.micro.yml ps | grep -c "Up" || echo "0")
+    local containers_up=$(docker-compose -f ./config/docker/docker-compose.home.yml ps | grep -c "Up" || echo "0")
     if [ "$containers_up" -lt 3 ]; then
         print_warning "일부 컨테이너가 실행되지 않았습니다."
     else
@@ -327,7 +327,7 @@ setup_monitoring() {
     print_step 9 10 "모니터링 설정"
     
     # 모니터링 스크립트 실행 권한 부여
-    chmod +x monitor-micro.sh
+    chmod +x ./scripts/monitor-micro.sh
     
     # 시스템 서비스로 등록
     sudo tee /etc/systemd/system/criti-ai-monitor.service >/dev/null << EOF
@@ -372,9 +372,9 @@ show_final_info() {
     
     echo "🛠️ 유용한 명령어:"
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    echo "• 서비스 상태 확인: docker-compose -f docker-compose.micro.yml ps"
-    echo "• 로그 확인: docker-compose -f docker-compose.micro.yml logs -f"
-    echo "• 서비스 재시작: docker-compose -f docker-compose.micro.yml restart"
+    echo "• 서비스 상태 확인: docker-compose -f docker-compose.home.yml ps"
+    echo "• 로그 확인: docker-compose -f docker-compose.home.yml logs -f"
+    echo "• 서비스 재시작: docker-compose -f docker-compose.home.yml restart"
     echo "• 리소스 모니터링: ./monitor-micro.sh --status"
     echo "• 수동 재시작: ./monitor-micro.sh --restart"
     echo ""
@@ -389,7 +389,7 @@ show_final_info() {
     echo "2. 백엔드 환경변수 업데이트"
     echo "   - nano backend/.env"
     echo "   - FRONTEND_URL을 Vercel URL로 변경"
-    echo "   - docker-compose -f docker-compose.micro.yml restart"
+    echo "   - docker-compose -f docker-compose.home.yml restart"
     echo ""
     
     echo "💰 비용 정보:"

@@ -25,9 +25,9 @@ services:
       - redis
     restart: unless-stopped
     # 메모리 제한 설정
-    mem_limit: 200m
-    mem_reservation: 150m
-    cpus: 0.7
+    # mem_limit: 200m
+    # mem_reservation: 150m
+    # cpus: 0.7
     healthcheck:
       test:
         [
@@ -59,9 +59,9 @@ services:
       - redis_data:/data
     restart: unless-stopped
     # 메모리 제한 (중요!)
-    mem_limit: 80m
-    mem_reservation: 50m
-    cpus: 0.2
+    # mem_limit: 80m
+    # mem_reservation: 50m
+    # cpus: 0.2
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 30s
@@ -73,17 +73,17 @@ services:
     image: nginx:alpine
     container_name: criti-ai-nginx
     ports:
-      - "80:80"
-      - "443:443"
+      - "8082:80"
+      - "8443:443"
     volumes:
       - ../nginx.micro.conf:/etc/nginx/nginx.conf:ro
       - logs_data:/var/log/nginx
     depends_on:
       - backend
     restart: unless-stopped
-    mem_limit: 50m
-    mem_reservation: 30m
-    cpus: 0.1
+    # mem_limit: 50m
+    # mem_reservation: 30m
+    # cpus: 0.1
 
 volumes:
   app_data:

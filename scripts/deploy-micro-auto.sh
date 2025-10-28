@@ -328,8 +328,8 @@ setup_monitoring() {
     print_step 9 10 "모니터링 설정"
     
     # 모니터링 스크립트 실행 권한 부여
-    chmod +x monitor-micro.sh
-    
+    chmod +x ./scripts/monitor-micro.sh
+
     # 시스템 서비스로 등록
     sudo tee /etc/systemd/system/criti-ai-monitor.service >/dev/null << EOF
 [Unit]
