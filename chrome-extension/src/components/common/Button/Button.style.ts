@@ -7,7 +7,7 @@ import {
   borderRadius,
   shadows,
   animations,
-} from "@/styles/design-system";
+} from "@/styles/style";
 
 interface ButtonStyleProps {
   variant?: "primary" | "secondary" | "outline" | "ghost" | "danger";
@@ -20,40 +20,40 @@ const getVariantStyles = (variant: ButtonStyleProps["variant"]) => {
   switch (variant) {
     case "primary":
       return css`
-        background-color: ${colors.primary[500]};
+        background-color: ${colors.primary.main};
         color: ${colors.text.inverse};
-        border: 1px solid ${colors.primary[500]};
+        border: 1px solid ${colors.primary.main};
 
         &:hover:not(:disabled) {
-          background-color: ${colors.primary[600]};
-          border-color: ${colors.primary[600]};
+          background-color: ${colors.primary.hover};
+          border-color: ${colors.primary.hover};
         }
 
         &:active:not(:disabled) {
-          background-color: ${colors.primary[700]};
+          background-color: ${colors.primary.dark};
         }
       `;
 
     case "secondary":
       return css`
-        background-color: ${colors.secondary[100]};
+        background-color: ${colors.background.secondary};
         color: ${colors.text.primary};
         border: 1px solid ${colors.border.primary};
 
         &:hover:not(:disabled) {
-          background-color: ${colors.secondary[200]};
+          background-color: ${colors.background.tertiary};
         }
       `;
 
     case "outline":
       return css`
         background-color: transparent;
-        color: ${colors.primary[600]};
-        border: 1px solid ${colors.primary[300]};
+        color: ${colors.primary.main};
+        border: 1px solid ${colors.primary.light};
 
         &:hover:not(:disabled) {
-          background-color: ${colors.primary[50]};
-          border-color: ${colors.primary[400]};
+          background-color: ${colors.background.hover};
+          border-color: ${colors.primary.main};
         }
       `;
 
@@ -64,7 +64,7 @@ const getVariantStyles = (variant: ButtonStyleProps["variant"]) => {
         border: 1px solid transparent;
 
         &:hover:not(:disabled) {
-          background-color: ${colors.secondary[100]};
+          background-color: ${colors.background.hover};
           color: ${colors.text.primary};
         }
       `;
@@ -76,7 +76,8 @@ const getVariantStyles = (variant: ButtonStyleProps["variant"]) => {
         border: 1px solid ${colors.status.error};
 
         &:hover:not(:disabled) {
-          background-color: #dc2626;
+          background-color: ${colors.palette.red};
+          border-color: ${colors.palette.red};
         }
       `;
 
@@ -90,14 +91,15 @@ const getSizeStyles = (size: ButtonStyleProps["size"]) => {
     case "sm":
       return css`
         padding: ${spacing[2]} ${spacing[3]};
-        font-size: ${typography.fontSize.sm};
+        ${typography.styles.caption3};
+        font-weight: ${typography.fontWeight.semibold};
         min-height: 2rem;
       `;
 
     case "lg":
       return css`
         padding: ${spacing[3]} ${spacing[6]};
-        font-size: ${typography.fontSize.lg};
+        ${typography.styles.title3};
         min-height: 2.75rem;
       `;
 
@@ -105,7 +107,7 @@ const getSizeStyles = (size: ButtonStyleProps["size"]) => {
     default:
       return css`
         padding: ${spacing[2]} ${spacing[4]};
-        font-size: ${typography.fontSize.base};
+        ${typography.styles.title4};
         min-height: 2.5rem;
       `;
   }
@@ -119,8 +121,6 @@ export const StyledButton = styled.button<ButtonStyleProps>`
   gap: ${spacing[2]};
 
   font-family: ${typography.fontFamily.primary};
-  font-weight: ${typography.fontWeight.medium};
-  line-height: ${typography.lineHeight.tight};
   text-decoration: none;
 
   border-radius: ${borderRadius.md};

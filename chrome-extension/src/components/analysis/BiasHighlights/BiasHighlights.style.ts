@@ -1,5 +1,11 @@
-import styled from '@emotion/styled';
-import { colors, spacing, borderRadius, typography, animations } from '@/styles/design-system';
+import styled from "@emotion/styled";
+import {
+  colors,
+  spacing,
+  borderRadius,
+  typography,
+  animations,
+} from "@/styles/style";
 
 export const HighlightsContainer = styled.div`
   margin-bottom: ${spacing[4]};
@@ -8,8 +14,9 @@ export const HighlightsContainer = styled.div`
 export const SectionTitle = styled.h4`
   margin: 0 0 ${spacing[3]} 0;
   color: ${colors.text.primary};
-  font-size: ${typography.fontSize.base};
-  font-weight: ${typography.fontWeight.semibold};
+
+  ${typography.styles.title4};
+
   display: flex;
   align-items: center;
   gap: ${spacing[2]};
@@ -17,7 +24,9 @@ export const SectionTitle = styled.h4`
 
 export const EmptyState = styled.p`
   color: ${colors.text.secondary};
-  font-size: ${typography.fontSize.sm};
+
+  ${typography.styles.caption3};
+
   margin: 0;
   padding: ${spacing[4]};
   background: ${colors.background.secondary};
@@ -40,68 +49,75 @@ export const HighlightItem = styled.li<HighlightItemProps>`
   padding: ${spacing[3]};
   background: ${colors.background.secondary};
   border-radius: ${borderRadius.md};
-  border-left: 3px solid ${
-    props => 
-      props.type === 'bias' ? colors.status.warning :
-      props.type === 'fallacy' ? colors.status.error :
-      props.type === 'manipulation' ? colors.status.error :
-      colors.status.warning
-  };
+  border-left: 3px solid
+    ${(props) =>
+      props.type === "bias"
+        ? colors.status.warning
+        : props.type === "fallacy"
+          ? colors.status.error
+          : props.type === "manipulation"
+            ? colors.status.error
+            : colors.status.warning};
   transition: all ${animations.transition.fast};
-  
+
   &:hover {
     background: ${colors.background.tertiary};
     transform: translateX(2px);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 8px ${colors.shadow.medium};
   }
-  
+
   &:last-child {
     margin-bottom: 0;
   }
-  
+
   .highlight-header {
     margin-bottom: ${spacing[2]};
-    
+
     .highlight-type {
       display: inline-block;
       background: ${
-        props => 
-          props.type === 'bias' ? 'rgba(251, 191, 36, 0.1)' :
-          props.type === 'fallacy' ? 'rgba(239, 68, 68, 0.1)' :
-          props.type === 'manipulation' ? 'rgba(239, 68, 68, 0.15)' :
-          'rgba(107, 114, 128, 0.1)'
+        (props) =>
+          props.type === "bias"
+            ? colors.palette.orange // warning 대신 orange 사용
+            : props.type === "fallacy"
+              ? colors.status.error
+              : props.type === "manipulation"
+                ? colors.status.error
+                : colors.palette.gray // 중립 색상 사용
       };
-      color: ${
-        props => 
-          props.type === 'bias' ? '#d97706' :
-          props.type === 'fallacy' ? '#dc2626' :
-          props.type === 'manipulation' ? '#dc2626' :
-          '#6b7280'
-      };
+
+      color: ${(props) =>
+        props.type === "bias"
+          ? colors.palette.yellow
+          : props.type === "fallacy"
+            ? colors.palette.red
+            : props.type === "manipulation"
+              ? colors.palette.red
+              : colors.palette.gray};
       padding: 2px 8px;
       border-radius: ${borderRadius.sm};
-      font-size: ${typography.fontSize.xs};
-      font-weight: ${typography.fontWeight.medium};
+
+      ${typography.styles.caption4};
     }
   }
-  
+
   .position-info {
     margin-top: ${spacing[2]};
-    font-size: ${typography.fontSize.xs};
-    color: ${colors.text.disabled};
+    color: ${colors.text.tertiary};
     opacity: 0.7;
+    ${typography.styles.caption4};
   }
 `;
 
 export const HighlightText = styled.strong`
   color: ${colors.text.primary};
-  font-weight: ${typography.fontWeight.medium};
+  ${typography.styles.caption2};
+  font-weight: ${typography.fontWeight.semibold};
   display: block;
   margin-bottom: ${spacing[1]};
 `;
 
 export const HighlightExplanation = styled.small`
   color: ${colors.text.secondary};
-  font-size: ${typography.fontSize.xs};
-  line-height: ${typography.lineHeight.normal};
+  ${typography.styles.body4};
 `;

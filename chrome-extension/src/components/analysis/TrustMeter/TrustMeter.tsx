@@ -29,10 +29,10 @@ export const TrustMeter: React.FC<TrustMeterProps> = ({ score, analysis }) => {
   };
 
   const getScoreColor = (score: number): string => {
-    if (score >= 80) return '#10b981'; // green
-    if (score >= 60) return '#f59e0b'; // yellow
-    if (score >= 40) return '#f97316'; // orange
-    return '#ef4444'; // red
+    if (score >= 80) return '#00B29A'; // trust.high
+    if (score >= 50) return '#FAB007'; // trust.medium
+    if (score >= 30) return '#FF7700'; // trust.low
+    return '#FF5E5E'; // trust.veryLow
   };
 
   const getScoreLabel = (key: string): string => {

@@ -1,23 +1,28 @@
 import { createRoot } from "react-dom/client";
+import createCache from "@emotion/cache";
+import { CacheProvider } from "@emotion/react";
 import { ContentScriptApp } from "../../components/ContentScriptApp";
 import { debugCommands } from "../../utils/debugUtils";
 
-// Shadow DOM용 완전히 격리된 CSS - 전면 재설계
+// Shadow DOM용 최소 CSS - reset + 폰트 격리
 const getShadowCSS = () => `
-  /* 완전 초기화 및 기본 폰트 설정 */
+  /* Shadow DOM 기본 reset + 폰트 격리 */
   :host {
     all: initial;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+    display: block;
+    /* 명시적 폰트 설정으로 외부 영향 차단 */
+    font-family: 'Pretendard', Pretendard, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
     font-size: 16px;
     line-height: 1.6;
     color: #111827;
-    letter-spacing: -0.01em;
-    box-sizing: border-box;
   }
   
   * {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif !important;
     box-sizing: border-box !important;
+    margin: 0;
+    padding: 0;
+    /* 모든 요소가 호스트 폰트를 상속받도록 */
+    font-family: 'Pretendard', Pretendard, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif !important;
   }
 
   /* 사이드바 기본 컨테이너 */
@@ -29,13 +34,10 @@ const getShadowCSS = () => `
     height: 100vh;
     z-index: 999999;
     background: #ffffff;
-    border-left: 1px solid #e5e7eb;
+    border-left: 1px solid #E2E7EB;
     box-shadow: -12px 0 40px rgba(0, 0, 0, 0.15);
     overflow-y: auto;
     transition: right 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    font-size: 14px;
-    line-height: 1.6;
-    color: #111827;
     padding: 0;
   }
 
@@ -43,1503 +45,27 @@ const getShadowCSS = () => `
     right: 0px;
   }
 
-  /* 사이드바 스크롤바 커스터마이징 */
+  /* 스크롤바 커스터마이징 */
   .criti-ai-sidebar-container::-webkit-scrollbar {
     width: 6px;
   }
   
   .criti-ai-sidebar-container::-webkit-scrollbar-track {
-    background: #f1f5f9;
+    background: #EEF0F2;
   }
   
   .criti-ai-sidebar-container::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
+    background: #B0B8C1;
     border-radius: 3px;
   }
   
   .criti-ai-sidebar-container::-webkit-scrollbar-thumb:hover {
-    background: #94a3b8;
-  }
-
-  /* 닫기 버튼 */
-  .close-button-container {
-    position: absolute;
-    top: 12px;
-    right: 12px;
-    z-index: 10;
-  }
-
-  .close-button {
-    background: rgba(255, 255, 255, 0.9);
-    border: none;
-    border-radius: 50%;
-    width: 32px;
-    height: 32px;
-    font-size: 16px;
-    cursor: pointer;
-    color: #6b7280;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: inherit !important;
-    backdrop-filter: blur(10px);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  }
-  
-  .close-button:hover {
-    background: rgba(239, 68, 68, 0.1);
-    color: #ef4444;
-    transform: scale(1.1);
-  }
-
-  /* 헤더 섹션 */
-  .header-section {
-    padding: 14px 10px;
-    background: linear-gradient(135deg, #0ea5e9 0%, #3b82f6 100%);
-    color: white;
-    position: relative;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    height: 10vh;
-  }
-  
-  .header-section::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(45deg, rgba(255,255,255,0.1) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.1) 75%, transparent 75%);
-    background-size: 20px 20px;
-    opacity: 0.3;
-  }
-  
-  .header-section h3 {
-    margin: 0 0 4px 0;
-    font-size: 24px !important;
-    font-weight: 700;
-    color: white;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    font-family: inherit !important;
-    position: relative;
-    z-index: 1;
-  }
-  
-  .header-section p {
-    margin: 0;
-    font-size: 14px !important;
-    color: rgba(255, 255, 255, 0.9);
-    font-family: inherit !important;
-    position: relative;
-    z-index: 1;
-  }
-
-  /* 에러 섹션 */
-  .error-section {
-    padding: 32px 24px;
-    text-align: center;
-    background: linear-gradient(135deg, #fef2f2, #fee2e2);
-  }
-  
-  .error-icon {
-    font-size: 48px;
-    margin-bottom: 16px;
-  }
-  
-  .error-section h3 {
-    margin: 0 0 12px 0;
-    color: #dc2626;
-    font-size: 20px;
-    font-weight: 600;
-  }
-  
-  .error-section p {
-    margin: 0 0 20px 0;
-    font-size: 14px;
-    line-height: 1.6;
-    color: #991b1b;
-  }
-  
-  .error-solutions {
-    background: rgba(239, 68, 68, 0.05);
-    border: 1px solid rgba(239, 68, 68, 0.2);
-    border-radius: 8px;
-    padding: 16px;
-    margin: 16px 0;
-    text-align: left;
-  }
-  
-  .error-solutions h4 {
-    margin: 0 0 8px 0;
-    font-size: 14px;
-    color: #991b1b;
-    font-weight: 600;
-  }
-  
-  .error-solutions ul {
-    margin: 0;
-    padding-left: 16px;
-    color: #7f1d1d;
-  }
-  
-  .error-solutions li {
-    font-size: 12px;
-    line-height: 1.5;
-    margin-bottom: 4px;
-  }
-  
-  .error-actions {
-    display: flex;
-    gap: 8px;
-    justify-content: center;
-  }
-  
-  .error-button {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 6px;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  
-  .error-button.primary {
-    background: linear-gradient(135deg, #dc2626, #991b1b);
-    color: white;
-  }
-  
-  .error-button.secondary {
-    background: linear-gradient(135deg, #f59e0b, #d97706);
-    color: white;
-  }
-  
-  .error-button:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  }
-
-  /* 환영 섹션 */
-  .welcome-section {
-    min-height: 90vh;
-    padding: 32px 24px;
-    text-align: center;
-    background: linear-gradient(135deg, #f8fafc, #e2e8f0);
-  }
-  
-  .welcome-icon {
-    font-size: 56px;
-    margin-bottom: 16px;
-    display: block;
-  }
-  
-  .welcome-section h3 {
-    margin: 0 0 12px 0;
-    font-size: 24px;
-    font-weight: 700;
-    color: #1e293b;
-  }
-  
-  .welcome-section p {
-    margin: 0 0 24px 0;
-    font-size: 14px;
-    color: #64748b;
-    line-height: 1.6;
-  }
-  
-  .analyze-button {
-    background: linear-gradient(135deg, #0ea5e9, #0284c7);
-    color: white;
-    border: none;
-    padding: 16px 32px;
-    border-radius: 12px;
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    margin-bottom: 24px;
-    transition: all 0.3s;
-    box-shadow: 0 4px 16px rgba(14, 165, 233, 0.3);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    width: fit-content;
-    margin: 0 auto 24px;
-  }
-  
-  .analyze-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(14, 165, 233, 0.4);
-  }
-  
-  .button-icon {
-    font-size: 18px;
-  }
-  
-  .analysis-features {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    margin-top: 24px;
-  }
-  
-  .feature-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 12px;
-    color: #475569;
-  }
-  
-  .feature-icon {
-    font-size: 16px;
-  }
-
-  /* 로딩 섹션 */
-  .loading-section {
-    padding: 32px 24px;
-    text-align: center;
-    background: linear-gradient(135deg, #f0f9ff, #dbeafe);
-  }
-  
-  .loading-animation {
-    position: relative;
-    margin-bottom: 24px;
-  }
-  
-  .spinner {
-    width: 48px;
-    height: 48px;
-    border: 4px solid #e0f2fe;
-    border-top: 4px solid #0ea5e9;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin: 0 auto 16px;
-  }
-  
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
-  
-  .loading-dots {
-    display: flex;
-    justify-content: center;
-    gap: 4px;
-    margin-bottom: 16px;
-  }
-  
-  .loading-dots span {
-    width: 8px;
-    height: 8px;
-    background: #0ea5e9;
-    border-radius: 50%;
-    animation: pulse 1.4s ease-in-out infinite both;
-  }
-  
-  .loading-dots span:nth-child(1) { animation-delay: -0.32s; }
-  .loading-dots span:nth-child(2) { animation-delay: -0.16s; }
-  .loading-dots span:nth-child(3) { animation-delay: 0s; }
-  
-  @keyframes pulse {
-    0%, 80%, 100% { transform: scale(0); }
-    40% { transform: scale(1); }
-  }
-  
-  .loading-section h3 {
-    margin: 0 0 8px 0;
-    font-size: 20px;
-    font-weight: 600;
-    color: #0c4a6e;
-  }
-  
-  .loading-section p {
-    margin: 0 0 20px 0;
-    color: #0369a1;
-    font-size: 14px;
-  }
-  
-  .analysis-steps {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    align-items: center;
-  }
-  
-  .step {
-    padding: 8px 16px;
-    background: rgba(14, 165, 233, 0.1);
-    border-radius: 20px;
-    font-size: 12px;
-    color: #0369a1;
-    transition: all 0.3s;
-  }
-  
-  .step.active {
-    background: rgba(14, 165, 233, 0.2);
-    color: #0c4a6e;
-    font-weight: 500;
-  }
-
-  /* 결과 섹션 */
-  .results-section {
-    padding: 20px;
-  }
-
-  /* 접을 수 있는 섹션 */
-  .expandable-section {
-    margin-bottom: 16px;
-    border-radius: 12px;
-    border: 1px solid #e2e8f0;
-    background: white;
-    overflow: hidden;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    transition: all 0.2s;
-  }
-  
-  .expandable-section:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  }
-  
-  .section-header {
-    width: 100%;
-    padding: 16px 20px;
-    background: linear-gradient(135deg, #f8fafc, #f1f5f9);
-    border: none;
-    cursor: pointer;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 14px;
-    transition: all 0.2s;
-    font-family: inherit;
-  }
-  
-  .section-header:hover {
-    background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
-  }
-  
-  .header-left {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-  
-  .section-icon {
-    font-size: 18px;
-  }
-  
-  .section-title {
-    font-weight: 600;
-    color: #1e293b;
-  }
-  
-  .section-badge {
-    background: #0ea5e9;
-    color: white;
-    padding: 4px 8px;
-    border-radius: 12px;
-    font-size: 11px;
-    font-weight: 500;
-  }
-  
-  .expand-arrow {
-    font-size: 12px;
-    color: #64748b;
-    transition: transform 0.2s;
-    transform: rotate(-90deg);
-  }
-  
-  .expand-arrow.expanded {
-    transform: rotate(0deg);
-  }
-  
-  .section-content {
-    padding: 20px;
-    border-top: 1px solid #e2e8f0;
-    animation: slideDown 0.3s ease;
-  }
-  
-  @keyframes slideDown {
-    from {
-      opacity: 0;
-      max-height: 0;
-    }
-    to {
-      opacity: 1;
-      max-height: 1000px;
-    }
-  }
-
-  /* 종합 분석 결과 섹션 */
-  .overview-content {
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
-  }
-  
-  .overall-score-display {
-    display: flex;
-    gap: 20px;
-    align-items: center;
-    padding: 20px;
-    background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
-    border-radius: 12px;
-    border: 1px solid #0ea5e9;
-  }
-  
-  .score-circle {
-    flex-shrink: 0;
-    text-align: center;
-  }
-  
-  .score-number {
-    font-size: 48px;
-    font-weight: 700;
-    background: linear-gradient(135deg, #0ea5e9, #3b82f6);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    line-height: 1;
-  }
-  
-  .score-label {
-    font-size: 12px;
-    color: #0369a1;
-    font-weight: 500;
-    margin-top: 4px;
-  }
-  
-  .score-description {
-    flex: 1;
-  }
-  
-  .score-description h4 {
-    margin: 0 0 8px 0;
-    font-size: 16px;
-    color: #0c4a6e;
-    font-weight: 600;
-  }
-  
-  .score-description p {
-    margin: 0;
-    font-size: 14px;
-    color: #0369a1;
-    line-height: 1.5;
-  }
-  
-  .detailed-scores h4 {
-    margin: 0 0 16px 0;
-    font-size: 16px;
-    color: #1e293b;
-    font-weight: 600;
-  }
-  
-  .score-bars {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-  }
-  
-  .score-bar {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-  
-  .bar-info {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  
-  .bar-label {
-    font-size: 13px;
-    color: #475569;
-    font-weight: 500;
-  }
-  
-  .bar-value {
-    font-size: 13px;
-    color: #1e293b;
-    font-weight: 600;
-  }
-  
-  .bar-track {
-    height: 8px;
-    background: #e2e8f0;
-    border-radius: 4px;
-    overflow: hidden;
-  }
-  
-  .bar-fill {
-    height: 100%;
-    border-radius: 4px;
-    transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  
-  .bar-fill.source { background: linear-gradient(90deg, #10b981, #059669); }
-  .bar-fill.objectivity { background: linear-gradient(90deg, #3b82f6, #2563eb); }
-  .bar-fill.logic { background: linear-gradient(90deg, #8b5cf6, #7c3aed); }
-  .bar-fill.advertisement { background: linear-gradient(90deg, #f59e0b, #d97706); }
-  .bar-fill.evidence { background: linear-gradient(90deg, #ef4444, #dc2626); }
-
-  /* 출처 신뢰도 섹션 */
-  .source-content {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-  }
-  
-  .trust-level {
-    display: flex;
-    justify-content: center;
-  }
-  
-  .trust-badge {
-    padding: 8px 16px;
-    border-radius: 20px;
-    font-size: 14px;
-    font-weight: 600;
-  }
-  
-  .trust-badge.trusted {
-    background: rgba(34, 197, 94, 0.1);
-    color: #059669;
-    border: 1px solid rgba(34, 197, 94, 0.3);
-  }
-  
-  .trust-badge.neutral {
-    background: rgba(107, 114, 128, 0.1);
-    color: #6b7280;
-    border: 1px solid rgba(107, 114, 128, 0.3);
-  }
-  
-  .trust-badge.caution {
-    background: rgba(251, 191, 36, 0.1);
-    color: #d97706;
-    border: 1px solid rgba(251, 191, 36, 0.3);
-  }
-  
-  .trust-badge.unreliable {
-    background: rgba(239, 68, 68, 0.1);
-    color: #dc2626;
-    border: 1px solid rgba(239, 68, 68, 0.3);
-  }
-  
-  .source-details h4 {
-    margin: 0 0 8px 0;
-    font-size: 16px;
-    color: #1e293b;
-    font-weight: 600;
-  }
-  
-  .source-description {
-    margin: 0 0 16px 0;
-    font-size: 14px;
-    color: #475569;
-    line-height: 1.6;
-  }
-  
-  .reputation-factors h5 {
-    margin: 0 0 8px 0;
-    font-size: 13px;
-    color: #64748b;
-    font-weight: 500;
-  }
-  
-  .factor-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-  }
-  
-  .factor-tag {
-    background: rgba(107, 114, 128, 0.1);
-    color: #6b7280;
-    padding: 4px 8px;
-    border-radius: 6px;
-    font-size: 11px;
-  }
-  
-  .historical-data {
-    background: #f8fafc;
-    padding: 12px;
-    border-radius: 8px;
-    border: 1px solid #e2e8f0;
-  }
-  
-  .historical-item {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 4px;
-  }
-  
-  .historical-item:last-child {
-    margin-bottom: 0;
-  }
-  
-  .historical-label {
-    font-size: 12px;
-    color: #64748b;
-  }
-  
-  .historical-value {
-    font-size: 12px;
-    color: #1e293b;
-    font-weight: 500;
-  }
-
-  /* 편향성 분석 섹션 */
-  .bias-content {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-  }
-  
-  .bias-section {
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    padding: 16px;
-    background: #fafafa;
-  }
-  
-  .bias-section h4 {
-    margin: 0 0 12px 0;
-    font-size: 14px;
-    font-weight: 600;
-    color: #1e293b;
-  }
-  
-  .intensity-display {
-    margin-bottom: 16px;
-  }
-  
-  .intensity-badge {
-    padding: 6px 12px;
-    border-radius: 16px;
-    font-size: 12px;
-    font-weight: 500;
-  }
-  
-  .intensity-badge.none, .intensity-badge.low {
-    background: rgba(34, 197, 94, 0.1);
-    color: #059669;
-  }
-  
-  .intensity-badge.medium {
-    background: rgba(251, 191, 36, 0.1);
-    color: #d97706;
-  }
-  
-  .intensity-badge.high {
-    background: rgba(239, 68, 68, 0.1);
-    color: #dc2626;
-  }
-  
-  .manipulative-words h5 {
-    margin: 0 0 12px 0;
-    font-size: 13px;
-    color: #64748b;
-    font-weight: 500;
-  }
-  
-  .words-grid {
-    display: grid;
-    gap: 12px;
-  }
-  
-  .word-item {
-    background: white;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    padding: 12px;
-  }
-  
-  .word-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 8px;
-  }
-  
-  .word-badge {
-    padding: 4px 8px;
-    border-radius: 6px;
-    font-size: 11px;
-    font-weight: 600;
-  }
-  
-  .word-badge.low {
-    background: rgba(251, 191, 36, 0.1);
-    color: #d97706;
-  }
-  
-  .word-badge.medium {
-    background: rgba(239, 68, 68, 0.15);
-    color: #dc2626;
-  }
-  
-  .word-badge.high {
-    background: rgba(239, 68, 68, 0.2);
-    color: #991b1b;
-  }
-  
-  .word-category {
-    font-size: 10px;
-    color: #6b7280;
-    padding: 2px 6px;
-    background: rgba(107, 114, 128, 0.1);
-    border-radius: 4px;
-  }
-  
-  .word-explanation {
-    font-size: 11px;
-    color: #475569;
-    line-height: 1.4;
-    margin: 0;
-  }
-
-  /* 클릭베이트 요소 */
-  .clickbait-grid {
-    display: grid;
-    gap: 12px;
-  }
-  
-  .clickbait-item {
-    background: white;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    padding: 12px;
-  }
-  
-  .clickbait-item.high {
-    border-color: #ef4444;
-    background: rgba(239, 68, 68, 0.02);
-  }
-  
-  .clickbait-item.medium {
-    border-color: #f59e0b;
-    background: rgba(251, 191, 36, 0.02);
-  }
-  
-  .clickbait-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 8px;
-  }
-  
-  .clickbait-type {
-    font-size: 12px;
-    font-weight: 500;
-    color: #1e293b;
-  }
-  
-  .severity-indicator {
-    padding: 2px 6px;
-    border-radius: 4px;
-    font-size: 10px;
-    font-weight: 500;
-  }
-  
-  .severity-indicator.high {
-    background: rgba(239, 68, 68, 0.1);
-    color: #dc2626;
-  }
-  
-  .severity-indicator.medium {
-    background: rgba(251, 191, 36, 0.1);
-    color: #d97706;
-  }
-  
-  .severity-indicator.low {
-    background: rgba(34, 197, 94, 0.1);
-    color: #059669;
-  }
-  
-  .clickbait-text {
-    font-size: 12px;
-    color: #374151;
-    margin: 4px 0;
-    font-style: italic;
-    padding: 4px 8px;
-    background: rgba(107, 114, 128, 0.05);
-    border-radius: 4px;
-  }
-  
-  .clickbait-explanation {
-    font-size: 11px;
-    color: #6b7280;
-    margin: 0;
-    line-height: 1.4;
-  }
-
-  /* 정치적 편향 */
-  .political-bias {
-    background: white;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    padding: 12px;
-  }
-  
-  .political-direction {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 12px;
-  }
-  
-  .political-badge {
-    padding: 6px 12px;
-    border-radius: 16px;
-    font-size: 12px;
-    font-weight: 500;
-  }
-  
-  .political-badge.left {
-    background: rgba(59, 130, 246, 0.1);
-    color: #2563eb;
-  }
-  
-  .political-badge.right {
-    background: rgba(239, 68, 68, 0.1);
-    color: #dc2626;
-  }
-  
-  .political-badge.center, .political-badge.neutral {
-    background: rgba(107, 114, 128, 0.1);
-    color: #6b7280;
-  }
-  
-  .confidence {
-    font-size: 11px;
-    color: #6b7280;
-  }
-  
-  .political-indicators h5 {
-    margin: 0 0 8px 0;
-    font-size: 12px;
-    color: #64748b;
-    font-weight: 500;
-  }
-  
-  .political-indicators ul {
-    margin: 0;
-    padding-left: 16px;
-    list-style-type: none;
-  }
-  
-  .political-indicators li {
-    font-size: 11px;
-    color: #475569;
-    margin-bottom: 4px;
-    position: relative;
-  }
-  
-  .political-indicators li::before {
-    content: '•';
-    color: #94a3b8;
-    position: absolute;
-    left: -12px;
-  }
-
-  /* 논리적 오류 섹션 */
-  .logic-content {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-  }
-  
-  .fallacies-grid {
-    display: grid;
-    gap: 16px;
-  }
-  
-  .fallacy-item {
-    background: white;
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    padding: 16px;
-    transition: all 0.2s;
-  }
-  
-  .fallacy-item:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  }
-  
-  .fallacy-item.high {
-    border-color: #ef4444;
-    background: rgba(239, 68, 68, 0.02);
-  }
-  
-  .fallacy-item.medium {
-    border-color: #f59e0b;
-    background: rgba(251, 191, 36, 0.02);
-  }
-  
-  .fallacy-item.low {
-    border-color: #10b981;
-    background: rgba(16, 185, 129, 0.02);
-  }
-  
-  .fallacy-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 12px;
-  }
-  
-  .fallacy-type {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  
-  .fallacy-icon {
-    font-size: 16px;
-  }
-  
-  .fallacy-name {
-    font-size: 14px;
-    font-weight: 600;
-    color: #1e293b;
-  }
-  
-  .severity-badge {
-    padding: 4px 8px;
-    border-radius: 12px;
-    font-size: 10px;
-    font-weight: 500;
-  }
-  
-  .severity-badge.high {
-    background: rgba(239, 68, 68, 0.1);
-    color: #dc2626;
-  }
-  
-  .severity-badge.medium {
-    background: rgba(251, 191, 36, 0.1);
-    color: #d97706;
-  }
-  
-  .severity-badge.low {
-    background: rgba(16, 185, 129, 0.1);
-    color: #059669;
-  }
-  
-  .fallacy-content {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-  
-  .fallacy-description {
-    font-size: 13px;
-    color: #475569;
-    line-height: 1.5;
-    margin: 0;
-  }
-  
-  .affected-text h5, .fallacy-explanation h5, .fallacy-examples h5 {
-    margin: 0 0 6px 0;
-    font-size: 12px;
-    color: #64748b;
-    font-weight: 500;
-  }
-  
-  .affected-text blockquote {
-    margin: 0;
-    padding: 8px 12px;
-    background: rgba(107, 114, 128, 0.05);
-    border-left: 3px solid #94a3b8;
-    border-radius: 4px;
-    font-size: 12px;
-    color: #374151;
-    font-style: italic;
-  }
-  
-  .fallacy-explanation p {
-    margin: 0;
-    font-size: 12px;
-    color: #475569;
-    line-height: 1.5;
-  }
-  
-  .fallacy-examples ul {
-    margin: 0;
-    padding-left: 16px;
-    list-style-type: none;
-  }
-  
-  .fallacy-examples li {
-    font-size: 11px;
-    color: #6b7280;
-    margin-bottom: 4px;
-    position: relative;
-  }
-  
-  .fallacy-examples li::before {
-    content: '•';
-    color: #94a3b8;
-    position: absolute;
-    left: -12px;
-  }
-
-  /* 광고성 분석 섹션 */
-  .advertisement-content {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-  }
-  
-  .ad-overview {
-    background: linear-gradient(135deg, #f8fafc, #f1f5f9);
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    padding: 16px;
-  }
-  
-  .ad-status {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 16px;
-  }
-  
-  .ad-badge {
-    padding: 8px 12px;
-    border-radius: 16px;
-    font-size: 12px;
-    font-weight: 600;
-  }
-  
-  .ad-badge.advertorial {
-    background: rgba(251, 191, 36, 0.1);
-    color: #d97706;
-    border: 1px solid rgba(251, 191, 36, 0.3);
-  }
-  
-  .ad-badge.non-advertorial {
-    background: rgba(16, 185, 129, 0.1);
-    color: #059669;
-    border: 1px solid rgba(16, 185, 129, 0.3);
-  }
-  
-  .ad-confidence {
-    font-size: 11px;
-    color: #6b7280;
-  }
-  
-  .ad-scores {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-  
-  .ad-score-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  
-  .score-label {
-    font-size: 12px;
-    color: #64748b;
-  }
-  
-  .score-value {
-    font-size: 12px;
-    color: #1e293b;
-    font-weight: 600;
-  }
-  
-  .ad-indicators h4 {
-    margin: 0 0 16px 0;
-    font-size: 14px;
-    color: #1e293b;
-    font-weight: 600;
-  }
-  
-  .indicators-grid {
-    display: grid;
-    gap: 12px;
-  }
-  
-  .indicator-item {
-    background: white;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    padding: 12px;
-    transition: all 0.2s;
-  }
-  
-  .indicator-item:hover {
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  }
-  
-  .indicator-item[class*="weight-"]:nth-child(odd) {
-    border-left: 3px solid #f59e0b;
-  }
-  
-  .indicator-item[class*="weight-"]:nth-child(even) {
-    border-left: 3px solid #ef4444;
-  }
-  
-  .indicator-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 8px;
-  }
-  
-  .indicator-type {
-    font-size: 12px;
-    font-weight: 500;
-    color: #1e293b;
-  }
-  
-  .indicator-weight {
-    font-size: 10px;
-    color: #6b7280;
-    background: rgba(107, 114, 128, 0.1);
-    padding: 2px 6px;
-    border-radius: 4px;
-  }
-  
-  .indicator-evidence h5, .indicator-explanation h5 {
-    margin: 0 0 6px 0;
-    font-size: 11px;
-    color: #64748b;
-    font-weight: 500;
-  }
-  
-  .indicator-evidence p, .indicator-explanation p {
-    margin: 0;
-    font-size: 11px;
-    color: #475569;
-    line-height: 1.4;
-  }
-  
-  .indicator-evidence p {
-    background: rgba(107, 114, 128, 0.05);
-    padding: 6px 8px;
-    border-radius: 4px;
-    font-style: italic;
-  }
-
-  /* 교차 검증 섹션 */
-  .crossref-content {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-  }
-  
-  .key-claims h4, .search-keywords h4, .fact-check-sources h4 {
-    margin: 0 0 12px 0;
-    font-size: 14px;
-    color: #1e293b;
-    font-weight: 600;
-  }
-  
-  .claims-list {
-    margin: 0;
-    padding-left: 16px;
-    list-style-type: none;
-  }
-  
-  .claim-item {
-    font-size: 13px;
-    color: #475569;
-    margin-bottom: 8px;
-    position: relative;
-    line-height: 1.5;
-    padding-left: 5px;
-  }
-  
-  .claim-item::before {
-    content: '🎯';
-    position: absolute;
-    left: -16px;
-  }
-  
-  .keywords-box {
-    background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
-    border: 1px solid #0ea5e9;
-    border-radius: 8px;
-    padding: 12px;
-    font-size: 13px;
-    color: #0369a1;
-    font-weight: 500;
-  }
-  
-  .sources-grid {
-    display: grid;
-    gap: 12px;
-  }
-  
-  .fact-check-item {
-    background: white;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    padding: 12px;
-    transition: all 0.2s;
-  }
-  
-  .fact-check-item:hover {
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  }
-  
-  .fact-check-item.true {
-    border-color: #10b981;
-    background: rgba(16, 185, 129, 0.02);
-  }
-  
-  .fact-check-item.false {
-    border-color: #ef4444;
-    background: rgba(239, 68, 68, 0.02);
-  }
-  
-  .fact-check-item.mixed {
-    border-color: #f59e0b;
-    background: rgba(251, 191, 36, 0.02);
-  }
-  
-  .source-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 8px;
-  }
-  
-  .source-org {
-    font-size: 12px;
-    font-weight: 600;
-    color: #1e293b;
-  }
-  
-  .verdict-badge {
-    padding: 4px 8px;
-    border-radius: 12px;
-    font-size: 10px;
-    font-weight: 500;
-  }
-  
-  .verdict-badge.true {
-    background: rgba(16, 185, 129, 0.1);
-    color: #059669;
-  }
-  
-  .verdict-badge.false {
-    background: rgba(239, 68, 68, 0.1);
-    color: #dc2626;
-  }
-  
-  .verdict-badge.mixed {
-    background: rgba(251, 191, 36, 0.1);
-    color: #d97706;
-  }
-  
-  .verdict-badge.unverified {
-    background: rgba(107, 114, 128, 0.1);
-    color: #6b7280;
-  }
-  
-  .source-summary {
-    font-size: 11px;
-    color: #475569;
-    line-height: 1.4;
-    margin: 0;
-  }
-  
-  .consensus-display h4 {
-    margin: 0 0 12px 0;
-    font-size: 14px;
-    color: #1e293b;
-    font-weight: 600;
-  }
-  
-  .consensus-badge {
-    padding: 12px 16px;
-    border-radius: 12px;
-    font-size: 14px;
-    font-weight: 600;
-    text-align: center;
-    border: 2px solid;
-  }
-  
-  .consensus-badge.agree {
-    background: rgba(16, 185, 129, 0.1);
-    color: #059669;
-    border-color: rgba(16, 185, 129, 0.3);
-  }
-  
-  .consensus-badge.disagree {
-    background: rgba(239, 68, 68, 0.1);
-    color: #dc2626;
-    border-color: rgba(239, 68, 68, 0.3);
-  }
-  
-  .consensus-badge.mixed {
-    background: rgba(251, 191, 36, 0.1);
-    color: #d97706;
-    border-color: rgba(251, 191, 36, 0.3);
-  }
-  
-  .consensus-badge.insufficient {
-    background: rgba(107, 114, 128, 0.1);
-    color: #6b7280;
-    border-color: rgba(107, 114, 128, 0.3);
-  }
-
-  /* 분석 팁 섹션 */
-  .analysis-tips {
-    margin-top: 24px;
-    padding: 20px;
-    background: linear-gradient(135deg, #fefce8, #fef3c7);
-    border: 1px solid #fbbf24;
-    border-radius: 12px;
-  }
-  
-  .analysis-tips h4 {
-    margin: 0 0 16px 0;
-    font-size: 16px;
-    color: #92400e;
-    font-weight: 600;
-    text-align: center;
-  }
-  
-  .tips-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-  }
-  
-  .tip-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 8px;
-    padding: 8px;
-    background: rgba(255, 255, 255, 0.7);
-    border-radius: 8px;
-  }
-  
-  .tip-icon {
-    font-size: 16px;
-    flex-shrink: 0;
-    margin-top: 2px;
-  }
-  
-  .tip-item p {
-    margin: 0;
-    font-size: 11px;
-    color: #92400e;
-    line-height: 1.4;
-  }
-
-  /* 하이라이트 스타일 - 외부 페이지용 */
-  .criti-ai-highlight {
-    position: relative !important;
-    cursor: pointer !important;
-    padding: 1px 3px !important;
-    border-radius: 3px !important;
-    transition: all 0.2s ease !important;
-    z-index: 999990 !important;
-  }
-  
-  .criti-ai-highlight:hover {
-    transform: scale(1.02) !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
-  }
-
-  .criti-ai-highlight-bias {
-    background-color: rgba(245, 158, 11, 0.3) !important;
-    border-bottom: 2px solid #f59e0b !important;
-    color: #92400e !important;
-    font-weight: 600 !important;
-  }
-
-  .criti-ai-highlight-fallacy {
-    background-color: rgba(239, 68, 68, 0.3) !important;
-    border-bottom: 2px solid #ef4444 !important;
-    color: #991b1b !important;
-    font-weight: 600 !important;
-  }
-
-  .criti-ai-highlight-manipulation {
-    background-color: rgba(168, 85, 247, 0.3) !important;
-    border-bottom: 2px solid #a855f7 !important;
-    color: #7c2d12 !important;
-    font-weight: 600 !important;
-  }
-
-  .criti-ai-highlight-advertisement {
-    background-color: rgba(16, 185, 129, 0.3) !important;
-    border-bottom: 2px solid #10b981 !important;
-    color: #065f46 !important;
-    font-weight: 600 !important;
-  }
-
-  /* 포커스 효과 - 클릭시 임시 강조 */
-  .criti-ai-highlight-focused {
-    animation: highlightPulse 2s ease-in-out !important;
-    transform: scale(1.05) !important;
-    z-index: 999999 !important;
-    position: relative !important;
-  }
-  
-  @keyframes highlightPulse {
-    0% {
-      box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.8);
-      background-color: rgba(59, 130, 246, 0.5);
-    }
-    50% {
-      box-shadow: 0 0 0 10px rgba(59, 130, 246, 0.3);
-      background-color: rgba(59, 130, 246, 0.7);
-    }
-    100% {
-      box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
-    }
-  }
-
-  /* 툴팁 스타일 */
-  .criti-ai-tooltip {
-    position: fixed !important;
-    background: linear-gradient(135deg, #1f2937, #374151) !important;
-    color: white !important;
-    padding: 12px 16px !important;
-    border-radius: 12px !important;
-    font-size: 14px !important;
-    font-weight: 500 !important;
-    line-height: 1.5 !important;
-    max-width: 320px !important;
-    z-index: 1000000 !important;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3) !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
-    backdrop-filter: blur(20px) !important;
-    animation: tooltipFadeIn 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
-  }
-  
-  @keyframes tooltipFadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(-10px) scale(0.95);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0) scale(1);
-    }
+    background: #8B95A1;
   }
 `;
 
 // Content Script 진입점
-console.log("🔍 Criti AI Content Script 로드됨 (Shadow DOM 버전)");
+console.log("🔍 Criti AI Content Script 로드됨 (Shadow DOM + Emotion 버전)");
 
 // 전역에서 사용될 선택자 리스트
 // '노이즈': 콘텐츠 추출을 방해하는 불필요한 요소
@@ -2074,12 +600,13 @@ const extractPageContent = async (): Promise<{
  * Shadow DOM을 사용하여 사이드바를 페이지에 마운트
  */
 const mountApp = () => {
-  console.log("🏠 Shadow DOM 기반 앱 마운트 시작");
+  console.log("🏠 Shadow DOM 기반 앱 마운트 시작 (Emotion)");
 
   let sidebarVisible = false;
   let shadowHost: HTMLElement | null = null;
   let shadowRoot: ShadowRoot | null = null;
   let reactRoot: import("react-dom/client").Root | null = null;
+  let emotionCache: ReturnType<typeof createCache> | null = null;
 
   // 사이드바의 표시/숨김 상태를 토글하는 함수
   const toggleSidebar = () => {
@@ -2089,7 +616,7 @@ const mountApp = () => {
     if (!shadowHost) {
       console.log("🌟 Shadow DOM 생성");
 
-      // 1. Shadow Host 역할을 할 div 요소를 생성
+      // Shadow Host 역할을 할 div 요소를 생성
       shadowHost = document.createElement("div");
       shadowHost.id = "criti-ai-shadow-host";
       // 페이지의 다른 요소와 충돌하지 않도록 스타일 설정
@@ -2104,40 +631,51 @@ const mountApp = () => {
       `;
       document.body.appendChild(shadowHost);
 
-      // 2. Shadow Host에 Shadow Root 연결
+      // Shadow Host에 Shadow Root 연결
       // `mode: "closed"`는 외부 JavaScript에서 Shadow DOM 내부에 접근할 수 없도록 해줌
       shadowRoot = shadowHost.attachShadow({ mode: "closed" });
 
-      // 3. Shadow DOM 내부에 필요한 CSS 주입
-      // 외부 CSS가 Shadow DOM 내부에 영향을 주지 않으므로, 직접 주입해야 함
-      const style = document.createElement("style");
-      style.textContent = getShadowCSS(); // getShadowCSS()는 별도의 CSS 문자열을 반환하는 함수
-      shadowRoot.appendChild(style);
+      // 기본 CSS 주입
+      const baseStyle = document.createElement("style");
+      baseStyle.textContent = getShadowCSS();
+      shadowRoot.appendChild(baseStyle);
 
-      // 4. 사이드바 React 앱을 담을 컨테이너 생성
+      // Emotion 스타일 컨테이너 생성 (기본 CSS 다음에 추가)
+      const emotionStyleContainer = document.createElement("div");
+      emotionStyleContainer.id = "criti-ai-emotion-styles";
+      shadowRoot.appendChild(emotionStyleContainer);
+
+      // Emotion cache 생성 - Shadow DOM 전용 설정
+      emotionCache = createCache({
+        key: "criti-ai",
+        container: emotionStyleContainer,
+        speedy: false, // Shadow DOM에서 DOM 방식으로 스타일 주입 (스타일 시트가 명확히 생성되도록)
+      });
+
       const sidebarContainer = document.createElement("div");
       sidebarContainer.className = "criti-ai-sidebar-container";
-      sidebarContainer.style.pointerEvents = "auto"; // 사이드바가 클릭 가능하도록 설정
+      sidebarContainer.style.pointerEvents = "auto";
       shadowRoot.appendChild(sidebarContainer);
 
-      // 5. React 앱을 컨테이너에 마운트
+      // React 앱을 컨테이너에 마운트
       reactRoot = createRoot(sidebarContainer);
 
       // 페이지 데이터를 추출하고 React 앱을 렌더링
       extractPageContent().then((pageData) => {
-        if (reactRoot) {
+        if (reactRoot && emotionCache) {
           reactRoot.render(
-            // ContentScriptApp은 React 컴포넌트로, 추출된 데이터를 props로 받음
-            <ContentScriptApp
-              url={window.location.href}
-              title={pageData.title}
-              content={pageData.content}
-              sidebarVisible={sidebarVisible}
-              onClose={() => {
-                console.log("✖️ 사이드바 닫기 요청");
-                closeSidebar();
-              }}
-            />
+            <CacheProvider value={emotionCache}>
+              <ContentScriptApp
+                url={window.location.href}
+                title={pageData.title}
+                content={pageData.content}
+                sidebarVisible={sidebarVisible}
+                onClose={() => {
+                  console.log("✖️ 사이드바 닫기 요청");
+                  closeSidebar();
+                }}
+              />
+            </CacheProvider>
           );
         }
       });
@@ -2187,21 +725,23 @@ const mountApp = () => {
 
   // React 앱의 상태(props) 업데이트하는 함수
   const updateReactAppState = () => {
-    if (reactRoot && shadowRoot) {
+    if (reactRoot && emotionCache) {
       // 최신 페이지 데이터를 다시 추출하여 props 갱신
       extractPageContent().then((pageData) => {
-        if (reactRoot) {
+        if (reactRoot && emotionCache) {
           reactRoot.render(
-            <ContentScriptApp
-              url={window.location.href}
-              title={pageData.title}
-              content={pageData.content}
-              sidebarVisible={sidebarVisible}
-              onClose={() => {
-                console.log("✖️ 사이드바 닫기 요청");
-                closeSidebar();
-              }}
-            />
+            <CacheProvider value={emotionCache}>
+              <ContentScriptApp
+                url={window.location.href}
+                title={pageData.title}
+                content={pageData.content}
+                sidebarVisible={sidebarVisible}
+                onClose={() => {
+                  console.log("✖️ 사이드바 닫기 요청");
+                  closeSidebar();
+                }}
+              />
+            </CacheProvider>
           );
         }
       });
@@ -2424,7 +964,7 @@ const mountApp = () => {
     clearAllHighlights,
     scrollToHighlightByText,
     cleanupResources,
-    version: "2.0.0", // 버전 정보
+    version: "2.0.0-emotion",
   };
 
   // 확장 프로그램의 팝업(popup)이나 백그라운드 스크립트에서 보낸 메시지 수신
@@ -2462,7 +1002,7 @@ const mountApp = () => {
     }
   );
 
-  console.log("✅ Shadow DOM 기반 Criti AI 시스템 초기화 완료");
+  console.log("✅ Shadow DOM + Emotion 기반 Criti AI 시스템 초기화 완료");
 };
 
 // ============================================================================
@@ -2500,7 +1040,7 @@ const getOptimizedHighlightCSS = () => `
   /* 편향성 하이라이트 */
   .criti-ai-highlight-bias {
     background: linear-gradient(135deg, rgba(245, 158, 11, 0.25), rgba(251, 191, 36, 0.35)) !important;
-    border-bottom: 2px solid #f59e0b !important;
+    border-bottom: 2px solid #FAB007 !important;
     color: #92400e !important;
     font-weight: 600 !important;
   }
@@ -2512,8 +1052,8 @@ const getOptimizedHighlightCSS = () => `
   /* 논리적 오류 하이라이트 */
   .criti-ai-highlight-fallacy {
     background: linear-gradient(135deg, rgba(239, 68, 68, 0.25), rgba(248, 113, 113, 0.35)) !important;
-    border-bottom: 2px solid #ef4444 !important;
-    color: #991b1b !important;
+    border-bottom: 2px solid #FF5E5E !important;
+    color: #CC3030 !important;
     font-weight: 600 !important;
   }
   
@@ -2536,7 +1076,7 @@ const getOptimizedHighlightCSS = () => `
   /* 광고성 하이라이트 */
   .criti-ai-highlight-advertisement {
     background: linear-gradient(135deg, rgba(16, 185, 129, 0.25), rgba(52, 211, 153, 0.35)) !important;
-    border-bottom: 2px solid #10b981 !important;
+    border-bottom: 2px solid #00B29A !important;
     color: #065f46 !important;
     font-weight: 600 !important;
   }
@@ -2548,7 +1088,7 @@ const getOptimizedHighlightCSS = () => `
   /* 핵심 주장 하이라이트 */
   .criti-ai-highlight-claim {
     background: linear-gradient(135deg, rgba(59, 130, 246, 0.25), rgba(147, 197, 253, 0.35)) !important;
-    border-bottom: 2px solid #3b82f6 !important;
+    border-bottom: 2px solid #6B8AFF !important;
     color: #1e40af !important;
     font-weight: 500 !important;
   }
@@ -2619,7 +1159,7 @@ const getOptimizedHighlightCSS = () => `
     }
     
     .criti-ai-tooltip {
-      background: linear-gradient(135deg, #0f172a, #1e293b) !important;
+      background: linear-gradient(135deg, #191F2B, #191F2B) !important;
       border-color: rgba(255, 255, 255, 0.2) !important;
     }
   }

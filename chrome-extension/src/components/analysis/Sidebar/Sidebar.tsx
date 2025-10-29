@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import type { TrustAnalysis } from "@shared/types";
+import { Global } from "@emotion/react";
+import * as S from "./Sidebar.style";
 
 interface SidebarProps {
   analysis: TrustAnalysis | null;
@@ -105,17 +107,18 @@ const ClickableText: React.FC<ClickableTextProps> = ({
   };
 
   return (
-    <span
-      className={`clickable-text clickable-${type} ${className}`}
+    <S.ClickableTextStyled
+      type={type}
+      className={className} // .word-badge 등이 여기 전달됨
       onClick={handleClick}
       title="클릭하여 본문에서 찾기"
-      style={{ cursor: "pointer" }}
     >
       {children || text}
-    </span>
+    </S.ClickableTextStyled>
   );
 };
 
+// ExpandableSection (S. 컴포넌트 사용)
 const ExpandableSection: React.FC<ExpandableSectionProps> = ({
   title,
   icon,
@@ -126,24 +129,21 @@ const ExpandableSection: React.FC<ExpandableSectionProps> = ({
   badgeColor = "#0ea5e9",
   sectionType,
 }) => (
-  <div className="expandable-section" data-section={sectionType}>
-    <button className="section-header" onClick={onToggle}>
-      <div className="header-left">
-        <span className="section-icon">{icon}</span>
-        <span className="section-title">{title}</span>
+  <S.ExpandableSectionContainer data-section={sectionType}>
+    <S.SectionHeader onClick={onToggle}>
+      <S.HeaderLeft>
+        <S.SectionIcon>{icon}</S.SectionIcon>
+        <S.SectionTitle>{title}</S.SectionTitle>
         {badge && (
-          <span
-            className="section-badge"
-            style={{ backgroundColor: badgeColor }}
-          >
+          <S.SectionBadge style={{ backgroundColor: badgeColor }}>
             {badge}
-          </span>
+          </S.SectionBadge>
         )}
-      </div>
-      <span className={`expand-arrow ${isExpanded ? "expanded" : ""}`}>▼</span>
-    </button>
-    {isExpanded && <div className="section-content">{children}</div>}
-  </div>
+      </S.HeaderLeft>
+      <S.ExpandArrow expanded={isExpanded}>▼</S.ExpandArrow>
+    </S.SectionHeader>
+    {isExpanded && <S.SectionContent>{children}</S.SectionContent>}
+  </S.ExpandableSectionContainer>
 );
 
 export const AnalysisSidebar: React.FC<SidebarProps> = ({
@@ -177,115 +177,105 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
     onSectionClick?.(type, text);
   };
 
-  // 전체 컨테이너 스타일 - 최소 높이 보장
-  const containerStyle: React.CSSProperties = {
-    minHeight: "100vh",
-    display: "flex",
-    flexDirection: "column",
-  };
-
   return (
-    <div style={containerStyle}>
-      <div className="close-button-container">
-        <button
-          className="close-button"
-          onClick={onClose}
-          type="button"
-          title="닫기"
-        >
+    <S.Container>
+      <Global styles={S.globalStyles} />
+      <S.CloseButtonContainer>
+        <S.CloseButton onClick={onClose} type="button" title="닫기">
           ✕
-        </button>
-      </div>
+        </S.CloseButton>
+      </S.CloseButtonContainer>
 
-      <div className="header-section">
-        <h3>🔍 Criti AI</h3>
-        <p>콘텐츠 신뢰도 종합 분석</p>
-      </div>
+      <S.HeaderSection>
+        <S.HeaderTitle>🔍 Criti AI</S.HeaderTitle>
+        <S.HeaderSubtitle>콘텐츠 신뢰도 종합 분석</S.HeaderSubtitle>
+      </S.HeaderSection>
 
       {error && (
-        <div className="error-section">
-          <div className="error-icon">❌</div>
-          <h3>연결 오류</h3>
-          <p>{error}</p>
+        <S.ErrorSection>
+          <S.ErrorIcon>❌</S.ErrorIcon>
+          <S.ErrorTitle>연결 오류</S.ErrorTitle>
+          <S.ErrorText>{error}</S.ErrorText>
 
-          <div className="error-solutions">
-            <h4>🔧 해결 방법:</h4>
-            <ul>
-              <li>백엔드 서버 실행 확인 (http://localhost:3001)</li>
-              <li>API 키 설정 확인</li>
-              <li>네트워크 연결 상태 확인</li>
-            </ul>
-          </div>
+          <S.ErrorSolutions>
+            <S.ErrorSolutionsTitle>🔧 해결 방법:</S.ErrorSolutionsTitle>
+            <S.ErrorSolutionsList>
+              <S.ErrorSolutionsItem>
+                백엔드 서버 실행 확인 (http://localhost:3001)
+              </S.ErrorSolutionsItem>
+              <S.ErrorSolutionsItem>API 키 설정 확인</S.ErrorSolutionsItem>
+              <S.ErrorSolutionsItem>
+                네트워크 연결 상태 확인
+              </S.ErrorSolutionsItem>
+            </S.ErrorSolutionsList>
+          </S.ErrorSolutions>
 
-          <div className="error-actions">
-            <button
-              onClick={() => window.location.reload()}
-              className="error-button primary"
-            >
+          <S.ErrorActions>
+            <S.ErrorButton primary onClick={() => window.location.reload()}>
               🔄 새로고침
-            </button>
-            <button onClick={onAnalyze} className="error-button secondary">
-              ⚡ 재시도
-            </button>
-          </div>
-        </div>
+            </S.ErrorButton>
+            <S.ErrorButton onClick={onAnalyze}>⚡ 재시도</S.ErrorButton>
+          </S.ErrorActions>
+        </S.ErrorSection>
       )}
 
       {!analysis && !isAnalyzing && !error && (
-        <div className="welcome-section">
-          <div className="welcome-icon">🎯</div>
-          <h3>분석 시작하기</h3>
-          <p>
+        <S.WelcomeSection>
+          <S.WelcomeIcon>🎯</S.WelcomeIcon>
+          <S.WelcomeTitle>분석 시작하기</S.WelcomeTitle>
+          <S.WelcomeText>
             AI가 이 콘텐츠의 신뢰도, 편향성, 광고성을 종합적으로 분석해드립니다
-          </p>
-          <button onClick={onAnalyze} className="analyze-button">
-            <span className="button-icon">🔍</span>이 글 분석하기
-          </button>
+          </S.WelcomeText>
+          <S.AnalyzeButton onClick={onAnalyze}>
+            <S.ButtonIcon>🔍</S.ButtonIcon>이 글 분석하기
+          </S.AnalyzeButton>
 
-          <div className="analysis-features">
-            <div className="feature-item">
-              <span className="feature-icon">🏛️</span>
+          <S.AnalysisFeatures>
+            <S.FeatureItem>
+              <S.FeatureIcon>🏛️</S.FeatureIcon>
               <span>출처 신뢰도</span>
-            </div>
-            <div className="feature-item">
-              <span className="feature-icon">🎭</span>
+            </S.FeatureItem>
+            <S.FeatureItem>
+              <S.FeatureIcon>🎭</S.FeatureIcon>
               <span>편향성 분석</span>
-            </div>
-            <div className="feature-item">
-              <span className="feature-icon">🧠</span>
+            </S.FeatureItem>
+            <S.FeatureItem>
+              <S.FeatureIcon>🧠</S.FeatureIcon>
               <span>논리적 오류</span>
-            </div>
-            <div className="feature-item">
-              <span className="feature-icon">🎯</span>
+            </S.FeatureItem>
+            <S.FeatureItem>
+              <S.FeatureIcon>🎯</S.FeatureIcon>
               <span>광고성 탐지</span>
-            </div>
-          </div>
-        </div>
+            </S.FeatureItem>
+          </S.AnalysisFeatures>
+        </S.WelcomeSection>
       )}
 
       {isAnalyzing && (
-        <div className="loading-section">
-          <div className="loading-animation">
-            <div className="spinner"></div>
-            <div className="loading-dots">
-              <span></span>
-              <span></span>
-              <span></span>
-            </div>
-          </div>
-          <h3>AI 분석 진행중...</h3>
-          <p>신뢰도, 편향성, 광고성, 논리적 오류를 종합 분석하고 있습니다</p>
+        <S.LoadingSection>
+          <S.LoadingAnimation>
+            <S.Spinner />
+            <S.LoadingDots>
+              <S.LoadingDot />
+              <S.LoadingDot />
+              <S.LoadingDot />
+            </S.LoadingDots>
+          </S.LoadingAnimation>
+          <S.LoadingTitle>AI 분석 진행중...</S.LoadingTitle>
+          <S.LoadingText>
+            신뢰도, 편향성, 광고성, 논리적 오류를 종합 분석하고 있습니다
+          </S.LoadingText>
 
-          <div className="analysis-steps">
-            <div className="step active">📊 데이터 수집</div>
-            <div className="step active">🔍 패턴 분석</div>
-            <div className="step active">🎯 결과 생성</div>
-          </div>
-        </div>
+          <S.AnalysisSteps>
+            <S.Step active>📊 데이터 수집</S.Step>
+            <S.Step active>🔍 패턴 분석</S.Step>
+            <S.Step active>🎯 결과 생성</S.Step>
+          </S.AnalysisSteps>
+        </S.LoadingSection>
       )}
 
       {analysis && (
-        <div className="results-section">
+        <S.ResultsSection>
           {/* 전체 점수 섹션 */}
           <ExpandableSection
             title="종합 분석 결과"
@@ -302,110 +292,114 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
             }
             sectionType="overview"
           >
-            <div className="overview-content">
-              <div className="overall-score-display">
-                <div className="score-circle">
-                  <div className="score-number">{analysis.overallScore}</div>
-                  <div className="score-label">신뢰도 점수</div>
-                </div>
-                <div className="score-description">
-                  <h4>🎯 분석 요약</h4>
-                  <p>{analysis.analysisSummary}</p>
-                </div>
-              </div>
+            <S.OverviewContent>
+              <S.OverallScoreDisplay>
+                <S.ScoreCircle>
+                  <S.ScoreNumber>{analysis.overallScore}</S.ScoreNumber>
+                  <S.ScoreLabel>신뢰도 점수</S.ScoreLabel>
+                </S.ScoreCircle>
+                <S.ScoreDescription>
+                  <S.ScoreDescriptionTitle>
+                    🎯 분석 요약
+                  </S.ScoreDescriptionTitle>
+                  <S.ScoreDescriptionText>
+                    {analysis.analysisSummary}
+                  </S.ScoreDescriptionText>
+                </S.ScoreDescription>
+              </S.OverallScoreDisplay>
 
               {analysis.detailedScores && (
-                <div className="detailed-scores">
-                  <h4>📈 상세 점수</h4>
-                  <div className="score-bars">
-                    <div className="score-bar">
-                      <div className="bar-info">
-                        <span className="bar-label">🏛️ 출처</span>
-                        <span className="bar-value">
+                <S.DetailedScores>
+                  <S.DetailedScoresTitle>📈 상세 점수</S.DetailedScoresTitle>
+                  <S.ScoreBars>
+                    <S.ScoreBar>
+                      <S.BarInfo>
+                        <S.BarLabel>🏛️ 출처</S.BarLabel>
+                        <S.BarValue>
                           {analysis.detailedScores.sourceScore}
-                        </span>
-                      </div>
-                      <div className="bar-track">
-                        <div
-                          className="bar-fill source"
+                        </S.BarValue>
+                      </S.BarInfo>
+                      <S.BarTrack>
+                        <S.BarFill
+                          type="source"
                           style={{
                             width: `${analysis.detailedScores.sourceScore}%`,
                           }}
                         />
-                      </div>
-                    </div>
+                      </S.BarTrack>
+                    </S.ScoreBar>
 
-                    <div className="score-bar">
-                      <div className="bar-info">
-                        <span className="bar-label">⚖️ 객관성</span>
-                        <span className="bar-value">
+                    <S.ScoreBar>
+                      <S.BarInfo>
+                        <S.BarLabel>⚖️ 객관성</S.BarLabel>
+                        <S.BarValue>
                           {analysis.detailedScores.objectivityScore}
-                        </span>
-                      </div>
-                      <div className="bar-track">
-                        <div
-                          className="bar-fill objectivity"
+                        </S.BarValue>
+                      </S.BarInfo>
+                      <S.BarTrack>
+                        <S.BarFill
+                          type="objectivity"
                           style={{
                             width: `${analysis.detailedScores.objectivityScore}%`,
                           }}
                         />
-                      </div>
-                    </div>
+                      </S.BarTrack>
+                    </S.ScoreBar>
 
-                    <div className="score-bar">
-                      <div className="bar-info">
-                        <span className="bar-label">🧠 논리성</span>
-                        <span className="bar-value">
+                    <S.ScoreBar>
+                      <S.BarInfo>
+                        <S.BarLabel>🧠 논리성</S.BarLabel>
+                        <S.BarValue>
                           {analysis.detailedScores.logicScore}
-                        </span>
-                      </div>
-                      <div className="bar-track">
-                        <div
-                          className="bar-fill logic"
+                        </S.BarValue>
+                      </S.BarInfo>
+                      <S.BarTrack>
+                        <S.BarFill
+                          type="logic"
                           style={{
                             width: `${analysis.detailedScores.logicScore}%`,
                           }}
                         />
-                      </div>
-                    </div>
+                      </S.BarTrack>
+                    </S.ScoreBar>
 
-                    <div className="score-bar">
-                      <div className="bar-info">
-                        <span className="bar-label">🚫 광고성</span>
-                        <span className="bar-value">
+                    <S.ScoreBar>
+                      <S.BarInfo>
+                        <S.BarLabel>🚫 광고성</S.BarLabel>
+                        <S.BarValue>
                           {analysis.detailedScores.advertisementScore}
-                        </span>
-                      </div>
-                      <div className="bar-track">
-                        <div
-                          className="bar-fill advertisement"
+                        </S.BarValue>
+                      </S.BarInfo>
+                      <S.BarTrack>
+                        <S.BarFill
+                          type="advertisement"
                           style={{
                             width: `${analysis.detailedScores.advertisementScore}%`,
                           }}
                         />
-                      </div>
-                    </div>
+                      </S.BarTrack>
+                    </S.ScoreBar>
 
-                    <div className="score-bar">
-                      <div className="bar-info">
-                        <span className="bar-label">📚 근거</span>
-                        <span className="bar-value">
+                    <S.ScoreBar>
+                      <S.BarInfo>
+                        <S.BarLabel>📚 근거</S.BarLabel>
+                        <S.BarValue>
                           {analysis.detailedScores.evidenceScore}
-                        </span>
-                      </div>
-                      <div className="bar-track">
-                        <div
-                          className="bar-fill evidence"
+                        </S.BarValue>
+                      </S.BarInfo>
+                      <S.BarTrack>
+                        <S.BarFill
+                          type="evidence"
                           style={{
                             width: `${analysis.detailedScores.evidenceScore}%`,
                           }}
                         />
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                      </S.BarTrack>
+                    </S.ScoreBar>
+                  </S.ScoreBars>
+                </S.DetailedScores>
               )}
-            </div>
+            </S.OverviewContent>
           </ExpandableSection>
 
           {/* 출처 신뢰도 섹션 */}
@@ -426,11 +420,9 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
             }
             sectionType="source"
           >
-            <div className="source-content">
-              <div className="trust-level">
-                <span
-                  className={`trust-badge ${analysis.sourceCredibility.level}`}
-                >
+            <S.SourceContent>
+              <S.TrustLevel>
+                <S.TrustBadge level={analysis.sourceCredibility.level}>
                   {analysis.sourceCredibility.level === "trusted"
                     ? "✅ 신뢰할 만함"
                     : analysis.sourceCredibility.level === "neutral"
@@ -438,55 +430,57 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
                       : analysis.sourceCredibility.level === "caution"
                         ? "⚠️ 주의 필요"
                         : "🚨 신뢰하기 어려움"}
-                </span>
-              </div>
+                </S.TrustBadge>
+              </S.TrustLevel>
 
-              <div className="source-details">
-                <h4>📰 {analysis.sourceCredibility.domain}</h4>
-                <p className="source-description">
+              <S.SourceDetails>
+                <S.SourceDetailsTitle>
+                  📰 {analysis.sourceCredibility.domain}
+                </S.SourceDetailsTitle>
+                <S.SourceDescriptionText>
                   {analysis.sourceCredibility.reputation.description}
-                </p>
+                </S.SourceDescriptionText>
 
-                <div className="reputation-factors">
-                  <h5>평가 근거:</h5>
-                  <div className="factor-tags">
+                <S.ReputationFactors>
+                  <S.ReputationFactorsTitle>
+                    평가 근거:
+                  </S.ReputationFactorsTitle>
+                  <S.FactorTags>
                     {analysis.sourceCredibility.reputation.factors.map(
                       (factor, idx) => (
-                        <span key={idx} className="factor-tag">
-                          • {factor}
-                        </span>
+                        <S.FactorTag key={idx}>• {factor}</S.FactorTag>
                       )
                     )}
-                  </div>
-                </div>
+                  </S.FactorTags>
+                </S.ReputationFactors>
 
                 {analysis.sourceCredibility.reputation
                   .historicalReliability && (
-                  <div className="historical-data">
-                    <div className="historical-item">
-                      <span className="historical-label">과거 신뢰도:</span>
-                      <span className="historical-value">
+                  <S.HistoricalData>
+                    <S.HistoricalItem>
+                      <S.HistoricalLabel>과거 신뢰도:</S.HistoricalLabel>
+                      <S.HistoricalValue>
                         {
                           analysis.sourceCredibility.reputation
                             .historicalReliability
                         }
                         %
-                      </span>
-                    </div>
+                      </S.HistoricalValue>
+                    </S.HistoricalItem>
                     {analysis.sourceCredibility.reputation.expertiseArea && (
-                      <div className="historical-item">
-                        <span className="historical-label">전문 분야:</span>
-                        <span className="historical-value">
+                      <S.HistoricalItem>
+                        <S.HistoricalLabel>전문 분야:</S.HistoricalLabel>
+                        <S.HistoricalValue>
                           {analysis.sourceCredibility.reputation.expertiseArea.join(
                             ", "
                           )}
-                        </span>
-                      </div>
+                        </S.HistoricalValue>
+                      </S.HistoricalItem>
                     )}
-                  </div>
+                  </S.HistoricalData>
                 )}
-              </div>
-            </div>
+              </S.SourceDetails>
+            </S.SourceContent>
           </ExpandableSection>
 
           {/* 편향성 분석 섹션 */}
@@ -503,13 +497,13 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
             }
             sectionType="bias"
           >
-            <div className="bias-content">
+            <S.BiasContent>
               {/* 감정적 편향 */}
-              <div className="bias-section">
-                <h4>💥 감정적 편향</h4>
-                <div className="intensity-display">
-                  <span
-                    className={`intensity-badge ${analysis.biasAnalysis.emotionalBias.intensity}`}
+              <S.BiasSection>
+                <S.BiasSectionTitle>💥 감정적 편향</S.BiasSectionTitle>
+                <S.IntensityDisplay>
+                  <S.IntensityBadge
+                    intensity={analysis.biasAnalysis.emotionalBias.intensity}
                   >
                     {analysis.biasAnalysis.emotionalBias.intensity === "high"
                       ? "🔥 매우 높음"
@@ -520,14 +514,16 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
                             "low"
                           ? "🟢 낮음"
                           : "✅ 거의 없음"}
-                  </span>
-                </div>
+                  </S.IntensityBadge>
+                </S.IntensityDisplay>
 
                 {analysis.biasAnalysis.emotionalBias.manipulativeWords?.length >
                   0 && (
-                  <div className="manipulative-words">
-                    <h5>🎯 조작적 표현 탐지 (클릭하여 본문에서 찾기):</h5>
-                    <div className="words-grid">
+                  <S.ManipulativeWords>
+                    <S.ManipulativeWordsTitle>
+                      🎯 조작적 표현 탐지 (클릭하여 본문에서 찾기):
+                    </S.ManipulativeWordsTitle>
+                    <S.WordsGrid>
                       {analysis.biasAnalysis.emotionalBias.manipulativeWords.map(
                         (wordObj, idx) => {
                           const word =
@@ -538,20 +534,24 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
                             typeof wordObj === "string"
                               ? `조작적 표현: "${word}"`
                               : wordObj.explanation;
+                          const impact =
+                            typeof wordObj === "string"
+                              ? "medium"
+                              : wordObj.impact;
 
                           return (
-                            <div key={idx} className="word-item">
-                              <div className="word-header">
+                            <S.WordItem key={idx}>
+                              <S.WordHeader>
                                 <ClickableText
                                   text={word}
                                   type="manipulation"
                                   onTextClick={handleTextClick}
-                                  className={`word-badge ${typeof wordObj === "string" ? "medium" : wordObj.impact}`}
+                                  className={`word-badge ${impact}`}
                                 >
                                   "{word}"
                                 </ClickableText>
                                 {typeof wordObj !== "string" && (
-                                  <span className="word-category">
+                                  <S.WordCategory>
                                     {wordObj.category === "emotional"
                                       ? "😭 감정적"
                                       : wordObj.category === "exaggeration"
@@ -563,37 +563,39 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
                                             : wordObj.category === "fear"
                                               ? "😰 공포"
                                               : "⚠️ 기타"}
-                                  </span>
+                                  </S.WordCategory>
                                 )}
-                              </div>
+                              </S.WordHeader>
                               {typeof wordObj !== "string" && (
-                                <p className="word-explanation">
+                                <S.WordExplanation>
                                   {explanation}
-                                </p>
+                                </S.WordExplanation>
                               )}
-                            </div>
+                            </S.WordItem>
                           );
                         }
                       )}
-                    </div>
-                  </div>
+                    </S.WordsGrid>
+                  </S.ManipulativeWords>
                 )}
-              </div>
+              </S.BiasSection>
 
               {/* 클릭베이트 요소 */}
               {analysis.biasAnalysis.clickbaitElements &&
                 analysis.biasAnalysis.clickbaitElements.length > 0 && (
-                  <div className="bias-section">
-                    <h4>🎣 클릭베이트 요소 (클릭하여 본문에서 찾기)</h4>
-                    <div className="clickbait-grid">
+                  <S.BiasSection>
+                    <S.BiasSectionTitle>
+                      🎣 클릭베이트 요소 (클릭하여 본문에서 찾기)
+                    </S.BiasSectionTitle>
+                    <S.ClickbaitGrid>
                       {analysis.biasAnalysis.clickbaitElements.map(
                         (element, idx) => (
-                          <div
+                          <S.ClickbaitItem
                             key={idx}
-                            className={`clickbait-item ${element.severity}`}
+                            severity={element.severity}
                           >
-                            <div className="clickbait-header">
-                              <span className="clickbait-type">
+                            <S.ClickbaitHeader>
+                              <S.ClickbaitType>
                                 {element.type === "curiosity_gap"
                                   ? "🔍 호기심 갭"
                                   : element.type === "emotional_trigger"
@@ -601,38 +603,37 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
                                     : element.type === "urgency"
                                       ? "⚡ 긴급성"
                                       : "⭐ 최상급"}
-                              </span>
-                              <span
-                                className={`severity-indicator ${element.severity}`}
-                              >
+                              </S.ClickbaitType>
+                              <S.SeverityIndicator severity={element.severity}>
                                 {element.severity}
-                              </span>
-                            </div>
-                            <ClickableText
-                              text={element.text}
-                              type="bias"
-                              onTextClick={handleTextClick}
-                              className="clickbait-text"
-                            >
-                              "{element.text}"
-                            </ClickableText>
-                            <p className="clickbait-explanation">
+                              </S.SeverityIndicator>
+                            </S.ClickbaitHeader>
+                            <S.ClickbaitText>
+                              <ClickableText
+                                text={element.text}
+                                type="bias"
+                                onTextClick={handleTextClick}
+                              >
+                                "{element.text}"
+                              </ClickableText>
+                            </S.ClickbaitText>
+                            <S.ClickbaitExplanation>
                               {element.explanation}
-                            </p>
-                          </div>
+                            </S.ClickbaitExplanation>
+                          </S.ClickbaitItem>
                         )
                       )}
-                    </div>
-                  </div>
+                    </S.ClickbaitGrid>
+                  </S.BiasSection>
                 )}
 
               {/* 정치적 편향 */}
-              <div className="bias-section">
-                <h4>🗳️ 정치적 편향</h4>
-                <div className="political-bias">
-                  <div className="political-direction">
-                    <span
-                      className={`political-badge ${analysis.biasAnalysis.politicalBias.direction}`}
+              <S.BiasSection>
+                <S.BiasSectionTitle>🗳️ 정치적 편향</S.BiasSectionTitle>
+                <S.PoliticalBias>
+                  <S.PoliticalDirection>
+                    <S.PoliticalBadge
+                      direction={analysis.biasAnalysis.politicalBias.direction}
                     >
                       {analysis.biasAnalysis.politicalBias.direction === "left"
                         ? "⬅️ 진보적"
@@ -643,29 +644,33 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
                               "center"
                             ? "🎯 중도"
                             : "⚖️ 중립적"}
-                    </span>
-                    <span className="confidence">
+                    </S.PoliticalBadge>
+                    <S.Confidence>
                       확신도: {analysis.biasAnalysis.politicalBias.confidence}%
-                    </span>
-                  </div>
+                    </S.Confidence>
+                  </S.PoliticalDirection>
 
                   {analysis.biasAnalysis.politicalBias.indicators &&
                     analysis.biasAnalysis.politicalBias.indicators.length >
                       0 && (
-                      <div className="political-indicators">
-                        <h5>편향 지표:</h5>
-                        <ul>
+                      <S.PoliticalIndicators>
+                        <S.PoliticalIndicatorsTitle>
+                          편향 지표:
+                        </S.PoliticalIndicatorsTitle>
+                        <S.PoliticalIndicatorsList>
                           {analysis.biasAnalysis.politicalBias.indicators.map(
                             (indicator, idx) => (
-                              <li key={idx}>{indicator}</li>
+                              <S.PoliticalIndicatorsItem key={idx}>
+                                {indicator}
+                              </S.PoliticalIndicatorsItem>
                             )
                           )}
-                        </ul>
-                      </div>
+                        </S.PoliticalIndicatorsList>
+                      </S.PoliticalIndicators>
                     )}
-                </div>
-              </div>
-            </div>
+                </S.PoliticalBias>
+              </S.BiasSection>
+            </S.BiasContent>
           </ExpandableSection>
 
           {/* 논리적 오류 섹션 */}
@@ -686,42 +691,37 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
                 }
                 sectionType="logic"
               >
-                <div className="logic-content">
-                  <div className="fallacies-grid">
+                <S.LogicContent>
+                  <S.FallaciesGrid>
                     {analysis.logicalFallacies.map((fallacy, idx) => (
-                      <div
-                        key={idx}
-                        className={`fallacy-item ${fallacy.severity}`}
-                      >
-                        <div className="fallacy-header">
-                          <div className="fallacy-type">
-                            <span className="fallacy-icon">
+                      <S.FallacyItem key={idx} severity={fallacy.severity}>
+                        <S.FallacyHeader>
+                          <S.FallacyType>
+                            <S.FallacyIcon>
                               {fallacy.severity === "high"
                                 ? "🚨"
                                 : fallacy.severity === "medium"
                                   ? "⚠️"
                                   : "💡"}
-                            </span>
-                            <span className="fallacy-name">{fallacy.type}</span>
-                          </div>
-                          <span
-                            className={`severity-badge ${fallacy.severity}`}
-                          >
+                            </S.FallacyIcon>
+                            <S.FallacyName>{fallacy.type}</S.FallacyName>
+                          </S.FallacyType>
+                          <S.SeverityBadge severity={fallacy.severity}>
                             {fallacy.severity}
-                          </span>
-                        </div>
+                          </S.SeverityBadge>
+                        </S.FallacyHeader>
 
-                        <div className="fallacy-content">
-                          <p className="fallacy-description">
+                        <S.FallacyContent>
+                          <S.FallacyDescription>
                             {fallacy.description}
-                          </p>
+                          </S.FallacyDescription>
 
                           {fallacy.affectedText && (
-                            <div className="affected-text">
-                              <h5>
+                            <S.AffectedText>
+                              <S.AffectedTextTitle>
                                 🎯 문제가 된 부분 (클릭하여 본문에서 찾기):
-                              </h5>
-                              <blockquote>
+                              </S.AffectedTextTitle>
+                              <S.AffectedTextQuote>
                                 <ClickableText
                                   text={fallacy.affectedText}
                                   type="fallacy"
@@ -729,30 +729,38 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
                                 >
                                   "{fallacy.affectedText}"
                                 </ClickableText>
-                              </blockquote>
-                            </div>
+                              </S.AffectedTextQuote>
+                            </S.AffectedText>
                           )}
 
-                          <div className="fallacy-explanation">
-                            <h5>💡 쉬운 설명:</h5>
-                            <p>{fallacy.explanation}</p>
-                          </div>
+                          <S.FallacyExplanation>
+                            <S.FallacyExplanationTitle>
+                              💡 쉬운 설명:
+                            </S.FallacyExplanationTitle>
+                            <S.FallacyExplanationText>
+                              {fallacy.explanation}
+                            </S.FallacyExplanationText>
+                          </S.FallacyExplanation>
 
                           {fallacy.examples && fallacy.examples.length > 0 && (
-                            <div className="fallacy-examples">
-                              <h5>📚 비슷한 예시:</h5>
-                              <ul>
+                            <S.FallacyExamples>
+                              <S.FallacyExamplesTitle>
+                                📚 비슷한 예시:
+                              </S.FallacyExamplesTitle>
+                              <S.FallacyExamplesList>
                                 {fallacy.examples.map((example, exIdx) => (
-                                  <li key={exIdx}>{example}</li>
+                                  <S.FallacyExamplesItem key={exIdx}>
+                                    {example}
+                                  </S.FallacyExamplesItem>
                                 ))}
-                              </ul>
-                            </div>
+                              </S.FallacyExamplesList>
+                            </S.FallacyExamples>
                           )}
-                        </div>
-                      </div>
+                        </S.FallacyContent>
+                      </S.FallacyItem>
                     ))}
-                  </div>
-                </div>
+                  </S.FallaciesGrid>
+                </S.LogicContent>
               </ExpandableSection>
             )}
 
@@ -775,49 +783,52 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
               }
               sectionType="advertisement"
             >
-              <div className="advertisement-content">
-                <div className="ad-overview">
-                  <div className="ad-status">
-                    <span
-                      className={`ad-badge ${analysis.advertisementAnalysis.isAdvertorial ? "advertorial" : "non-advertorial"}`}
+              <S.AdvertisementContent>
+                <S.AdOverview>
+                  <S.AdStatus>
+                    <S.AdBadge
+                      isAdvertorial={
+                        analysis.advertisementAnalysis.isAdvertorial
+                      }
                     >
                       {analysis.advertisementAnalysis.isAdvertorial
                         ? "🚨 광고성 콘텐츠"
                         : "✅ 일반 콘텐츠"}
-                    </span>
-                    <span className="ad-confidence">
+                    </S.AdBadge>
+                    <S.AdConfidence>
                       확신도: {analysis.advertisementAnalysis.confidence}%
-                    </span>
-                  </div>
+                    </S.AdConfidence>
+                  </S.AdStatus>
 
-                  <div className="ad-scores">
-                    <div className="ad-score-item">
-                      <span className="score-label">네이티브 광고:</span>
-                      <span className="score-value">
+                  <S.AdScores>
+                    <S.AdScoreItem>
+                      <S.AdScoreLabel>네이티브 광고:</S.AdScoreLabel>
+                      <S.AdScoreValue>
                         {analysis.advertisementAnalysis.nativeAdScore}/100
-                      </span>
-                    </div>
-                    <div className="ad-score-item">
-                      <span className="score-label">상업적 의도:</span>
-                      <span className="score-value">
+                      </S.AdScoreValue>
+                    </S.AdScoreItem>
+                    <S.AdScoreItem>
+                      <S.AdScoreLabel>상업적 의도:</S.AdScoreLabel>
+                      <S.AdScoreValue>
                         {analysis.advertisementAnalysis.commercialIntentScore}
                         /100
-                      </span>
-                    </div>
-                  </div>
-                </div>
+                      </S.AdScoreValue>
+                    </S.AdScoreItem>
+                  </S.AdScores>
+                </S.AdOverview>
 
                 {analysis.advertisementAnalysis.indicators &&
                   analysis.advertisementAnalysis.indicators.length > 0 && (
-                    <div className="ad-indicators">
-                      <h5>🔍 광고성 지표 탐지 (클릭하여 본문에서 찾기):</h5>
-                      <div className="words-grid">
+                    <S.AdIndicators>
+                      <S.AdIndicatorsTitle>
+                        🔍 광고성 지표 탐지 (클릭하여 본문에서 찾기):
+                      </S.AdIndicatorsTitle>
+                      <S.WordsGrid>
                         {analysis.advertisementAnalysis.indicators.map(
                           (indicator, idx) => {
                             // 광고성 표현 텍스트와 설명을 변수로 추출
                             const text = indicator.evidence;
                             const explanation = indicator.explanation;
-
                             // 가중치(weight)에 따라 영향도를 low, medium, high로 매핑
                             const impact =
                               indicator.weight > 6
@@ -827,20 +838,18 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
                                   : "low";
 
                             return (
-                              <div key={idx} className="word-item">
-                                <div className="word-header">
-                                  {/* 클릭 가능한 텍스트 (광고성 표현) */}
+                              <S.WordItem key={idx}>
+                                <S.WordHeader>
                                   <ClickableText
                                     text={text}
                                     type="advertisement"
                                     onTextClick={handleTextClick}
-                                    className={`word-badge ${impact}`} // 가중치에 따른 클래스 적용
+                                    className={`word-badge ${impact}`}
                                   >
                                     "{text}"
                                   </ClickableText>
 
-                                  {/* 광고 유형 카테고리 */}
-                                  <span className="word-category">
+                                  <S.WordCategory>
                                     {indicator.type === "product_mention"
                                       ? "🛍️ 제품 언급"
                                       : indicator.type ===
@@ -854,21 +863,21 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
                                                 "affiliate_link"
                                               ? "🔗 제휴 링크"
                                               : "📝 후원 콘텐츠"}
-                                  </span>
-                                </div>
+                                  </S.WordCategory>
+                                </S.WordHeader>
 
                                 {/* 광고성 표현에 대한 설명 */}
-                                <p className="word-explanation">
+                                <S.WordExplanation>
                                   {explanation}
-                                </p>
-                              </div>
+                                </S.WordExplanation>
+                              </S.WordItem>
                             );
                           }
                         )}
-                      </div>
-                    </div>
+                      </S.WordsGrid>
+                    </S.AdIndicators>
                   )}
-              </div>
+              </S.AdvertisementContent>
             </ExpandableSection>
           )}
 
@@ -897,14 +906,14 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
               }
               sectionType="crossref"
             >
-              <div className="crossref-content">
+              <S.CrossRefContent>
                 {analysis.crossReference.keyClaims &&
                   analysis.crossReference.keyClaims.length > 0 && (
-                    <div className="key-claims">
-                      <h4>🎯 핵심 주장</h4>
-                      <ul className="claims-list">
+                    <S.KeyClaims>
+                      <S.KeyClaimsTitle>🎯 핵심 주장</S.KeyClaimsTitle>
+                      <S.ClaimsList>
                         {analysis.crossReference.keyClaims.map((claim, idx) => (
-                          <li key={idx} className="claim-item">
+                          <S.ClaimItem key={idx}>
                             <ClickableText
                               text={claim}
                               type="claim"
@@ -912,39 +921,36 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
                             >
                               {claim}
                             </ClickableText>
-                          </li>
+                          </S.ClaimItem>
                         ))}
-                      </ul>
-                    </div>
+                      </S.ClaimsList>
+                    </S.KeyClaims>
                   )}
 
                 {analysis.crossReference.relatedArticleKeywords && (
-                  <div className="search-keywords">
-                    <h4>🔎 추천 검색 키워드</h4>
-                    <div className="keywords-box">
+                  <S.SearchKeywords>
+                    <S.SearchKeywordsTitle>
+                      🔎 추천 검색 키워드
+                    </S.SearchKeywordsTitle>
+                    <S.KeywordsBox>
                       {analysis.crossReference.relatedArticleKeywords}
-                    </div>
-                  </div>
+                    </S.KeywordsBox>
+                  </S.SearchKeywords>
                 )}
 
                 {analysis.crossReference.factCheckSources &&
                   analysis.crossReference.factCheckSources.length > 0 && (
-                    <div className="fact-check-sources">
-                      <h4>✅ 팩트체크 소스</h4>
-                      <div className="sources-grid">
+                    <S.FactCheckSources>
+                      <S.FactCheckSourcesTitle>
+                        ✅ 팩트체크 소스
+                      </S.FactCheckSourcesTitle>
+                      <S.SourcesGrid>
                         {analysis.crossReference.factCheckSources.map(
                           (source, idx) => (
-                            <div
-                              key={idx}
-                              className={`fact-check-item ${source.verdict}`}
-                            >
-                              <div className="source-header">
-                                <span className="source-org">
-                                  {source.organization}
-                                </span>
-                                <span
-                                  className={`verdict-badge ${source.verdict}`}
-                                >
+                            <S.FactCheckItem key={idx} verdict={source.verdict}>
+                              <S.SourceHeader>
+                                <S.SourceOrg>{source.organization}</S.SourceOrg>
+                                <S.VerdictBadge verdict={source.verdict}>
                                   {source.verdict === "true"
                                     ? "✅ 사실"
                                     : source.verdict === "false"
@@ -952,30 +958,33 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
                                       : source.verdict === "mixed"
                                         ? "🔄 부분적"
                                         : "❓ 미확인"}
-                                </span>
-                              </div>
-                              <p className="source-summary">{source.summary}</p>
+                                </S.VerdictBadge>
+                              </S.SourceHeader>
+                              <S.SourceSummary>
+                                {source.summary}
+                              </S.SourceSummary>
                               {source.url && (
-                                <a
+                                <S.SourceLink
                                   href={source.url}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="source-link"
                                 >
                                   🔗 소스 확인하기
-                                </a>
+                                </S.SourceLink>
                               )}
-                            </div>
+                            </S.FactCheckItem>
                           )
                         )}
-                      </div>
-                    </div>
+                      </S.SourcesGrid>
+                    </S.FactCheckSources>
                   )}
 
-                <div className="consensus-display">
-                  <h4>📊 전체적 합의</h4>
-                  <div
-                    className={`consensus-badge ${analysis.crossReference.consensus}`}
+                <S.ConsensusDisplay>
+                  <S.ConsensusDisplayTitle>
+                    📊 전체적 합의
+                  </S.ConsensusDisplayTitle>
+                  <S.ConsensusBadge
+                    consensus={analysis.crossReference.consensus}
                   >
                     {analysis.crossReference.consensus === "agree"
                       ? "✅ 대체로 일치함"
@@ -984,36 +993,42 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
                         : analysis.crossReference.consensus === "mixed"
                           ? "🔄 의견이 혼재됨"
                           : "❓ 검증 정보 부족"}
-                  </div>
-                </div>
-              </div>
+                  </S.ConsensusBadge>
+                </S.ConsensusDisplay>
+              </S.CrossRefContent>
             </ExpandableSection>
           )}
 
           {/* 분석 팁 */}
-          <div className="analysis-tips">
-            <h4>💡 비판적 사고 팁</h4>
-            <div className="tips-grid">
-              <div className="tip-item">
-                <span className="tip-icon">🔍</span>
-                <p>여러 출처에서 정보를 교차 확인하세요</p>
-              </div>
-              <div className="tip-item">
-                <span className="tip-icon">⚖️</span>
-                <p>감정적 언어에 휩쓸리지 말고 객관적으로 판단하세요</p>
-              </div>
-              <div className="tip-item">
-                <span className="tip-icon">🎯</span>
-                <p>광고성 콘텐츠는 상업적 목적을 염두에 두고 읽으세요</p>
-              </div>
-              <div className="tip-item">
-                <span className="tip-icon">🧠</span>
-                <p>논리적 근거가 충분한지 스스로 판단해보세요</p>
-              </div>
-            </div>
-          </div>
-        </div>
+          <S.AnalysisTips>
+            <S.AnalysisTipsTitle>💡 비판적 사고 팁</S.AnalysisTipsTitle>
+            <S.TipsGrid>
+              <S.TipItem>
+                <S.TipIcon>🔍</S.TipIcon>
+                <S.TipText>여러 출처에서 정보를 교차 확인하세요</S.TipText>
+              </S.TipItem>
+              <S.TipItem>
+                <S.TipIcon>⚖️</S.TipIcon>
+                <S.TipText>
+                  감정적 언어에 휩쓸리지 말고 객관적으로 판단하세요
+                </S.TipText>
+              </S.TipItem>
+              <S.TipItem>
+                <S.TipIcon>🎯</S.TipIcon>
+                <S.TipText>
+                  광고성 콘텐츠는 상업적 목적을 염두에 두고 읽으세요
+                </S.TipText>
+              </S.TipItem>
+              <S.TipItem>
+                <S.TipIcon>🧠</S.TipIcon>
+                <S.TipText>
+                  논리적 근거가 충분한지 스스로 판단해보세요
+                </S.TipText>
+              </S.TipItem>
+            </S.TipsGrid>
+          </S.AnalysisTips>
+        </S.ResultsSection>
       )}
-    </div>
+    </S.Container>
   );
 };
