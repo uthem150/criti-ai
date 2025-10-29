@@ -9,8 +9,18 @@ export default defineConfig(() => {
     plugins: [
       react({
         jsxImportSource: "@emotion/react",
+        babel: {
+          plugins: [
+            [
+              "@emotion/babel-plugin",
+              {
+                autoLabel: "dev-only",
+              },
+            ],
+          ],
+        },
       }),
-      crx({ 
+      crx({
         manifest,
       }),
     ],
@@ -21,19 +31,19 @@ export default defineConfig(() => {
       },
     },
     build: {
-      minify: 'esbuild' as const, // 타입 명시
-      target: 'chrome90',
+      minify: "esbuild" as const, // 타입 명시
+      target: "chrome90",
       sourcemap: false,
-      outDir: 'dist',
+      outDir: "dist",
       emptyOutDir: true,
-      assetsDir: 'assets',
+      assetsDir: "assets",
       rollupOptions: {
         output: {
-          format: 'es' as const,
-        }
-      }
+          format: "es" as const,
+        },
+      },
     },
-    base: './',
+    base: "./",
     server: {
       port: 5173,
       open: false,
