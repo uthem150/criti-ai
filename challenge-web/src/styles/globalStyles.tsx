@@ -1,5 +1,5 @@
 import { css, Global } from "@emotion/react";
-import { colors, typography, spacing } from "./design-system";
+import { colors, typography } from "./design-system";
 
 export const GlobalStyles = () => (
   <Global
@@ -24,8 +24,8 @@ export const GlobalStyles = () => (
         padding: 0;
         font-family: ${typography.fontFamily.primary};
         line-height: 1.5;
-        color: ${colors.text.primary};
-        background-color: ${colors.background.secondary};
+        color: ${colors.light.grayscale[90]};
+        background-color: ${colors.light.grayscale[5]};
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
         overflow-x: hidden;
@@ -55,13 +55,13 @@ export const GlobalStyles = () => (
 
       /* Links */
       a {
-        color: ${colors.primary};
+        color: ${colors.light.brand.primary100};
         text-decoration: none;
         transition: color 0.2s ease;
       }
 
       a:hover {
-        color: ${colors.palette.purple};
+        color: ${colors.light.etc.purple};
       }
 
       /* Buttons */
@@ -93,20 +93,20 @@ export const GlobalStyles = () => (
 
       /* Focus Styles */
       *:focus-visible {
-        outline: 2px solid ${colors.border.focus};
+        outline: 2px solid ${colors.light.brand.primary100};
         outline-offset: 2px;
       }
 
       button:focus-visible,
       a:focus-visible {
-        outline: 2px solid ${colors.primary};
+        outline: 2px solid ${colors.light.brand.primary100};
         outline-offset: 2px;
       }
 
       /* Selection */
       ::selection {
-        background-color: ${colors.primary}30;
-        color: ${colors.text.primary};
+        background-color: ${colors.light.brand.primary20};
+        color: ${colors.light.grayscale[90]};
       }
 
       /* Scrollbar */
@@ -116,16 +116,16 @@ export const GlobalStyles = () => (
       }
 
       ::-webkit-scrollbar-track {
-        background: ${colors.background.tertiary};
+        background: ${colors.light.grayscale[10]};
       }
 
       ::-webkit-scrollbar-thumb {
-        background: ${colors.grayscale[40]};
+        background: ${colors.light.grayscale[40]};
         border-radius: 4px;
       }
 
       ::-webkit-scrollbar-thumb:hover {
-        background: ${colors.grayscale[50]};
+        background: ${colors.light.grayscale[50]};
       }
 
       /* Spinner Animation */

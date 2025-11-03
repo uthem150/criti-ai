@@ -1,8 +1,5 @@
 import styled from "@emotion/styled";
-import {
-  colors,
-  typography,
-} from "../../styles/design";
+import { colors, typography } from "../../styles/design-system";
 
 export const PageContainer = styled.div`
   max-width: 1200px;
@@ -237,9 +234,7 @@ export const OptionButton = styled.button<OptionButtonProps>`
         ? colors.light.brand.primary100
         : colors.light.grayscale[20]};
   background: ${(props) =>
-    props.selected
-      ? colors.light.brand.primary10
-      : colors.light.grayscale[0]};
+    props.selected ? colors.light.brand.primary10 : colors.light.grayscale[0]};
   color: ${(props) =>
     props.selected
       ? colors.light.brand.primary100
@@ -327,9 +322,7 @@ interface ResultTextProps {
 export const ResultText = styled.div<ResultTextProps>`
   ${typography.styles.title1};
   color: ${(props) =>
-    props.isCorrect
-      ? colors.light.state.success
-      : colors.light.state.error};
+    props.isCorrect ? colors.light.state.success : colors.light.state.error};
   margin-bottom: 1rem;
   text-align: center;
 `;

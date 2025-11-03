@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { colors, typography } from "../../styles/design";
+import { colors, typography } from "../../styles/design-system";
 
 // 전체 컨테이너
 export const Container = styled.div`
