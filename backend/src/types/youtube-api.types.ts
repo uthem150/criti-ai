@@ -140,6 +140,12 @@ export interface ChannelStatus {
   madeForKids?: boolean;
 }
 
+export interface ChannelInfo {
+  subscriberCount: number;
+  verificationStatus: string;
+  channelImageUrl: string;
+}
+
 // 에러 응답
 export interface YouTubeAPIError {
   error: {

@@ -361,6 +361,7 @@ export interface YoutubeTrustAnalysis {
     level: "trusted" | "neutral" | "caution" | "unreliable";
     subscriberCount: number;
     verificationStatus: "verified" | "unverified";
+    channelImageUrl: string;
     reputation: {
       description: string;
       factors: string[];

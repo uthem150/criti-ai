@@ -21,6 +21,7 @@ const YoutubeAnalysisPage = () => {
 
   // 숫자 포맷팅 (천 단위 구분)
   const formatNumber = (num: number): string => {
+    if (num === null || num === undefined) return "0";
     return num.toLocaleString("ko-KR");
   };
 
@@ -190,17 +191,39 @@ const YoutubeAnalysisPage = () => {
 
                   <S.CollapsibleContent isOpen={sourceOpen}>
                     <S.SourceInfo>
-                      <S.SourceLink>
-                        {analysis.videoInfo?.channelName ||
-                          "www.doctorsnews.co.kr"}
-                      </S.SourceLink>
+                      <S.SourceInfoWrapper>
+                        {analysis.channelCredibility.channelImageUrl && (
+                          <S.ChannelImage
+                            src={analysis.channelCredibility.channelImageUrl}
+                            alt={`${analysis.videoInfo?.channelName} 프로필 이미지`}
+                          />
+                        )}
+                        <S.SourceTextInfo>
+                          <S.SourceLink>
+                            {analysis.videoInfo?.channelName || "채널명 없음"}
+                          </S.SourceLink>
 
-                      <S.SourceDetail>
-                        <S.SourceDetailLabel>과거 신뢰도</S.SourceDetailLabel>
-                        <S.SourceDetailValue>
-                          {analysis.channelCredibility.score}%
-                        </S.SourceDetailValue>
-                      </S.SourceDetail>
+                          <S.SourceDetail>
+                            <S.SourceDetailLabel>구독자 수</S.SourceDetailLabel>
+                            <S.SourceDetailValue>
+                              {formatNumber(
+                                analysis.channelCredibility.subscriberCount
+                              )}
+                              명
+                            </S.SourceDetailValue>
+                          </S.SourceDetail>
+
+                          <S.SourceDetail>
+                            <S.SourceDetailLabel>
+                              과거 신뢰도
+                            </S.SourceDetailLabel>
+                            <S.SourceDetailValue>
+                              {analysis.channelCredibility.score}%
+                            </S.SourceDetailValue>
+                          </S.SourceDetail>
+                        </S.SourceTextInfo>
+                      </S.SourceInfoWrapper>
+                      {/* === 수정 끝 === */}
 
                       <S.SourceDescription>
                         <strong>전문 분야:</strong>{" "}

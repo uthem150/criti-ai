@@ -7,6 +7,7 @@ import type {
   LogicalFallacy,
   AdvertisementIndicator,
 } from "@criti-ai/shared";
+import { ChannelInfo } from "../types/youtube-api.types";
 
 export class GeminiService {
   private ai: GoogleGenAI;
@@ -102,7 +103,7 @@ export class GeminiService {
     return `
 # ⚠️ 중요: 현재 날짜 및 팩트체크 규칙
 
-**현재 날짜**: ${new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' })}
+**현재 날짜**: ${new Date().toLocaleDateString("ko-KR", { year: "numeric", month: "long", day: "numeric", weekday: "long" })}
 **현재 시간**: ${new Date().toISOString()}
 
 🔴 **핵심 규칙 - 반드시 준수**:
@@ -293,7 +294,7 @@ ${request.content}
     "factCheckSources": [
       {
         "organization": "팩트체크 기관명 (Google 검색 기반)",
-        "url": "#fact-check-url (Google 검색 기반)",
+        "url": "**실제 Google 검색을 통해 찾은 유효한 팩트체크 기사의 URL (반드시 유효한 URL 제공)**",
         "verdict": "'true' | 'false' | 'mixed' | 'unverified'",
         "summary": "팩트체크 결과 요약 (Google 검색 기반)"
       }
@@ -352,7 +353,7 @@ ${request.content}
     🔎 제공된 Google 검색 도구를 활용하여 'sourceCredibility' (출처 신뢰도) 및 'keyClaims' (핵심 주장)의 팩트체크를 수행하세요.
     🔎 출처의 평판, 전문성, 과거 이력 등을 검색하여 \`sourceCredibility.reputation.description\`에 반영하세요.
     🔎 팩트체크가 필요한 주장에 대한 검증 결과를 \`crossReference\` 섹션에 반영하세요.
-
+    **🚨 \`crossReference.factCheckSources[].url\` 필드에는 Google 검색을 통해 실제로 조사된, 유효하고 접근 가능한 팩트체크 기사의 URL을 반드시 제공해야 합니다. 플레이스 홀더나 무효한 URL을 사용해서는 안 됩니다.**
 `;
   }
 
@@ -1000,13 +1001,13 @@ ${request.content}
    *
    * @param videoInfo - 비디오 메타데이터
    * @param transcript - 추출된 자막
-   * @param channelInfo - 채널 정보 (구독자 수 등)
+   * @param ChannelInfo - 채널 정보 (구독자 수 등)
    * @returns YoutubeTrustAnalysis - 상세 분석 결과
    */
   async analyzeYoutubeWithTranscript(
     videoInfo: any,
     transcript: any,
-    channelInfo: { subscriberCount: number; verificationStatus: string }
+    channelInfo: ChannelInfo
   ): Promise<YoutubeTrustAnalysis> {
     console.log("🚀 유튜브 빠른 분석 시작 (텍스트 기반)");
     console.log(`📺 비디오: ${videoInfo.title}`);
@@ -1081,7 +1082,7 @@ ${request.content}
   private buildFastYoutubeAnalysisPrompt(
     videoInfo: any,
     transcript: any,
-    channelInfo: { subscriberCount: number; verificationStatus: string }
+    channelInfo: ChannelInfo
   ): string {
     // 자막 세그먼트를 타임스탬프 포함 형식으로 변환
     const transcriptWithTimestamps = transcript.segments
@@ -1092,7 +1093,7 @@ ${request.content}
     return `
 # ⚠️ 중요: 현재 날짜 및 팩트체크 규칙
 
-**현재 날짜**: ${new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' })}
+**현재 날짜**: ${new Date().toLocaleDateString("ko-KR", { year: "numeric", month: "long", day: "numeric", weekday: "long" })}
 **현재 시간**: ${new Date().toISOString()}
 
 🔴 **핵심 규칙 - 반드시 준수**:
@@ -1140,6 +1141,7 @@ ${request.content}
 ## 채널 정보
 - **구독자 수**: ${channelInfo.subscriberCount.toLocaleString()}명
 - **인증 상태**: ${channelInfo.verificationStatus}
+- **채널 이미지**: ${channelInfo.channelImageUrl}
 
 ## 자막 전문 (타임스탬프 포함)
 ${transcriptWithTimestamps}
@@ -1320,8 +1322,9 @@ ${transcript.fullText.substring(0, 5000)}${transcript.fullText.length > 5000 ? "
   "channelCredibility": {
     "score": 80,
     "level": "trusted | neutral | caution | unreliable",
-    "subscriberCount": 100000,
-    "verificationStatus": "verified | unverified",
+    "subscriberCount": ${channelInfo.subscriberCount},
+    "verificationStatus": ${channelInfo.verificationStatus},
+    "channelImageUrl": ${channelInfo.channelImageUrl},
     "reputation": {
       "description": "채널에 대한 간결한 설명",
       "factors": ["신뢰도 판단 근거들"],

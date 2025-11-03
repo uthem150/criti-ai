@@ -200,9 +200,8 @@ router.post(
         videoInfo.channelId
       );
       console.log(
-        `✅ 채널 메타데이터 수집 완료: ${channelInfo.subscriberCount.toLocaleString()}명 구독자`
+        `✅ 채널 메타데이터 수집 완료: ${JSON.stringify(channelInfo)}`
       );
-
       // 4-5. Gemini 텍스트 분석
       console.log("🤖 Gemini 텍스트 분석 중...");
       const analysis = await geminiService.analyzeYoutubeWithTranscript(

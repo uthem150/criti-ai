@@ -8,6 +8,7 @@ import type {
 import type {
   YouTubeVideoResponse,
   YouTubeChannelResponse,
+  ChannelInfo,
 } from "../types/youtube-api.types.js";
 
 const execFileAsync = promisify(execFile);
@@ -327,21 +328,20 @@ export class YoutubeService {
    * @param channelId - 유튜브 채널 ID
    * @returns 구독자 수 등 채널 정보
    */
-  async fetchChannelMetadata(
-    channelId: string
-  ): Promise<{ subscriberCount: number; verificationStatus: string }> {
+  async fetchChannelMetadata(channelId: string): Promise<ChannelInfo> {
     if (!this.youtubeApiKey) {
       console.warn("⚠️ YouTube API 키가 없습니다. 기본 채널 정보 반환");
       return {
         subscriberCount: 0,
         verificationStatus: "unverified",
+        channelImageUrl: "",
       };
     }
 
     console.log(`👤 채널 메타데이터 수집 시작: ${channelId}`);
 
     try {
-      const url = `https://www.googleapis.com/youtube/v3/channels?id=${channelId}&part=statistics,status&key=${this.youtubeApiKey}`;
+      const url = `https://www.googleapis.com/youtube/v3/channels?id=${channelId}&part=statistics,status,snippet&key=${this.youtubeApiKey}`;
 
       const response = await fetch(url);
 
@@ -359,20 +359,32 @@ export class YoutubeService {
 
       const channel = data.items[0];
 
+      // 구독자 수
       const subscriberCount = parseInt(
         channel.statistics?.subscriberCount || "0",
         10
       );
+      // 인증 상태
       const verificationStatus =
         channel.status?.isLinked === true ? "verified" : "unverified";
+
+      // 채널 이미지 URL 추출 (고해상도 우선)
+      const thumbnails = channel.snippet?.thumbnails;
+      const channelImageUrl =
+        thumbnails?.high?.url ||
+        thumbnails?.medium?.url ||
+        thumbnails?.default?.url ||
+        "";
 
       console.log("✅ 채널 메타데이터 수집 완료");
       console.log(`👥 구독자 수: ${subscriberCount.toLocaleString()}`);
       console.log(`✓ 인증 상태: ${verificationStatus}`);
+      console.log(`🖼️ 채널 이미지 URL: ${channelImageUrl}`); // <-- 로그 추가
 
       return {
         subscriberCount,
         verificationStatus,
+        channelImageUrl,
       };
     } catch (error) {
       console.error("❌ 채널 메타데이터 수집 오류:", error);
@@ -380,6 +392,7 @@ export class YoutubeService {
       return {
         subscriberCount: 0,
         verificationStatus: "unverified",
+        channelImageUrl: "", // 오류 시 기본값 추가
       };
     }
   }

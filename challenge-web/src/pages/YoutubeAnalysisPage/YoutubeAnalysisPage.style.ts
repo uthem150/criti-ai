@@ -392,11 +392,30 @@ export const SourceInfo = styled.div`
   padding: ${spacing[5]};
 `;
 
+export const SourceInfoWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${spacing[4]};
+`;
+
+export const ChannelImage = styled.img`
+  width: 50px;
+  height: 50px;
+  border-radius: ${borderRadius.full};
+  object-fit: cover;
+  border: 1px solid ${colors.border.primary};
+  flex-shrink: 0;
+`;
+
+export const SourceTextInfo = styled.div`
+  flex: 1;
+`;
+
 export const SourceLink = styled.div`
   color: ${colors.primary};
   ${typography.styles.body3};
   font-weight: ${typography.fontWeight.semibold};
-  margin-bottom: ${spacing[3]};
+  /* margin-bottom: ${spacing[3]}; <-- 레이아웃을 위해 제거 */
 `;
 
 export const SourceDetail = styled.div`
@@ -404,6 +423,7 @@ export const SourceDetail = styled.div`
   justify-content: space-between;
   align-items: center;
   margin-bottom: ${spacing[2]};
+  margin-top: ${spacing[2]};
 
   &:last-child {
     margin-bottom: 0;
