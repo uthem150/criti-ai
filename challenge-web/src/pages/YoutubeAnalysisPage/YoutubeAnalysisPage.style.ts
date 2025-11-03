@@ -1,21 +1,14 @@
 import styled from "@emotion/styled";
-import {
-  colors,
-  typography,
-  spacing,
-  borderRadius,
-  shadows,
-  animations,
-} from "../../styles/design-system";
+import { colors, typography } from "../../styles/design";
 
 // 전체 컨테이너
 export const Container = styled.div`
   min-height: 100vh;
-  background: ${colors.background.primary};
-  padding: ${spacing[8]};
+  background: ${colors.light.grayscale[0]};
+  padding: 2rem;
 
   @media (max-width: 768px) {
-    padding: ${spacing[4]};
+    padding: 1rem;
   }
 `;
 
@@ -30,15 +23,15 @@ export const Header = styled.header`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: ${spacing[6]} 0;
-  margin-bottom: ${spacing[8]};
-  border-bottom: 1px solid ${colors.border.primary};
+  padding: 1.5rem 0;
+  margin-bottom: 2rem;
+  border-bottom: 1px solid ${colors.light.grayscale[20]};
 `;
 
 export const Logo = styled.div`
   display: flex;
   align-items: center;
-  gap: ${spacing[2]};
+  gap: 0.5rem;
 `;
 
 export const LogoIcon = styled.div`
@@ -47,24 +40,24 @@ export const LogoIcon = styled.div`
 
 export const LogoText = styled.h1`
   ${typography.styles.title2};
-  color: ${colors.text.primary};
+  color: ${colors.light.grayscale[90]};
   margin: 0;
 `;
 
 export const NavButton = styled.button`
-  padding: ${spacing[2]} ${spacing[5]};
-  background: ${colors.primary};
-  color: ${colors.text.inverse};
+  padding: 0.5rem 1.25rem;
+  background: ${colors.light.brand.primary100};
+  color: ${colors.light.grayscale[0]};
   border: none;
-  border-radius: ${borderRadius.lg};
+  border-radius: 0.5rem;
   ${typography.styles.title5};
   cursor: pointer;
-  transition: ${animations.transition.normal};
-  box-shadow: ${shadows.sm};
+  transition: "250ms ease-in-out";
+  box-shadow: "0 1px 2px 0 rgb(0 0 0 / 0.05)";
 
   &:hover {
     opacity: 0.9;
-    box-shadow: ${shadows.md};
+    box-shadow: "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)";
   }
 
   &:active {
@@ -74,78 +67,78 @@ export const NavButton = styled.button`
 
 // 입력 카드
 export const InputCard = styled.div`
-  background: ${colors.background.primary};
-  border: 1px solid ${colors.border.primary};
-  border-radius: ${borderRadius.xl};
-  padding: ${spacing[12]} ${spacing[8]};
-  margin-bottom: ${spacing[8]};
+  background: ${colors.light.grayscale[0]};
+  border: 1px solid ${colors.light.grayscale[20]};
+  border-radius: 0.75rem;
+  padding: 3rem 2rem;
+  margin-bottom: 2rem;
   text-align: center;
-  box-shadow: ${shadows.sm};
+  box-shadow: "0 1px 2px 0 rgb(0 0 0 / 0.05)";
 `;
 
 export const InputTitle = styled.h2`
   ${typography.styles.headline2};
-  color: ${colors.text.primary};
-  margin-bottom: ${spacing[2]};
+  color: ${colors.light.grayscale[90]};
+  margin-bottom: 0.5rem;
 `;
 
 export const InputDescription = styled.p`
   ${typography.styles.body2};
-  color: ${colors.text.secondary};
-  margin-bottom: ${spacing[8]};
+  color: ${colors.light.grayscale[70]};
+  margin-bottom: 2rem;
 `;
 
 export const InputGroup = styled.div`
   display: flex;
-  gap: ${spacing[3]};
+  gap: 0.75rem;
   max-width: 600px;
   margin: 0 auto;
 `;
 
 export const Input = styled.input`
   flex: 1;
-  padding: ${spacing[3]} ${spacing[4]};
+  padding: 0.75rem 1rem;
   ${typography.styles.body2};
   font-family: ${typography.fontFamily.primary};
-  border: 1px solid ${colors.border.secondary};
-  border-radius: ${borderRadius.md};
+  border: 1px solid ${colors.light.grayscale[30]};
+  border-radius: 0.375rem;
   outline: none;
-  transition: ${animations.transition.normal};
+  transition: "250ms ease-in-out";
 
   &:focus {
-    border-color: ${colors.border.focus};
-    box-shadow: 0 0 0 3px rgba(107, 138, 255, 0.1);
+    border-color: ${colors.light.brand.primary100};
+    box-shadow: 0 0 0 3px ${colors.light.brand.primary10};
   }
 
   &::placeholder {
-    color: ${colors.grayscale[40]};
+    color: ${colors.light.grayscale[40]};
   }
 
   &:disabled {
-    background: ${colors.background.tertiary};
+    background: ${colors.light.grayscale[10]};
     cursor: not-allowed;
   }
 `;
 
 export const SubmitButton = styled.button<{ disabled?: boolean }>`
-  padding: ${spacing[3]} ${spacing[6]};
-  background: ${colors.primary};
-  color: ${colors.text.inverse};
+  padding: 0.75rem 1.5rem;
+  background: ${colors.light.brand.primary100};
+  color: ${colors.light.grayscale[0]};
   border: none;
-  border-radius: ${borderRadius.md};
+  border-radius: 0.375rem;
   ${typography.styles.title5};
   cursor: ${(props) => (props.disabled ? "not-allowed" : "pointer")};
   opacity: ${(props) => (props.disabled ? 0.6 : 1)};
-  transition: ${animations.transition.normal};
+  transition: "250ms ease-in-out";
   display: flex;
   align-items: center;
-  gap: ${spacing[2]};
+  gap: 0.5rem;
   white-space: nowrap;
-  box-shadow: ${shadows.sm};
+  box-shadow: "0 1px 2px 0 rgb(0 0 0 / 0.05)";
 
   &:hover:not(:disabled) {
     opacity: 0.9;
-    box-shadow: ${shadows.md};
+    box-shadow: "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)";
   }
 
   &:active:not(:disabled) {
@@ -154,39 +147,39 @@ export const SubmitButton = styled.button<{ disabled?: boolean }>`
 `;
 
 export const ErrorMessage = styled.div`
-  padding: ${spacing[4]};
-  background: ${colors.status.error}15;
-  border: 1px solid ${colors.status.error};
-  border-radius: ${borderRadius.md};
-  color: ${colors.status.error};
+  padding: 1rem;
+  background: ${colors.light.state.errorLight};
+  border: 1px solid ${colors.light.state.error};
+  border-radius: 0.375rem;
+  color: ${colors.light.state.error};
   ${typography.styles.body3};
-  margin-top: ${spacing[4]};
+  margin-top: 1rem;
   max-width: 600px;
   margin-left: auto;
   margin-right: auto;
   display: flex;
   align-items: center;
-  gap: ${spacing[2]};
+  gap: 0.5rem;
 `;
 
 // 로딩
 export const LoadingCard = styled.div`
-  background: ${colors.background.primary};
-  border: 1px solid ${colors.border.primary};
-  border-radius: ${borderRadius.xl};
-  padding: ${spacing[16]} ${spacing[8]};
+  background: ${colors.light.grayscale[0]};
+  border: 1px solid ${colors.light.grayscale[20]};
+  border-radius: 0.75rem;
+  padding: 4rem 2rem;
   text-align: center;
-  box-shadow: ${shadows.sm};
+  box-shadow: "0 1px 2px 0 rgb(0 0 0 / 0.05)";
 `;
 
 export const LoadingSpinner = styled.div`
   width: 48px;
   height: 48px;
-  border: 3px solid ${colors.border.primary};
-  border-top-color: ${colors.primary};
-  border-radius: ${borderRadius.full};
+  border: 3px solid ${colors.light.grayscale[20]};
+  border-top-color: ${colors.light.brand.primary100};
+  border-radius: 9999px;
   animation: spin 0.8s linear infinite;
-  margin: 0 auto ${spacing[6]};
+  margin: 0 auto 1.5rem;
 
   @keyframes spin {
     to {
@@ -197,23 +190,23 @@ export const LoadingSpinner = styled.div`
 
 export const LoadingText = styled.p`
   ${typography.styles.body2};
-  color: ${colors.text.secondary};
+  color: ${colors.light.grayscale[70]};
   margin: 0;
 `;
 
 // 결과 카드
 export const ResultCard = styled.div`
-  background: ${colors.background.primary};
-  border: 1px solid ${colors.border.primary};
-  border-radius: ${borderRadius.xl};
-  padding: ${spacing[8]};
-  box-shadow: ${shadows.sm};
+  background: ${colors.light.grayscale[0]};
+  border: 1px solid ${colors.light.grayscale[20]};
+  border-radius: 0.75rem;
+  padding: 2rem;
+  box-shadow: "0 1px 2px 0 rgb(0 0 0 / 0.05)";
 `;
 
 export const ResultLayout = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: ${spacing[8]};
+  gap: 2rem;
 
   @media (max-width: 1024px) {
     grid-template-columns: 1fr;
@@ -225,16 +218,16 @@ export const LeftSection = styled.div``;
 
 export const ResultTitle = styled.h2`
   ${typography.styles.title2};
-  color: ${colors.text.primary};
-  margin-bottom: ${spacing[6]};
+  color: ${colors.light.grayscale[90]};
+  margin-bottom: 1.5rem;
 `;
 
 // export const VideoPreview = styled.div`
 //   display: flex;
-//   gap: ${spacing[6]};
-//   margin-bottom: ${spacing[6]};
-//   padding-bottom: ${spacing[6]};
-//   border-bottom: 1px solid ${colors.border.primary};
+//   gap: 1.5rem;
+//   margin-bottom: 1.5rem;
+//   padding-bottom: 1.5rem;
+//   border-bottom: 1px solid ${colors.light.grayscale[20]};
 // `;
 
 // 16:9 비율을 가진 플레이어 컨테이너
@@ -243,7 +236,7 @@ export const PlayerWrapper = styled.div`
   padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
   height: 0;
   overflow: hidden;
-  border-radius: ${borderRadius.lg};
+  border-radius: 0.5rem;
   background: #000;
   width: 100%;
   flex-shrink: 0;
@@ -258,13 +251,13 @@ export const PlayerWrapper = styled.div`
 `;
 
 export const VideoInfo = styled.div`
-  margin-top: ${spacing[4]}; /* 플레이어와 간격 */
+  margin-top: 1rem; /* 플레이어와 간격 */
 `;
 
 export const VideoTitle = styled.h3`
   ${typography.styles.title4};
-  color: ${colors.text.primary};
-  margin: 0 0 ${spacing[2]} 0;
+  color: ${colors.light.grayscale[90]};
+  margin: 0 0 0.5rem 0;
   line-height: ${typography.styles.title4.lineHeight};
 `;
 
@@ -273,7 +266,7 @@ export const RightSection = styled.div``;
 
 export const ScoreDisplay = styled.div`
   text-align: center;
-  margin-bottom: ${spacing[8]};
+  margin-bottom: 2rem;
 `;
 
 export const ScoreValue = styled.div<{ score: number }>`
@@ -281,53 +274,53 @@ export const ScoreValue = styled.div<{ score: number }>`
   font-weight: ${typography.fontWeight.bold};
   font-family: ${typography.fontFamily.primary};
   color: ${(props) => {
-    if (props.score >= 70) return colors.status.success;
-    if (props.score >= 50) return colors.status.warning;
-    return colors.status.error;
+    if (props.score >= 70) return colors.light.state.success;
+    if (props.score >= 50) return colors.light.etc.orange;
+    return colors.light.state.error;
   }};
   line-height: 1;
-  margin-bottom: ${spacing[2]};
+  margin-bottom: 0.5rem;
 `;
 
 export const ScoreLabel = styled.div`
   ${typography.styles.body3};
-  color: ${colors.text.secondary};
+  color: ${colors.light.grayscale[70]};
 `;
 
 export const ScoreSummary = styled.p`
   ${typography.styles.body2};
-  color: ${colors.text.secondary};
+  color: ${colors.light.grayscale[70]};
   line-height: 1.6;
-  margin: ${spacing[4]} 0 ${spacing[8]} 0;
+  margin: 1rem 0 2rem 0;
   text-align: center;
 `;
 
 // 막대 그래프
 export const ChartContainer = styled.div`
-  margin-top: ${spacing[8]};
+  margin-top: 2rem;
 `;
 
 export const ChartBar = styled.div`
-  margin-bottom: ${spacing[4]};
+  margin-bottom: 1rem;
 `;
 
 export const ChartLabel = styled.div`
   display: flex;
   justify-content: space-between;
-  margin-bottom: ${spacing[2]};
+  margin-bottom: 0.5rem;
   ${typography.styles.body3};
 `;
 
 export const ChartLabelText = styled.span`
-  color: ${colors.text.secondary};
+  color: ${colors.light.grayscale[70]};
   font-weight: ${typography.fontWeight.semibold};
 `;
 
 export const ChartLabelValue = styled.span<{ score: number }>`
   color: ${(props) => {
-    if (props.score >= 70) return colors.status.success;
-    if (props.score >= 50) return colors.status.warning;
-    return colors.status.error;
+    if (props.score >= 70) return colors.light.state.success;
+    if (props.score >= 50) return colors.light.etc.orange;
+    return colors.light.state.error;
   }};
   font-weight: ${typography.fontWeight.bold};
 `;
@@ -335,8 +328,8 @@ export const ChartLabelValue = styled.span<{ score: number }>`
 export const ChartBarBackground = styled.div`
   width: 100%;
   height: 24px;
-  background: ${colors.background.tertiary};
-  border-radius: ${borderRadius.base};
+  background: ${colors.light.grayscale[10]};
+  border-radius: 0.25rem;
   overflow: hidden;
 `;
 
@@ -344,15 +337,15 @@ export const ChartBarFill = styled.div<{ width: number; color: string }>`
   width: ${(props) => props.width}%;
   height: 100%;
   background: ${(props) => props.color};
-  border-radius: ${borderRadius.base};
+  border-radius: 0.25rem;
   transition: width 0.5s ease;
 `;
 
 // 접기/펼치기 섹션
 export const CollapsibleSection = styled.div`
-  margin-top: ${spacing[8]};
-  border-top: 1px solid ${colors.border.primary};
-  padding-top: ${spacing[6]};
+  margin-top: 2rem;
+  border-top: 1px solid ${colors.light.grayscale[20]};
+  padding-top: 1.5rem;
 `;
 
 export const CollapsibleHeader = styled.button`
@@ -369,41 +362,41 @@ export const CollapsibleHeader = styled.button`
 
 export const CollapsibleTitle = styled.h3`
   ${typography.styles.title4};
-  color: ${colors.text.primary};
+  color: ${colors.light.grayscale[90]};
   margin: 0;
 `;
 
 export const CollapsibleIcon = styled.span<{ isOpen: boolean }>`
   transform: ${(props) => (props.isOpen ? "rotate(180deg)" : "rotate(0deg)")};
-  transition: ${animations.transition.normal};
+  transition: "250ms ease-in-out";
 `;
 
 export const CollapsibleContent = styled.div<{ isOpen: boolean }>`
   max-height: ${(props) => (props.isOpen ? "500px" : "0")};
   overflow: hidden;
   transition: max-height 0.3s ease;
-  margin-top: ${(props) => (props.isOpen ? spacing[4] : "0")};
+  margin-top: ${(props) => (props.isOpen ? "1rem" : 0)};
 `;
 
 export const SourceInfo = styled.div`
-  background: ${colors.background.secondary};
-  border: 1px solid ${colors.border.primary};
-  border-radius: ${borderRadius.lg};
-  padding: ${spacing[5]};
+  background: ${colors.light.grayscale[5]};
+  border: 1px solid ${colors.light.grayscale[20]};
+  border-radius: 0.5rem;
+  padding: 1.25rem;
 `;
 
 export const SourceInfoWrapper = styled.div`
   display: flex;
   align-items: center;
-  gap: ${spacing[4]};
+  gap: 1rem;
 `;
 
 export const ChannelImage = styled.img`
   width: 50px;
   height: 50px;
-  border-radius: ${borderRadius.full};
+  border-radius: 9999px;
   object-fit: cover;
-  border: 1px solid ${colors.border.primary};
+  border: 1px solid ${colors.light.grayscale[20]};
   flex-shrink: 0;
 `;
 
@@ -412,7 +405,7 @@ export const SourceTextInfo = styled.div`
 `;
 
 export const SourceLink = styled.div`
-  color: ${colors.primary};
+  color: ${colors.light.brand.primary100};
   ${typography.styles.body3};
   font-weight: ${typography.fontWeight.semibold};
 `;
@@ -421,8 +414,8 @@ export const SourceDetail = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: ${spacing[2]};
-  margin-top: ${spacing[2]};
+  margin-bottom: 0.5rem;
+  margin-top: 0.5rem;
 
   &:last-child {
     margin-bottom: 0;
@@ -431,47 +424,47 @@ export const SourceDetail = styled.div`
 
 export const SourceDetailLabel = styled.span`
   ${typography.styles.body3};
-  color: ${colors.text.secondary};
+  color: ${colors.light.grayscale[70]};
 `;
 
 export const SourceDetailValue = styled.span`
   ${typography.styles.title3};
-  color: ${colors.text.primary};
+  color: ${colors.light.grayscale[90]};
 `;
 
 export const SourceDescription = styled.p`
   ${typography.styles.body3};
-  color: ${colors.text.secondary};
-  margin: ${spacing[3]} 0 0 0;
+  color: ${colors.light.grayscale[70]};
+  margin: 0.75rem 0 0 0;
   line-height: 1.5;
 `;
 
 // 분석 섹션들
 export const FullWidthSection = styled.div`
-  margin-top: ${spacing[8]};
-  padding-top: ${spacing[8]};
-  border-top: 1px solid ${colors.border.primary};
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid ${colors.light.grayscale[20]};
 `;
 
 export const SectionTitle = styled.h3`
   ${typography.styles.title3};
-  color: ${colors.text.primary};
-  margin-bottom: ${spacing[4]};
+  color: ${colors.light.grayscale[90]};
+  margin-bottom: 1rem;
   display: flex;
   align-items: center;
-  gap: ${spacing[2]};
+  gap: 0.5rem;
 `;
 
 export const AnalysisContent = styled.div`
-  background: ${colors.background.secondary};
-  border: 1px solid ${colors.border.primary};
-  border-radius: ${borderRadius.lg};
-  padding: ${spacing[5]};
+  background: ${colors.light.grayscale[5]};
+  border: 1px solid ${colors.light.grayscale[20]};
+  border-radius: 0.5rem;
+  padding: 1.25rem;
 `;
 
 export const AnalysisItem = styled.div`
-  padding: ${spacing[4]} 0;
-  border-bottom: 1px solid ${colors.border.primary};
+  padding: 1rem 0;
+  border-bottom: 1px solid ${colors.light.grayscale[20]};
 
   &:last-child {
     border-bottom: none;
@@ -487,25 +480,25 @@ export const ItemHeader = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: start;
-  margin-bottom: ${spacing[2]};
+  margin-bottom: 0.5rem;
 `;
 
 export const ItemTitle = styled.div`
   font-weight: ${typography.fontWeight.semibold};
-  color: ${colors.text.primary};
+  color: ${colors.light.grayscale[90]};
   ${typography.styles.body2};
 `;
 
 export const ItemTimestamp = styled.span`
   ${typography.styles.body4};
-  color: ${colors.primary};
-  background: ${colors.primary}15;
-  padding: ${spacing[1]} ${spacing[2]};
-  border-radius: ${borderRadius.base};
+  color: ${colors.light.brand.primary100};
+  background: ${colors.light.etc.blueLight};
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
   font-weight: ${typography.fontWeight.semibold};
   cursor: pointer;
   user-select: none;
-  transition: ${animations.transition.normal};
+  transition: "250ms ease-in-out";
 
   &:hover {
     opacity: 0.8;
@@ -514,53 +507,53 @@ export const ItemTimestamp = styled.span`
 
 export const ItemDescription = styled.p`
   ${typography.styles.body3};
-  color: ${colors.text.secondary};
+  color: ${colors.light.grayscale[70]};
   line-height: 1.5;
-  margin: ${spacing[2]} 0 0 0;
+  margin: 0.5rem 0 0 0;
 `;
 
 export const Badge = styled.span<{
   severity?: "low" | "medium" | "high" | "critical";
 }>`
   display: inline-block;
-  padding: ${spacing[1]} ${spacing[2]};
-  border-radius: ${borderRadius.base};
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
   ${typography.styles.body4};
   font-weight: ${typography.fontWeight.bold};
   text-transform: uppercase;
   background: ${(props) => {
     switch (props.severity) {
       case "critical":
-        return colors.status.error;
+        return colors.light.state.error;
       case "high":
-        return `${colors.status.error}20`;
+        return colors.light.etc.redLight;
       case "medium":
-        return `${colors.status.warning}20`;
+        return colors.light.etc.orangeLight;
       case "low":
-        return `${colors.status.info}20`;
+        return colors.light.etc.blueLight;
       default:
-        return colors.background.tertiary;
+        return colors.light.grayscale[10];
     }
   }};
   color: ${(props) => {
     switch (props.severity) {
       case "critical":
-        return colors.text.inverse;
+        return colors.light.grayscale[0];
       case "high":
-        return colors.status.error;
+        return colors.light.state.error;
       case "medium":
-        return colors.status.warning;
+        return colors.light.etc.orange;
       case "low":
-        return colors.status.info;
+        return colors.light.brand.primary100;
       default:
-        return colors.text.secondary;
+        return colors.light.grayscale[70];
     }
   }};
 `;
 
 export const EmptyState = styled.div`
   text-align: center;
-  padding: ${spacing[8]};
-  color: ${colors.text.disabled};
+  padding: 2rem;
+  color: ${colors.light.grayscale[40]};
   ${typography.styles.body3};
 `;
