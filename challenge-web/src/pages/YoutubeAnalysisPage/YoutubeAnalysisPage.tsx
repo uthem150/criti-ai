@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { challengeApiService } from "../../services/challengeApiService";
 import type { YoutubeTrustAnalysis } from "@criti-ai/shared";
 import * as S from "./YoutubeAnalysisPage.style";
 import { useNavigate } from "react-router-dom";
+import YouTube, { YouTubePlayer } from "react-youtube";
 
 const YoutubeAnalysisPage = () => {
   const navigate = useNavigate();
@@ -10,7 +11,10 @@ const YoutubeAnalysisPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [analysis, setAnalysis] = useState<YoutubeTrustAnalysis | null>(null);
-  const [sourceOpen, setSourceOpen] = useState(true); // 출처 신뢰도 섹션 펼침/접힘
+  const [sourceOpen, setSourceOpen] = useState(true);
+
+  // YouTube 플레이어 객체 저장할 ref
+  const playerRef = useRef<YouTubePlayer | null>(null);
 
   // 시간을 분:초 형식으로 변환
   const formatTime = (seconds: number): string => {
@@ -83,6 +87,15 @@ const YoutubeAnalysisPage = () => {
     setUrl("");
     setAnalysis(null);
     setError(null);
+    playerRef.current = null; // 플레이어 참조 초기화
+  };
+
+  // 타임스탬프 클릭 핸들러
+  const handleTimestampClick = (seconds: number) => {
+    if (playerRef.current) {
+      playerRef.current.seekTo(seconds); // 해당 시간(초)으로 이동
+      playerRef.current.playVideo(); // 즉시 재생
+    }
   };
 
   return (
@@ -158,24 +171,40 @@ const YoutubeAnalysisPage = () => {
                   </S.SubmitButton>
                 </S.InputGroup>
 
-                {/* 비디오 프리뷰 */}
+                {/* === 비디오 프리뷰 섹션 === */}
                 {analysis.videoInfo && (
-                  <S.VideoPreview>
-                    <S.Thumbnail
-                      src={analysis.videoInfo.thumbnailUrl}
-                      alt={analysis.videoInfo.title}
-                    />
+                  <>
+                    <S.PlayerWrapper>
+                      <YouTube
+                        key={analysis.videoInfo.videoId}
+                        videoId={analysis.videoInfo.videoId}
+                        opts={{
+                          width: "100%",
+                          height: "100%",
+                          playerVars: {
+                            origin: window.location.origin,
+                            autoplay: 0,
+                          },
+                        }}
+                        // onReady 이벤트로 플레이어 ref 설정
+                        onReady={(event) => {
+                          playerRef.current = event.target;
+                        }}
+                        style={{
+                          position: "absolute",
+                          top: 0,
+                          left: 0,
+                          width: "100%",
+                          height: "100%",
+                        }}
+                      />
+                    </S.PlayerWrapper>
+
+                    {/* 비디오 정보 (S.VideoLink 제거) */}
                     <S.VideoInfo>
                       <S.VideoTitle>{analysis.videoInfo.title}</S.VideoTitle>
-                      <S.VideoLink
-                        href={`https://www.youtube.com/watch?v=${analysis.videoInfo.videoId}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        {`https://www.youtube.com/watch?v=${analysis.videoInfo.videoId}`}
-                      </S.VideoLink>
                     </S.VideoInfo>
-                  </S.VideoPreview>
+                  </>
                 )}
 
                 {/* 출처 신뢰도 섹션 */}
@@ -223,7 +252,6 @@ const YoutubeAnalysisPage = () => {
                           </S.SourceDetail>
                         </S.SourceTextInfo>
                       </S.SourceInfoWrapper>
-                      {/* === 수정 끝 === */}
 
                       <S.SourceDescription>
                         <strong>전문 분야:</strong>{" "}
@@ -350,7 +378,7 @@ const YoutubeAnalysisPage = () => {
 
             {/* 전체 너비 섹션들 */}
 
-            {/* 경고 사항 */}
+            {/* 경고 사항 (타임스탬프 없음) */}
             {analysis.warnings && analysis.warnings.length > 0 && (
               <S.FullWidthSection>
                 <S.SectionTitle>⚠️ 주의 사항</S.SectionTitle>
@@ -393,7 +421,12 @@ const YoutubeAnalysisPage = () => {
                             }}
                           >
                             {element.timestamp > 0 && (
-                              <S.ItemTimestamp>
+                              <S.ItemTimestamp
+                                // === 클릭 이벤트 ===
+                                onClick={() =>
+                                  handleTimestampClick(element.timestamp)
+                                }
+                              >
                                 {formatTime(element.timestamp)}
                               </S.ItemTimestamp>
                             )}
@@ -431,7 +464,12 @@ const YoutubeAnalysisPage = () => {
                               alignItems: "center",
                             }}
                           >
-                            <S.ItemTimestamp>
+                            <S.ItemTimestamp
+                              // === 클릭 이벤트 ===
+                              onClick={() =>
+                                handleTimestampClick(word.timestamp)
+                              }
+                            >
                               {formatTime(word.timestamp)}
                             </S.ItemTimestamp>
                             <S.Badge
@@ -484,7 +522,12 @@ const YoutubeAnalysisPage = () => {
                             alignItems: "center",
                           }}
                         >
-                          <S.ItemTimestamp>
+                          <S.ItemTimestamp
+                            // === 클릭 이벤트 ===
+                            onClick={() =>
+                              handleTimestampClick(fallacy.timestamp)
+                            }
+                          >
                             {formatTime(fallacy.timestamp)}
                           </S.ItemTimestamp>
                           <S.Badge severity={fallacy.severity}>
@@ -519,7 +562,12 @@ const YoutubeAnalysisPage = () => {
                       <S.AnalysisItem key={idx}>
                         <S.ItemHeader>
                           <S.ItemTitle>{indicator.type}</S.ItemTitle>
-                          <S.ItemTimestamp>
+                          <S.ItemTimestamp
+                            // === 클릭 이벤트 ===
+                            onClick={() =>
+                              handleTimestampClick(indicator.timestamp)
+                            }
+                          >
                             {formatTime(indicator.timestamp)}
                           </S.ItemTimestamp>
                         </S.ItemHeader>
@@ -552,7 +600,12 @@ const YoutubeAnalysisPage = () => {
                             alignItems: "center",
                           }}
                         >
-                          <S.ItemTimestamp>
+                          <S.ItemTimestamp
+                            // === 클릭 이벤트 ===
+                            onClick={() =>
+                              handleTimestampClick(claim.timestamp)
+                            }
+                          >
                             {formatTime(claim.timestamp)}
                           </S.ItemTimestamp>
                           {claim.needsFactCheck && (

@@ -229,24 +229,36 @@ export const ResultTitle = styled.h2`
   margin-bottom: ${spacing[6]};
 `;
 
-export const VideoPreview = styled.div`
-  display: flex;
-  gap: ${spacing[6]};
-  margin-bottom: ${spacing[6]};
-  padding-bottom: ${spacing[6]};
-  border-bottom: 1px solid ${colors.border.primary};
-`;
+// export const VideoPreview = styled.div`
+//   display: flex;
+//   gap: ${spacing[6]};
+//   margin-bottom: ${spacing[6]};
+//   padding-bottom: ${spacing[6]};
+//   border-bottom: 1px solid ${colors.border.primary};
+// `;
 
-export const Thumbnail = styled.img`
-  width: 160px;
-  height: 90px;
+// 16:9 비율을 가진 플레이어 컨테이너
+export const PlayerWrapper = styled.div`
+  position: relative;
+  padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+  height: 0;
+  overflow: hidden;
   border-radius: ${borderRadius.lg};
-  object-fit: cover;
+  background: #000;
+  width: 100%;
   flex-shrink: 0;
+
+  iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
 `;
 
 export const VideoInfo = styled.div`
-  flex: 1;
+  margin-top: ${spacing[4]}; /* 플레이어와 간격 */
 `;
 
 export const VideoTitle = styled.h3`
@@ -254,18 +266,6 @@ export const VideoTitle = styled.h3`
   color: ${colors.text.primary};
   margin: 0 0 ${spacing[2]} 0;
   line-height: ${typography.styles.title4.lineHeight};
-`;
-
-export const VideoLink = styled.a`
-  display: inline-block;
-  color: ${colors.primary};
-  ${typography.styles.body3};
-  text-decoration: none;
-  margin-top: ${spacing[2]};
-
-  &:hover {
-    text-decoration: underline;
-  }
 `;
 
 // 오른쪽 섹션
@@ -415,7 +415,6 @@ export const SourceLink = styled.div`
   color: ${colors.primary};
   ${typography.styles.body3};
   font-weight: ${typography.fontWeight.semibold};
-  /* margin-bottom: ${spacing[3]}; <-- 레이아웃을 위해 제거 */
 `;
 
 export const SourceDetail = styled.div`
@@ -504,6 +503,13 @@ export const ItemTimestamp = styled.span`
   padding: ${spacing[1]} ${spacing[2]};
   border-radius: ${borderRadius.base};
   font-weight: ${typography.fontWeight.semibold};
+  cursor: pointer;
+  user-select: none;
+  transition: ${animations.transition.normal};
+
+  &:hover {
+    opacity: 0.8;
+  }
 `;
 
 export const ItemDescription = styled.p`
