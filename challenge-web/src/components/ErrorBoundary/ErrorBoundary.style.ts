@@ -1,10 +1,5 @@
 import styled from "@emotion/styled";
-import {
-  colors,
-  typography,
-  spacing,
-  borderRadius,
-} from "../../styles/design-system";
+import { colors, typography } from "@/styles/design-system";
 
 export const ErrorContainer = styled.div`
   display: flex;
@@ -12,9 +7,9 @@ export const ErrorContainer = styled.div`
   justify-content: center;
   min-height: 100vh;
   flex-direction: column;
-  gap: ${spacing[6]};
-  padding: ${spacing[8]};
-  background: ${colors.background.primary};
+  gap: 24px;
+  padding: 32px;
+  background: ${colors.light.grayscale[0]};
   text-align: center;
 `;
 
@@ -24,21 +19,21 @@ export const ErrorIcon = styled.div`
 
 export const ErrorTitle = styled.h1`
   ${typography.styles.headline2};
-  color: ${colors.text.primary};
+  color: ${colors.light.grayscale[90]};
   margin: 0;
 `;
 
 export const ErrorDescription = styled.p`
   ${typography.styles.body2};
-  color: ${colors.text.secondary};
+  color: ${colors.light.grayscale[70]};
   max-width: 500px;
   line-height: 1.6;
 `;
 
 export const ErrorDetails = styled.div`
-  background: ${colors.background.tertiary};
-  padding: ${spacing[4]};
-  border-radius: ${borderRadius.md};
+  background: ${colors.light.grayscale[10]};
+  padding: 16px;
+  border-radius: 6px;
   max-width: 600px;
   width: 100%;
   overflow: auto;
@@ -48,7 +43,7 @@ export const ErrorDetails = styled.div`
 export const ErrorCode = styled.code`
   ${typography.styles.body3};
   font-family: ${typography.fontFamily.code};
-  color: ${colors.status.error};
+  color: ${colors.light.state.error};
   display: block;
   text-align: left;
   white-space: pre-wrap;
@@ -56,17 +51,17 @@ export const ErrorCode = styled.code`
 `;
 
 export const ResetButton = styled.button`
-  padding: ${spacing[3]} ${spacing[6]};
-  background: ${colors.primary};
-  color: ${colors.text.inverse};
+  padding: 12px 24px;
+  background: ${colors.light.brand.primary100};
+  color: ${colors.light.grayscale[0]};
   border: none;
-  border-radius: ${borderRadius.md};
+  border-radius: 6px;
   ${typography.styles.title5};
   cursor: pointer;
   transition: all 0.2s ease;
   display: flex;
   align-items: center;
-  gap: ${spacing[2]};
+  gap: 8px;
 
   &:hover {
     opacity: 0.9;

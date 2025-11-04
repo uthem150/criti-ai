@@ -1,10 +1,5 @@
 import styled from "@emotion/styled";
-import {
-  colors,
-  typography,
-  spacing,
-  borderRadius,
-} from "../../styles/design-system";
+import { colors, typography } from "@/styles/design-system";
 
 export const LoadingContainer = styled.div`
   display: flex;
@@ -12,21 +7,21 @@ export const LoadingContainer = styled.div`
   justify-content: center;
   min-height: 100vh;
   flex-direction: column;
-  gap: ${spacing[4]};
-  background: ${colors.background.secondary};
+  gap: 16px;
+  background: ${colors.light.grayscale[5]};
 `;
 
 export const Spinner = styled.div`
   width: 48px;
   height: 48px;
-  border: 3px solid ${colors.border.primary};
-  border-top-color: ${colors.primary};
-  border-radius: ${borderRadius.full};
+  border: 3px solid ${colors.light.grayscale[20]};
+  border-top-color: ${colors.light.brand.primary100};
+  border-radius: 9999px;
   animation: spin 0.8s linear infinite;
 `;
 
 export const LoadingText = styled.p`
   ${typography.styles.body2};
-  color: ${colors.text.secondary};
+  color: ${colors.light.grayscale[70]};
   margin: 0;
 `;

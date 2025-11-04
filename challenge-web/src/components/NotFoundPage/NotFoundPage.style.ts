@@ -1,10 +1,5 @@
 import styled from "@emotion/styled";
-import {
-  colors,
-  typography,
-  spacing,
-  borderRadius,
-} from "../../styles/design-system";
+import { colors, typography } from "@/styles/design-system";
 
 export const NotFoundContainer = styled.div`
   display: flex;
@@ -12,9 +7,9 @@ export const NotFoundContainer = styled.div`
   justify-content: center;
   min-height: 100vh;
   flex-direction: column;
-  gap: ${spacing[6]};
-  background: ${colors.background.primary};
-  padding: ${spacing[8]};
+  gap: 24px;
+  background: ${colors.light.grayscale[0]};
+  padding: 32px;
   text-align: center;
 `;
 
@@ -24,26 +19,26 @@ export const NotFoundIcon = styled.div`
 
 export const NotFoundCode = styled.h1`
   ${typography.styles.headline1};
-  color: ${colors.text.primary};
+  color: ${colors.light.grayscale[90]};
   margin: 0;
 `;
 
 export const NotFoundMessage = styled.p`
   ${typography.styles.body1};
-  color: ${colors.text.secondary};
+  color: ${colors.light.grayscale[70]};
   max-width: 500px;
 `;
 
 export const HomeLink = styled.a`
-  padding: ${spacing[3]} ${spacing[6]};
-  background: ${colors.primary};
-  color: ${colors.text.inverse};
+  padding: 12px 24px;
+  background: ${colors.light.brand.primary100};
+  color: ${colors.light.grayscale[0]};
   border: none;
-  border-radius: ${borderRadius.md};
+  border-radius: 6px;
   ${typography.styles.title5};
   display: inline-flex;
   align-items: center;
-  gap: ${spacing[2]};
+  gap: 8px;
   text-decoration: none;
   transition: all 0.2s ease;
 
