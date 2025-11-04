@@ -16,7 +16,7 @@
     "build:backend": "cd backend && npm run build",
     "start": "cd backend && npm start",
     "lint": "cd chrome-extension && npm run lint && cd ../challenge-web && npm run lint && cd ../backend && npm run lint",
-    "clean": "rimraf **/dist **/node_modules/.cache",
+    "clean": "rimraf --glob **/dist **/node_modules/.cache",
     "docker:dev": "docker-compose -f config/docker/docker-compose.yml up -d",
     "docker:logs": "docker-compose -f config/docker/docker-compose.yml logs -f",
     "docker:stop": "docker-compose -f config/docker/docker-compose.yml down",

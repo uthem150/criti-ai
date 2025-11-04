@@ -1,3 +1,2 @@
-export * from './challenge';
-export * from './routes';
-export * from './fallbackChallenges';
+export * from "./challenge";
+export * from "./fallbackChallenges";
