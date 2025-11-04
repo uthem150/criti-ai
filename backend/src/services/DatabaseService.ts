@@ -5,6 +5,7 @@ import type {
   UserProgress,
   Badge,
   ChallengeResponse,
+  ChallengeOption, // ChallengeOption 타입을 임포트해야 할 수 있습니다. (types.ts에 있다면)
 } from "@criti-ai/shared";
 
 class DatabaseService {
@@ -210,11 +211,14 @@ class DatabaseService {
         id: c.id,
         type: c.type as Challenge["type"],
         title: c.title,
-        content: c.content,
+        // content: c.content, // 삭제
+        options: JSON.parse(c.options || "[]") as ChallengeOption[], // 추가
+        category: c.category || undefined, // 추가
         correctAnswers: JSON.parse(c.correctAnswers),
         explanation: c.explanation,
         difficulty: c.difficulty as Challenge["difficulty"],
         points: c.points,
+        hints: c.hints ? JSON.parse(c.hints) : undefined, // hints 파싱 추가
       }));
     } catch (error) {
       console.error("챌린지 조회 실패:", error);
@@ -236,11 +240,14 @@ class DatabaseService {
         id: challenge.id,
         type: challenge.type as Challenge["type"],
         title: challenge.title,
-        content: challenge.content,
+        // content: challenge.content, // 삭제
+        options: JSON.parse(challenge.options || "[]") as ChallengeOption[], // 추가
+        category: challenge.category || undefined, // 추가
         correctAnswers: JSON.parse(challenge.correctAnswers),
         explanation: challenge.explanation,
         difficulty: challenge.difficulty as Challenge["difficulty"],
         points: challenge.points,
+        hints: challenge.hints ? JSON.parse(challenge.hints) : undefined, // hints 파싱 추가
       };
     } catch (error) {
       console.error("챌린지 조회 실패:", error);
@@ -300,22 +307,26 @@ class DatabaseService {
       const challenges = await this.prisma.challenge.findMany({
         where: {
           isActive: true,
-          ...(dateKey && { dailyKey: dateKey as any }), // 임시 타입 단언
+          ...(dateKey && { dailyKey: dateKey }),
         },
         orderBy: {
           difficulty: "asc",
         },
       });
 
+      // [수정됨] 새 Challenge 타입에 맞게 반환
       return challenges.map((c) => ({
         id: c.id,
-        type: c.type as any,
+        type: c.type as Challenge["type"],
         title: c.title,
-        content: c.content,
+        // content: c.content, // 삭제
+        options: JSON.parse(c.options || "[]") as ChallengeOption[], // 추가
+        category: c.category || undefined, // 추가
         correctAnswers: JSON.parse(c.correctAnswers),
         explanation: c.explanation,
-        difficulty: c.difficulty as any,
+        difficulty: c.difficulty as Challenge["difficulty"],
         points: c.points,
+        hints: c.hints ? JSON.parse(c.hints) : undefined, // hints 파싱 추가
       }));
     } catch (error) {
       console.error("일일 챌린지 조회 실패:", error);
@@ -323,15 +334,18 @@ class DatabaseService {
     }
   }
 
+  // [수정됨] createChallenge 함수 시그니처 및 구현 변경
   async createChallenge(data: {
     type: string;
     title: string;
-    content: string;
+    // content: string; // 삭제
+    options: string; // 추가 (JSON 문자열)
+    category: string; // 추가
     difficulty: string;
     points: number;
-    correctAnswers: string;
+    correctAnswers: string; // JSON 문자열 (예: ["1"])
     explanation: string;
-    hints?: string | null;
+    hints?: string | null; // JSON 문자열 (예: ["힌트1"])
     isGenerated: boolean;
     isActive: boolean;
     dailyKey?: string;
@@ -341,7 +355,9 @@ class DatabaseService {
         data: {
           type: data.type,
           title: data.title,
-          content: data.content,
+          // content: data.content, // 삭제
+          options: data.options, // 추가
+          category: data.category, // 추가
           difficulty: data.difficulty,
           points: data.points,
           correctAnswers: data.correctAnswers,
@@ -349,19 +365,23 @@ class DatabaseService {
           hints: data.hints,
           isGenerated: data.isGenerated,
           isActive: data.isActive,
-          ...(data.dailyKey && { dailyKey: data.dailyKey as any }), // 임시 타입 단언
+          ...(data.dailyKey && { dailyKey: data.dailyKey }),
         },
       });
 
+      // [수정됨] 새 Challenge 타입에 맞게 반환
       return {
         id: challenge.id,
         type: challenge.type as Challenge["type"],
         title: challenge.title,
-        content: challenge.content,
+        // content: challenge.content, // 삭제
+        options: JSON.parse(challenge.options || "[]") as ChallengeOption[], // 추가
+        category: challenge.category || undefined, // 추가
         correctAnswers: JSON.parse(challenge.correctAnswers),
         explanation: challenge.explanation,
         difficulty: challenge.difficulty as Challenge["difficulty"],
         points: challenge.points,
+        hints: challenge.hints ? JSON.parse(challenge.hints) : undefined, // hints 파싱 추가
       };
     } catch (error) {
       console.error("챌린지 생성 실패:", error);
