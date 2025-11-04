@@ -212,14 +212,9 @@ export const ChallengeContent = styled.div`
 
 export const OptionsContainer = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-
-  @media (max-width: 768px) {
-    grid-template-columns: 1fr;
-    gap: 0.75rem;
-  }
+  grid-template-columns: 1fr; // 1열로 고정 (사용자 이미지 참고)
+  gap: 0.75rem; // 간격 좁힘
+  margin-bottom: 2rem; // 하단 여백 늘림
 `;
 
 interface OptionButtonProps {
@@ -243,9 +238,10 @@ export const OptionButton = styled.button<OptionButtonProps>`
   cursor: pointer;
   transition: all "250ms ease-in-out";
   text-align: left;
-  min-height: 80px;
+  min-height: 60px;
   display: flex;
   align-items: center;
+  gap: 0.75rem;
   ${typography.styles.body2};
 
   &:hover {
@@ -262,8 +258,40 @@ export const OptionButton = styled.button<OptionButtonProps>`
     transform: translateY(0);
   }
 
-  div {
-    width: 100%;
+  /* 옵션 번호 스타일 */
+  .option-number {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    font-weight: ${typography.fontWeight.semibold};
+    width: 28px; // 크기 조절
+    height: 28px; // 크기 조절
+    border-radius: 0.375rem;
+    background: ${(props) =>
+      props.selected
+        ? colors.light.brand.primary100
+        : colors.light.grayscale[20]};
+    color: ${(props) =>
+      props.selected ? colors.light.grayscale[0] : colors.light.grayscale[70]};
+    flex-shrink: 0;
+    transition: all 250ms ease-in-out;
+  }
+
+  /* 옵션 텍스트 스타일 */
+  .option-text {
+    flex-grow: 1;
+    line-height: 1.5;
+    color: ${colors.light.grayscale[90]};
+  }
+
+  /* 선택 시 텍스트 색상 (재정의) */
+  &:hover .option-text,
+  &.selected .option-text {
+    color: ${(props) =>
+      props.selected
+        ? colors.light.brand.primary100
+        : colors.light.grayscale[90]};
   }
 `;
 
@@ -332,12 +360,14 @@ export const ExplanationText = styled.div`
   line-height: 1.7;
   color: ${colors.light.grayscale[90]};
   margin-bottom: 1rem;
+  white-space: pre-wrap; // \n 줄바꿈이 적용되도록 pre-wrap 사용
 
   &:last-child {
     margin-bottom: 0;
   }
 
-  strong {
+  strong,
+  b {
     color: ${colors.light.brand.primary100};
     font-weight: ${typography.fontWeight.semibold};
   }

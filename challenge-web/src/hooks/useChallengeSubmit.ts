@@ -11,6 +11,8 @@ interface UseChallengeSubmitReturn {
   isCorrect: boolean;
   submitLoading: boolean;
   startTime: number;
+  explanation: string | null; // 서버에서 받은 해설
+  resultAnswers: string[]; // 서버에서 받은 정답 ID
   toggleAnswer: (answer: string) => void;
   submitChallenge: (challengeId: string) => Promise<{
     isCorrect: boolean;
@@ -28,15 +30,17 @@ export const useChallengeSubmit = (): UseChallengeSubmitReturn => {
   const [isCorrect, setIsCorrect] = useState(false);
   const [submitLoading, setSubmitLoading] = useState(false);
   const [startTime, setStartTime] = useState<number>(Date.now());
+  const [explanation, setExplanation] = useState<string | null>(null); // 추가
+  const [resultAnswers, setResultAnswers] = useState<string[]>([]); // 추가
 
   /**
-   * 답안 선택/해제 토글
+   * 답안 선택/해제 토글 (answer는 "1", "2" 같은 ID)
    */
   const toggleAnswer = (answer: string) => {
     setUserAnswers((prev) =>
       prev.includes(answer)
         ? prev.filter((a) => a !== answer)
-        : [...prev, answer]
+        : [answer] // 4지 선다형이므로 하나만 선택하도록 수정 (여러 개 선택 시: [...prev, answer])
     );
   };
 
@@ -61,6 +65,8 @@ export const useChallengeSubmit = (): UseChallengeSubmitReturn => {
       if (result) {
         setIsCorrect(result.isCorrect);
         setShowResult(true);
+        setExplanation(result.explanation); // 해설 저장
+        setResultAnswers(result.correctAnswers); // 정답 ID 저장
         console.log("✅ 답안 제출 완료:", result.isCorrect ? "정답" : "오답");
         return result;
       } else {
@@ -81,6 +87,8 @@ export const useChallengeSubmit = (): UseChallengeSubmitReturn => {
     setUserAnswers([]);
     setShowResult(false);
     setIsCorrect(false);
+    setExplanation(null);
+    setResultAnswers([]); 
     setStartTime(Date.now());
   };
 
@@ -90,6 +98,8 @@ export const useChallengeSubmit = (): UseChallengeSubmitReturn => {
     isCorrect,
     submitLoading,
     startTime,
+    explanation,
+    resultAnswers,
     toggleAnswer,
     submitChallenge,
     resetChallenge,
