@@ -198,6 +198,23 @@ export const ChallengeTitle = styled.h2`
   }
 `;
 
+// 용어 설명 스타일
+export const ChallengeCategoryDescription = styled.div`
+  background: ${colors.light.grayscale[5]};
+  padding: 1rem;
+  border-radius: 0.375rem;
+  border-left: 4px solid ${colors.light.etc.blue}; // 파란색으로 구분
+  margin-bottom: 2rem;
+  line-height: 1.6;
+  ${typography.styles.body2};
+  color: ${colors.light.grayscale[80]};
+
+  strong {
+    font-weight: ${typography.fontWeight.semibold};
+    color: ${colors.light.etc.blue};
+  }
+`;
+
 export const ChallengeContent = styled.div`
   background: ${colors.light.grayscale[5]};
   padding: 1.5rem;

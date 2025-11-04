@@ -9,6 +9,7 @@ export const FALLBACK_CHALLENGES: Challenge[] = [
     type: "article-analysis",
     title: "다음 중 '성급한 일반화'가 포함된 문장을 선택하세요.",
     category: "성급한 일반화",
+    categoryDescription: "적은 사례만으로 전체를 판단하는 논리적 오류입니다.", // ⭐️ [추가]
     options: [
       {
         id: "1",
@@ -42,6 +43,8 @@ export const FALLBACK_CHALLENGES: Challenge[] = [
     type: "article-analysis",
     title: "다음 중 '감정적 편향'이 드러나는 문장을 선택하세요.",
     category: "감정적 편향",
+    categoryDescription:
+      "객관적인 사실 전달보다 감정을 자극하는 단어를 사용하여 독자의 반응을 유도하는 표현입니다.", // ⭐️ [추가]
     options: [
       {
         id: "1",
@@ -72,6 +75,8 @@ export const FALLBACK_CHALLENGES: Challenge[] = [
     type: "article-analysis",
     title: "다음 중 '긴급성 유도' 표현이 포함된 문장을 선택하세요.",
     category: "긴급성 유도",
+    categoryDescription:
+      "시간적 압박을 주어 소비자에게 성급한 결정을 내리도록 유도하는 기법입니다.", // ⭐️ [추가]
     options: [
       {
         id: "1",

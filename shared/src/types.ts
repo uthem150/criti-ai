@@ -171,6 +171,7 @@ export interface Challenge {
   title: string; // 챌린지 질문 (예: "다음 중 '감정적 편향'이 있는 문장을 고르세요.")
   options: ChallengeOption[]; // 4개의 문장 선택지
   category?: string; // 챌린지 카테고리 (예: "감정적 편향")
+  categoryDescription?: string; // 챌린지 카테고리 설명
   correctAnswers: string[]; // 정답 선택지의 id 배열 (예: ["2"])
   explanation: string;
   difficulty: "beginner" | "intermediate" | "advanced";

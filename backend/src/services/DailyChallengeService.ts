@@ -99,16 +99,17 @@ export class DailyChallengeService {
         const challenge = await databaseService.createChallenge({
           type: template.type,
           title: aiChallenge.title as string, // 질문
-          options: JSON.stringify(aiChallenge.options), // (DB 저장을 위해 stringify)
+          options: JSON.stringify(aiChallenge.options),
           category: aiChallenge.category as string,
+          categoryDescription: aiChallenge.categoryDescription as string,
           difficulty: template.difficulty,
           points: aiChallenge.points as number,
-          correctAnswers: JSON.stringify(aiChallenge.correctAnswers), // 정답 ID (예: ["2"])
+          correctAnswers: JSON.stringify(aiChallenge.correctAnswers),
           explanation: aiChallenge.explanation as string,
           hints: aiChallenge.hints ? JSON.stringify(aiChallenge.hints) : null,
           isGenerated: true,
           isActive: true,
-          dailyKey: today, // 일일 키 추가
+          dailyKey: today,
         });
 
         generatedChallenges.push(challenge);
@@ -157,6 +158,7 @@ export class DailyChallengeService {
         title: fallbackContent.title, // 질문
         options: JSON.stringify(fallbackContent.options),
         category: fallbackContent.category,
+        categoryDescription: fallbackContent.categoryDescription,
         difficulty: template.difficulty,
         points: fallbackContent.points,
         correctAnswers: JSON.stringify(fallbackContent.correctAnswers),
@@ -180,8 +182,10 @@ export class DailyChallengeService {
       {
         id: "fallback-1",
         type: "article-analysis",
-        title: "다음 중 '성급한 일반화'가 포함된 문장을 선택하세요.", // 질문
+        title: "다음 중 '성급한 일반화'가 포함된 문장을 선택하세요.",
         category: "성급한 일반화",
+        categoryDescription:
+          "적은 사례만으로 전체를 판단하는 논리적 오류입니다.",
         options: [
           {
             id: "1",
@@ -194,7 +198,7 @@ export class DailyChallengeService {
           {
             id: "3",
             text: "따라서 모든 청소년들은 반드시 스마트폰 사용을 중단해야 합니다.",
-          }, // 정답
+          },
           {
             id: "4",
             text: "이것은 과학적으로 증명된 사실이므로 의심의 여지가 없습니다.",
@@ -225,6 +229,7 @@ export class DailyChallengeService {
   ): {
     title: string;
     category: string;
+    categoryDescription: string;
     options: ChallengeOption[];
     correctAnswers: string[];
     explanation: string;
@@ -235,8 +240,8 @@ export class DailyChallengeService {
       string,
       {
         title: string;
-        // content: string;
         category: string;
+        categoryDescription: string;
         options: ChallengeOption[];
         correctAnswers: string[];
         explanation: string;
@@ -247,9 +252,11 @@ export class DailyChallengeService {
       "beginner-논리적 오류": {
         title: "다음 중 '권위에 호소'하는 문장을 선택하세요.",
         category: "권위에 호소",
+        categoryDescription:
+          "근거가 불충분한 상태에서 권위자의 말을 인용해 주장을 내세우는 오류입니다.",
         options: [
           { id: "1", text: "모든 연예인들이 이 제품을 사용한다고 합니다." },
-          { id: "2", text: "그러니 우리도 반드시 이 제품을 사용해야 합니다." }, // 정답
+          { id: "2", text: "그러니 우리도 반드시 이 제품을 사용해야 합니다." },
           { id: "3", text: "이 제품은 정말 놀라운 성능을 가졌습니다." },
           { id: "4", text: "지금 사지 않으면 나중에 후회할 것입니다." },
         ],
@@ -265,9 +272,11 @@ export class DailyChallengeService {
       "beginner-편향 표현": {
         title: "다음 중 '감정적 편향'이 드러나는 문장을 선택하세요.",
         category: "감정적 편향",
+        categoryDescription:
+          "객관적인 사실 전달보다 '충격', '분노' 등 감정을 자극하는 단어를 사용하여 독자의 반응을 유도하는 표현입니다.",
         options: [
-          { id: "1", text: "이 비밀을 모르면 절대로 성공할 수 없습니다." }, // 과장된 표현
-          { id: "2", text: "충격적인 사실이 밝혀졌습니다!" }, // 정답
+          { id: "1", text: "이 비밀을 모르면 절대로 성공할 수 없습니다." },
+          { id: "2", text: "충격적인 사실이 밝혀졌습니다!" },
           { id: "3", text: "많은 전문가들이 이 방법을 추천하고 있습니다." },
           { id: "4", text: "이 제품은 세 가지 주요 기능을 제공합니다." },
         ],

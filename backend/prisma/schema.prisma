@@ -110,6 +110,7 @@ model Challenge {
   title         String
   options        String?  // (JSON 문자열 저장용)
   category       String?  // (예: "감정적 편향")
+  categoryDescription String?  // 용어 설명 저장할 필드
   difficulty    String   // beginner, intermediate, advanced
   points        Int
   

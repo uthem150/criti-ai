@@ -7,6 +7,7 @@ import {
   PageContainer,
   Header,
   HeaderTitle,
+  ChallengeCategoryDescription,
   HeaderSubtitle,
   NavButtonContainer,
   NavButton,
@@ -241,7 +242,12 @@ const ChallengePage: React.FC<ChallengePageProps> = ({
             챌린지 {challengeIndex + 1}/{challenges.length}:{" "}
             {currentChallenge.title}
           </ChallengeTitle>
-
+          {currentChallenge.categoryDescription && (
+            <ChallengeCategoryDescription>
+              <strong>❓ 용어 설명:</strong>
+              {currentChallenge.categoryDescription}
+            </ChallengeCategoryDescription>
+          )}
           {!showResult && (
             <>
               <OptionsContainer>
@@ -249,7 +255,7 @@ const ChallengePage: React.FC<ChallengePageProps> = ({
                   <OptionButton
                     key={option.id}
                     selected={userAnswers.includes(option.id)}
-                    onClick={() => toggleAnswer(option.id)} // 훅의 toggleAnswer 사용
+                    onClick={() => toggleAnswer(option.id)}
                     title={option.text}
                   >
                     {/* 번호 + 텍스트 */}
@@ -258,9 +264,8 @@ const ChallengePage: React.FC<ChallengePageProps> = ({
                   </OptionButton>
                 ))}
               </OptionsContainer>
-
               <ActionButton
-                onClick={handleSubmit} // 래핑된 handleSubmit 함수 사용
+                onClick={handleSubmit}
                 disabled={userAnswers.length === 0 || submitLoading}
               >
                 {submitLoading ? "제출 중..." : "답안 제출"}
