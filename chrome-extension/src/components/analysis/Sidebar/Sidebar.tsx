@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import type { TrustAnalysis } from "@shared/types";
-import { Global } from "@emotion/react";
+// import { Global } from "@emotion/react";
 import * as S from "./Sidebar.style";
 
 interface SidebarProps {
@@ -179,7 +179,7 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
 
   return (
     <S.Container>
-      <Global styles={S.globalStyles} />
+      {/* <Global styles={S.globalStyles} /> */}
       <S.CloseButtonContainer>
         <S.CloseButton onClick={onClose} type="button" title="닫기">
           ✕

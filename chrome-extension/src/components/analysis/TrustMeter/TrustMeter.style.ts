@@ -1,32 +1,30 @@
 import styled from "@emotion/styled";
-import {
-  colors,
-  typography,
-  spacing,
-  borderRadius,
-  shadows,
-} from "@/styles/style";
+import { colors, typography } from "@/styles/design";
 
 export const MeterContainer = styled.div`
   display: flex;
   flex-direction: column;
-  gap: ${spacing[4]};
-  padding: ${spacing[5]} ${spacing[4]};
-  background: ${colors.background.gradient};
-  border-radius: ${borderRadius.xl};
-  border: 1px solid ${colors.border.primary};
-  box-shadow: ${shadows.sm};
+  gap: 16px;
+  padding: 20px 16px;
+  background: linear-gradient(
+    135deg,
+    ${colors.light.grayscale[5]} 0%,
+    ${colors.light.grayscale[10]} 100%
+  );
+  border-radius: 12px;
+  border: 1px solid ${colors.light.grayscale[20]};
+  box-shadow: "0 1px 2px 0 rgb(0 0 0 / 0.05)";
   font-family: ${typography.fontFamily.primary};
 `;
 
 export const ScoreBarContainer = styled.div`
   width: 100%;
   height: 40px;
-  background-color: ${colors.background.tertiary};
-  border-radius: ${borderRadius.full};
+  background-color: ${colors.light.grayscale[10]};
+  border-radius: 9999px;
   overflow: hidden;
   position: relative;
-  box-shadow: inset 0 2px 4px ${colors.shadow.light};
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
 `;
 
 interface ScoreBarProps {
@@ -42,7 +40,7 @@ export const ScoreBar = styled.div<ScoreBarProps>`
     ${(props) => props.color}CC,
     ${(props) => props.color}
   );
-  border-radius: ${borderRadius.full};
+  border-radius: 9999px;
   display: flex;
   align-items: center;
   justify-content: ${(props) => (props.score > 25 ? "center" : "flex-end")};
@@ -60,7 +58,7 @@ export const ScoreBar = styled.div<ScoreBarProps>`
     background: linear-gradient(
       45deg,
       transparent 30%,
-      rgba(255, 255, 255, 0.2) 50%,
+      ${colors.light.transparency.white[20]} 50%,
       transparent 70%
     );
     border-radius: inherit;
@@ -71,11 +69,11 @@ export const ScoreText = styled.span<{ score: number }>`
   font-size: ${typography.styles.title3.fontSize};
   font-weight: ${typography.fontWeight.bold};
   color: ${(props) =>
-    props.score > 25 ? colors.text.inverse : colors.text.primary};
+    props.score > 25 ? colors.light.grayscale[0] : colors.light.grayscale[90]};
   text-shadow: ${(props) =>
     props.score > 25 ? "0 1px 2px rgba(0, 0, 0, 0.3)" : "none"};
   position: ${(props) => (props.score <= 25 ? "absolute" : "static")};
-  right: ${(props) => (props.score <= 25 ? spacing[2] : "auto")};
+  right: ${(props) => (props.score <= 25 ? "8px" : "auto")};
   z-index: 10;
   font-family: ${typography.fontFamily.primary};
 `;
@@ -84,7 +82,7 @@ export const LevelContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: ${spacing[1]};
+  gap: 4px;
   font-family: ${typography.fontFamily.primary};
 `;
 
@@ -96,10 +94,10 @@ export const TrustLabel = styled.div<TrustLabelProps>`
   font-size: ${typography.styles.headline2.fontSize};
   font-weight: ${typography.fontWeight.bold};
   color: ${(props) => {
-    if (props.score >= 80) return colors.trust.high;
-    if (props.score >= 50) return colors.trust.medium;
-    if (props.score >= 30) return colors.trust.low;
-    return colors.trust.veryLow;
+    if (props.score >= 80) return colors.light.etc.mint;
+    if (props.score >= 50) return colors.light.etc.yellow;
+    if (props.score >= 30) return colors.light.etc.orange;
+    return colors.light.state.error;
   }};
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -108,30 +106,30 @@ export const TrustLabel = styled.div<TrustLabelProps>`
 
 export const TrustDescription = styled.p`
   font-size: ${typography.styles.body3.fontSize};
-  color: ${colors.text.tertiary};
+  color: ${colors.light.grayscale[60]};
   margin: 0;
   font-weight: ${typography.fontWeight.regular};
   font-family: ${typography.fontFamily.primary};
 `;
 
 export const DetailedScoresContainer = styled.div`
-  margin-top: ${spacing[2]};
-  padding-top: ${spacing[4]};
-  border-top: 1px solid ${colors.border.primary};
+  margin-top: 8px;
+  padding-top: 16px;
+  border-top: 1px solid ${colors.light.grayscale[20]};
   font-family: ${typography.fontFamily.primary};
 
   h4 {
     font-size: ${typography.styles.title4.fontSize};
     font-weight: ${typography.fontWeight.semibold};
-    color: ${colors.text.primary};
-    margin: 0 0 ${spacing[3]} 0;
+    color: ${colors.light.grayscale[90]};
+    margin: 0 0 12px 0;
     text-align: center;
     font-family: ${typography.fontFamily.primary};
   }
 `;
 
 export const DetailedScoreItem = styled.div`
-  margin-bottom: ${spacing[3]};
+  margin-bottom: 12px;
   font-family: ${typography.fontFamily.primary};
 
   &:last-child {
@@ -143,10 +141,10 @@ export const ScoreLabel = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: ${spacing[1]};
+  margin-bottom: 4px;
   font-size: ${typography.styles.caption2.fontSize};
   font-weight: ${typography.fontWeight.regular};
-  color: ${colors.text.secondary};
+  color: ${colors.light.grayscale[70]};
   font-family: ${typography.fontFamily.primary};
 `;
 
@@ -158,10 +156,10 @@ export const ScoreValue = styled.span<ScoreValueProps>`
   font-weight: ${typography.fontWeight.semibold};
   font-size: ${typography.styles.caption3.fontSize};
   color: ${(props) => {
-    if (props.score >= 80) return colors.trust.high;
-    if (props.score >= 50) return colors.trust.medium;
-    if (props.score >= 30) return colors.trust.low;
-    return colors.trust.veryLow;
+    if (props.score >= 80) return colors.light.etc.mint;
+    if (props.score >= 50) return colors.light.etc.yellow;
+    if (props.score >= 30) return colors.light.etc.orange;
+    return colors.light.state.error;
   }};
   font-family: ${typography.fontFamily.primary};
 `;
@@ -169,14 +167,14 @@ export const ScoreValue = styled.span<ScoreValueProps>`
 export const ScoreMiniBar = styled.div`
   width: 100%;
   height: 6px;
-  background-color: ${colors.background.tertiary};
-  border-radius: ${borderRadius.base};
+  background-color: ${colors.light.grayscale[10]};
+  border-radius: 4px;
   overflow: hidden;
   position: relative;
 
   .fill {
     height: 100%;
-    border-radius: ${borderRadius.base};
+    border-radius: 4px;
     transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
     min-width: 2px;
     position: relative;
@@ -188,8 +186,8 @@ export const ScoreMiniBar = styled.div`
       right: 0;
       bottom: 0;
       width: 2px;
-      background: rgba(255, 255, 255, 0.8);
-      border-radius: 0 ${borderRadius.base} ${borderRadius.base} 0;
+      background: ${colors.light.transparency.white[80]};
+      border-radius: 0 4px 4px 0;
     }
   }
 `;

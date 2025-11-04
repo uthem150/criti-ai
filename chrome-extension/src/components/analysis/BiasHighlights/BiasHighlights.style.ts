@@ -1,36 +1,30 @@
 import styled from "@emotion/styled";
-import {
-  colors,
-  spacing,
-  borderRadius,
-  typography,
-  animations,
-} from "@/styles/style";
+import { colors, typography } from "@/styles/design";
 
 export const HighlightsContainer = styled.div`
-  margin-bottom: ${spacing[4]};
+  margin-bottom: 16px;
 `;
 
 export const SectionTitle = styled.h4`
-  margin: 0 0 ${spacing[3]} 0;
-  color: ${colors.text.primary};
+  margin: 0 0 12px 0;
+  color: ${colors.light.grayscale[90]};
 
   ${typography.styles.title4};
 
   display: flex;
   align-items: center;
-  gap: ${spacing[2]};
+  gap: 8px;
 `;
 
 export const EmptyState = styled.p`
-  color: ${colors.text.secondary};
+  color: ${colors.light.grayscale[70]};
 
   ${typography.styles.caption3};
 
   margin: 0;
-  padding: ${spacing[4]};
-  background: ${colors.background.secondary};
-  border-radius: ${borderRadius.md};
+  padding: 16px;
+  background: ${colors.light.grayscale[5]};
+  border-radius: 6px;
   text-align: center;
 `;
 
@@ -45,25 +39,25 @@ interface HighlightItemProps {
 }
 
 export const HighlightItem = styled.li<HighlightItemProps>`
-  margin-bottom: ${spacing[3]};
-  padding: ${spacing[3]};
-  background: ${colors.background.secondary};
-  border-radius: ${borderRadius.md};
+  margin-bottom: 12px;
+  padding: 12px;
+  background: ${colors.light.grayscale[5]};
+  border-radius: 6px;
   border-left: 3px solid
     ${(props) =>
       props.type === "bias"
-        ? colors.status.warning
+        ? colors.light.etc.orange
         : props.type === "fallacy"
-          ? colors.status.error
+          ? colors.light.state.error
           : props.type === "manipulation"
-            ? colors.status.error
-            : colors.status.warning};
-  transition: all ${animations.transition.fast};
+            ? colors.light.state.error
+            : colors.light.etc.orange};
+  transition: all "150ms ease-in-out";
 
   &:hover {
-    background: ${colors.background.tertiary};
+    background: ${colors.light.grayscale[10]};
     transform: translateX(2px);
-    box-shadow: 0 2px 8px ${colors.shadow.medium};
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   }
 
   &:last-child {
@@ -71,53 +65,51 @@ export const HighlightItem = styled.li<HighlightItemProps>`
   }
 
   .highlight-header {
-    margin-bottom: ${spacing[2]};
+    margin-bottom: 8px;
 
     .highlight-type {
       display: inline-block;
-      background: ${
-        (props) =>
-          props.type === "bias"
-            ? colors.palette.orange // warning 대신 orange 사용
-            : props.type === "fallacy"
-              ? colors.status.error
-              : props.type === "manipulation"
-                ? colors.status.error
-                : colors.palette.gray // 중립 색상 사용
-      };
+      background: ${(props) =>
+        props.type === "bias"
+          ? colors.light.etc.orange
+          : props.type === "fallacy"
+            ? colors.light.state.error
+            : props.type === "manipulation"
+              ? colors.light.state.error
+              : colors.light.etc.gray};
 
       color: ${(props) =>
         props.type === "bias"
-          ? colors.palette.yellow
+          ? colors.light.etc.yellow
           : props.type === "fallacy"
-            ? colors.palette.red
+            ? colors.light.etc.red
             : props.type === "manipulation"
-              ? colors.palette.red
-              : colors.palette.gray};
+              ? colors.light.etc.red
+              : colors.light.etc.gray};
       padding: 2px 8px;
-      border-radius: ${borderRadius.sm};
+      border-radius: 2px;
 
       ${typography.styles.caption4};
     }
   }
 
   .position-info {
-    margin-top: ${spacing[2]};
-    color: ${colors.text.tertiary};
+    margin-top: 8px;
+    color: ${colors.light.grayscale[60]};
     opacity: 0.7;
     ${typography.styles.caption4};
   }
 `;
 
 export const HighlightText = styled.strong`
-  color: ${colors.text.primary};
+  color: ${colors.light.grayscale[90]};
   ${typography.styles.caption2};
   font-weight: ${typography.fontWeight.semibold};
   display: block;
-  margin-bottom: ${spacing[1]};
+  margin-bottom: 4px;
 `;
 
 export const HighlightExplanation = styled.small`
-  color: ${colors.text.secondary};
+  color: ${colors.light.grayscale[70]};
   ${typography.styles.body4};
 `;
