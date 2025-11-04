@@ -205,6 +205,7 @@ export interface ChallengeResponse {
   userAnswers: string[];
   timeSpent: number;
   hintsUsed: number;
+  userId?: string;
 }
 
 // 캐싱 관련 타입

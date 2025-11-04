@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import type { Challenge, UserProgress } from "@criti-ai/shared";
-import { challengeApiService } from "../../services/challengeApiService";
+// 훅
+import { useChallengeData } from "../../hooks/useChallengeData";
+import { useChallengeSubmit } from "../../hooks/useChallengeSubmit";
 import {
   PageContainer,
   Header,
@@ -32,144 +33,66 @@ interface ChallengePageProps {
   onNavigateBack?: () => void;
 }
 
-// 로딩 상태 및 에러 상태
-interface LoadingState {
-  isLoading: boolean;
-  error: string | null;
-}
-
 const ChallengePage: React.FC<ChallengePageProps> = ({
   onNavigateBack: _onNavigateBack,
 }) => {
   const navigate = useNavigate();
-  // 상태 관리
-  const [challenges, setChallenges] = useState<Challenge[]>([]);
-  const [currentChallenge, setCurrentChallenge] = useState<Challenge | null>(
-    null
-  );
-  const [challengeIndex, setChallengeIndex] = useState(0);
-  const [userAnswers, setUserAnswers] = useState<string[]>([]);
-  const [showResult, setShowResult] = useState(false);
-  const [isCorrect, setIsCorrect] = useState(false);
-  const [userProgress, setUserProgress] = useState<UserProgress | null>(null);
-  const [loadingState, setLoadingState] = useState<LoadingState>({
-    isLoading: true,
-    error: null,
-  });
-  const [submitLoading, setSubmitLoading] = useState(false);
-  const [startTime, setStartTime] = useState<number>(Date.now());
 
-  // 초기 데이터 로드
+  // 1. 챌린지 데이터 관리 훅
+  const {
+    challenges,
+    currentChallenge,
+    challengeIndex,
+    userProgress,
+    isLoading, // loadingState.isLoading -> isLoading
+    error, // loadingState.error -> error
+    loadInitialData,
+    goToNext,
+    goToPrevious,
+    updateUserProgress, // 사용자 진행도 업데이트 함수
+  } = useChallengeData();
+
+  // 2. 챌린지 제출 관리 훅
+  const {
+    userAnswers,
+    showResult,
+    isCorrect,
+    submitLoading,
+    toggleAnswer, // handleAnswerToggle -> toggleAnswer
+    submitChallenge, // 제출 함수
+    resetChallenge, // 리셋 함수
+  } = useChallengeSubmit();
+
+  // 3. 초기 데이터 로드 (컴포넌트 마운트 시 1회 실행)
   useEffect(() => {
     loadInitialData();
   }, []);
 
-  // 현재 챌린지 설정
-  useEffect(() => {
-    if (challenges.length > 0 && challengeIndex < challenges.length) {
-      setCurrentChallenge(challenges[challengeIndex]);
-      setStartTime(Date.now()); // 챌린지 시작 시간 기록
-    }
-  }, [challenges, challengeIndex]);
-
   /**
-   * 초기 데이터 로드 (챌린지 + 사용자 진행도)
-   */
-  const loadInitialData = async () => {
-    setLoadingState({ isLoading: true, error: null });
-
-    try {
-      console.log("🚀 초기 데이터 로드 시작");
-
-      // 백엔드 연결 확인
-      const isHealthy = await challengeApiService.healthCheck();
-      if (!isHealthy) {
-        throw new Error(
-          "백엔드 서버에 연결할 수 없습니다. 서버가 실행 중인지 확인해주세요."
-        );
-      }
-
-      // 오늘의 챌린지 로드
-      const todaysChallenges = await challengeApiService.getTodaysChallenges();
-      console.log("✅ 오늘의 챌린지 로드 완료:", todaysChallenges.length, "개");
-
-      if (todaysChallenges.length === 0) {
-        throw new Error("오늘의 챌린지가 없습니다. 잠시 후 다시 시도해주세요.");
-      }
-
-      // 사용자 진행도 로드
-      const progress = await challengeApiService.getUserProgress();
-      console.log("✅ 사용자 진행도 로드 완료");
-
-      setChallenges(todaysChallenges);
-      setUserProgress(progress);
-      setLoadingState({ isLoading: false, error: null });
-    } catch (error) {
-      console.error("❌ 초기 데이터 로드 실패:", error);
-      setLoadingState({
-        isLoading: false,
-        error:
-          error instanceof Error
-            ? error.message
-            : "데이터를 불러오는 중 오류가 발생했습니다.",
-      });
-    }
-  };
-
-  /**
-   * 답안 선택/해제 토글
-   */
-  const handleAnswerToggle = (answer: string) => {
-    setUserAnswers((prev) =>
-      prev.includes(answer)
-        ? prev.filter((a) => a !== answer)
-        : [...prev, answer]
-    );
-  };
-
-  /**
-   * 답안 제출
+   * 답안 제출 (컴포넌트 레벨)
+   * 훅 호출하고, 결과에 따라 userProgress 업데이트
    */
   const handleSubmit = async () => {
-    if (!currentChallenge || submitLoading) return;
-
-    setSubmitLoading(true);
+    if (!currentChallenge) return;
 
     try {
-      const timeSpent = Math.floor((Date.now() - startTime) / 1000); // 초 단위
-      console.log("📝 답안 제출:", { userAnswers, timeSpent });
+      // 훅 submitChallenge 함수 호출
+      const result = await submitChallenge(currentChallenge.id);
 
-      const result = await challengeApiService.submitChallenge(
-        currentChallenge.id,
-        userAnswers,
-        timeSpent
-      );
-
-      if (result) {
-        setIsCorrect(result.isCorrect);
-        setShowResult(true);
-
-        // 사용자 진행도 업데이트 (점수 반영)
-        if (userProgress && result.isCorrect) {
-          setUserProgress({
-            ...userProgress,
-            totalPoints: userProgress.totalPoints + result.score,
-            completedChallenges: [
-              ...userProgress.completedChallenges,
-              currentChallenge.id,
-            ],
-          });
-        }
-
-        console.log("✅ 답안 제출 완료:", result.isCorrect ? "정답" : "오답");
-      } else {
-        throw new Error("답안 제출에 실패했습니다.");
+      // 정답인 경우, useChallengeData 훅 updateUserProgress 함수로 상태 업데이트
+      if (result && result.isCorrect) {
+        console.log("✅ 정답! 사용자 진행도 업데이트");
+        updateUserProgress({
+          totalPoints: (userProgress?.totalPoints || 0) + result.score,
+          completedChallenges: [
+            ...(userProgress?.completedChallenges || []),
+            currentChallenge.id,
+          ],
+        });
       }
     } catch (error) {
-      console.error("❌ 답안 제출 실패:", error);
+      console.error("❌ 답안 제출 실패 (Page):", error);
       alert("답안 제출 중 오류가 발생했습니다. 다시 시도해주세요.");
-    } finally {
-      setSubmitLoading(false);
     }
   };
 
@@ -177,34 +100,20 @@ const ChallengePage: React.FC<ChallengePageProps> = ({
    * 다음 챌린지로 이동
    */
   const handleNext = () => {
-    if (challengeIndex < challenges.length - 1) {
-      setChallengeIndex((prev) => prev + 1);
-      resetChallenge();
-    }
+    goToNext(); // useChallengeData
+    resetChallenge(); // useChallengeSubmit
   };
 
   /**
    * 이전 챌린지로 이동
    */
   const handlePrevious = () => {
-    if (challengeIndex > 0) {
-      setChallengeIndex((prev) => prev - 1);
-      resetChallenge();
-    }
+    goToPrevious(); // useChallengeData
+    resetChallenge(); // useChallengeSubmit
   };
 
   /**
-   * 챌린지 상태 초기화
-   */
-  const resetChallenge = () => {
-    setUserAnswers([]);
-    setShowResult(false);
-    setIsCorrect(false);
-    setStartTime(Date.now());
-  };
-
-  /**
-   * 답안 옵션 목록 반환 (설명 포함)
+   * 답안 옵션 목록 반환 (이전과 동일)
    */
   const getAnswerOptions = () => {
     if (currentChallenge?.type === "article-analysis") {
@@ -298,8 +207,10 @@ const ChallengePage: React.FC<ChallengePageProps> = ({
     return [];
   };
 
+  // --- 렌더링 ---
+
   // 로딩 중 화면
-  if (loadingState.isLoading) {
+  if (isLoading) {
     return (
       <PageContainer>
         <Header>
@@ -324,7 +235,7 @@ const ChallengePage: React.FC<ChallengePageProps> = ({
   }
 
   // 에러 화면
-  if (loadingState.error) {
+  if (error) {
     return (
       <PageContainer>
         <Header>
@@ -335,7 +246,7 @@ const ChallengePage: React.FC<ChallengePageProps> = ({
           <ChallengeCard>
             <div style={{ textAlign: "center", padding: "40px" }}>
               <div style={{ fontSize: "24px", marginBottom: "16px" }}>❌</div>
-              <div style={{ marginBottom: "16px" }}>{loadingState.error}</div>
+              <div style={{ marginBottom: "16px" }}>{error}</div>
               <ActionButton onClick={loadInitialData}>다시 시도</ActionButton>
             </div>
           </ChallengeCard>
@@ -364,6 +275,7 @@ const ChallengePage: React.FC<ChallengePageProps> = ({
     );
   }
 
+  // 메인 챌린지 화면
   return (
     <PageContainer>
       <Header>
@@ -433,7 +345,7 @@ const ChallengePage: React.FC<ChallengePageProps> = ({
                   <OptionButton
                     key={option.id}
                     selected={userAnswers.includes(option.id)}
-                    onClick={() => handleAnswerToggle(option.id)}
+                    onClick={() => toggleAnswer(option.id)} // 훅의 toggleAnswer 사용
                     title={option.example}
                   >
                     <div
@@ -464,7 +376,7 @@ const ChallengePage: React.FC<ChallengePageProps> = ({
               </OptionsContainer>
 
               <ActionButton
-                onClick={handleSubmit}
+                onClick={handleSubmit} // 래핑된 handleSubmit 함수 사용
                 disabled={userAnswers.length === 0 || submitLoading}
               >
                 {submitLoading ? "제출 중..." : "답안 제출"}
