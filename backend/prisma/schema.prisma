@@ -108,7 +108,8 @@ model Challenge {
   id            String   @id @default(cuid())
   type          String   // article-analysis, image-detection, etc.
   title         String
-  content       String   // 챌린지 내용
+  options        String?  // (JSON 문자열 저장용)
+  category       String?  // (예: "감정적 편향")
   difficulty    String   // beginner, intermediate, advanced
   points        Int
   

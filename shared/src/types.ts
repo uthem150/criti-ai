@@ -147,6 +147,18 @@ export interface TextPosition {
 }
 
 // 챌린지 게임 타입
+
+/**
+ * 챌린지 선택지 (4지 선다형)
+ */
+export interface ChallengeOption {
+  id: string; // 예: "1", "2", "3", "4"
+  text: string; // 선택지 문장
+}
+
+/**
+ * 챌린지 기본 구조
+ */
 export interface Challenge {
   id: string;
   type:
@@ -156,13 +168,14 @@ export interface Challenge {
     | "ad-detection"
     | "fact-check"
     | "bias-detection";
-  title: string;
-  content: string;
-  correctAnswers: string[];
+  title: string; // 챌린지 질문 (예: "다음 중 '감정적 편향'이 있는 문장을 고르세요.")
+  options: ChallengeOption[]; // 4개의 문장 선택지
+  category?: string; // 챌린지 카테고리 (예: "감정적 편향")
+  correctAnswers: string[]; // 정답 선택지의 id 배열 (예: ["2"])
   explanation: string;
   difficulty: "beginner" | "intermediate" | "advanced";
   points: number;
-  hints?: string[]; // 힌트 배열 추가
+  hints?: string[]; // 힌트 배열
 }
 
 export interface UserProgress {
