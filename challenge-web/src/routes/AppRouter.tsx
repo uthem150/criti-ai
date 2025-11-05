@@ -1,14 +1,18 @@
-import { lazy } from 'react';
-import { createBrowserRouter, Navigate } from 'react-router-dom';
-import NotFoundPage from '../components/NotFoundPage/NotFoundPage';
+// import { lazy } from 'react';
+
+import { createBrowserRouter, Navigate } from "react-router-dom";
+import NotFoundPage from "../components/NotFoundPage/NotFoundPage";
 
 // Lazy-loaded page components
-const ChallengePage = lazy(() => import('../pages/ChallengePage/ChallengePage'));
-const YoutubeAnalysisPage = lazy(() => import('../pages/YoutubeAnalysisPage/YoutubeAnalysisPage'));
+// const ChallengePage = lazy(() => import('../pages/ChallengePage/ChallengePage'));
+// const YoutubeAnalysisPage = lazy(() => import('../pages/YoutubeAnalysisPage/YoutubeAnalysisPage'));
+
+import ChallengePage from "../pages/ChallengePage/ChallengePage";
+import YoutubeAnalysisPage from "../pages/YoutubeAnalysisPage/YoutubeAnalysisPage";
 
 /**
  * Application Router Configuration
- * 
+ *
  * Routes:
  * - / : ChallengePage (Home)
  * - /youtube : YoutubeAnalysisPage
