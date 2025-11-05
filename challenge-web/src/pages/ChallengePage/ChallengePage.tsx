@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 // 훅
 import { useChallengeData } from "../../hooks/useChallengeData";
@@ -20,6 +20,10 @@ import {
   ChallengeTitle,
   OptionsContainer,
   OptionButton,
+  HintContainer,
+  HintText,
+  ActionButtonsContainer,
+  HintButton,
   ActionButton,
   ResultContainer,
   ResultText,
@@ -37,6 +41,8 @@ const ChallengePage: React.FC<ChallengePageProps> = ({
   onNavigateBack: _onNavigateBack,
 }) => {
   const navigate = useNavigate();
+  // 힌트 상태
+  const [visibleHints, setVisibleHints] = useState<string[]>([]);
 
   // 1. 챌린지 데이터 관리 훅
   const {
@@ -94,6 +100,21 @@ const ChallengePage: React.FC<ChallengePageProps> = ({
     } catch (error) {
       console.error("❌ 답안 제출 실패 (Page):", error);
       alert("답안 제출 중 오류가 발생했습니다. 다시 시도해주세요.");
+    }
+  };
+
+  /**
+   * 힌트 보기 핸들러
+   */
+  const handleShowHint = () => {
+    if (!currentChallenge?.hints || !currentChallenge.hints.length) return;
+
+    const nextHintIndex = visibleHints.length;
+
+    // 아직 보여주지 않은 힌트가 있다면
+    if (nextHintIndex < currentChallenge.hints.length) {
+      const nextHint = currentChallenge.hints[nextHintIndex];
+      setVisibleHints([...visibleHints, nextHint]);
     }
   };
 
@@ -264,12 +285,43 @@ const ChallengePage: React.FC<ChallengePageProps> = ({
                   </OptionButton>
                 ))}
               </OptionsContainer>
-              <ActionButton
-                onClick={handleSubmit}
-                disabled={userAnswers.length === 0 || submitLoading}
-              >
-                {submitLoading ? "제출 중..." : "답안 제출"}
-              </ActionButton>
+              {/* --- 힌트 표시 영역 --- */}
+              {visibleHints.length > 0 && (
+                <HintContainer>
+                  {visibleHints.map((hint, index) => (
+                    <HintText key={index}>
+                      <strong>💡 힌트 {index + 1}:</strong> {hint}
+                    </HintText>
+                  ))}
+                </HintContainer>
+              )}
+
+              {/* --- 버튼 컨테이너 --- */}
+              <ActionButtonsContainer>
+                {/* 힌트 버튼 */}
+                {currentChallenge.hints &&
+                  currentChallenge.hints.length > 0 && (
+                    <HintButton
+                      onClick={handleShowHint}
+                      // 모든 힌트를 다 봤으면 비활성화
+                      disabled={
+                        visibleHints.length === currentChallenge.hints.length
+                      }
+                    >
+                      💡 힌트 보기 (
+                      {`${visibleHints.length}/${currentChallenge.hints.length}`}
+                      )
+                    </HintButton>
+                  )}
+
+                {/* 제출 버튼 */}
+                <ActionButton
+                  onClick={handleSubmit}
+                  disabled={userAnswers.length === 0 || submitLoading}
+                >
+                  {submitLoading ? "제출 중..." : "답안 제출"}
+                </ActionButton>
+              </ActionButtonsContainer>
             </>
           )}
 

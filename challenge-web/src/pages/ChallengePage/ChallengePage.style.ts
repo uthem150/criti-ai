@@ -312,6 +312,81 @@ export const OptionButton = styled.button<OptionButtonProps>`
   }
 `;
 
+export const HintContainer = styled.div`
+  margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+`;
+
+export const HintText = styled.div`
+  background: ${colors.light.grayscale[5]};
+  border: 1px solid ${colors.light.grayscale[20]};
+  border-left: 4px solid ${colors.light.etc.purple};
+  padding: 1rem;
+  border-radius: 0.375rem;
+  ${typography.styles.body2};
+  color: ${colors.light.grayscale[80]};
+  line-height: 1.6;
+  animation: fadeIn 0.3s ease-out;
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  strong {
+    font-weight: ${typography.fontWeight.semibold};
+    color: ${colors.light.etc.purple};
+  }
+`;
+
+// 힌트 버튼과 제출 버튼 묶는 컨테이너
+export const ActionButtonsContainer = styled.div`
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  flex-wrap: wrap; // 모바일에서 줄바꿈
+`;
+
+// 힌트 버튼 (보조 버튼)
+export const HintButton = styled.button`
+  background: ${colors.light.grayscale[0]};
+  color: ${colors.light.brand.primary100};
+  border: 1px solid ${colors.light.brand.primary100};
+  padding: 0.75rem 1.5rem; // ActionButton과 동일한 크기
+  border-radius: 0.375rem;
+  ${typography.styles.title5};
+  cursor: pointer;
+  transition: all 250ms ease-in-out;
+  box-shadow: "0 1px 2px 0 rgb(0 0 0 / 0.05)";
+
+  &:hover:not(:disabled) {
+    background: ${colors.light.brand.primary10};
+    transform: translateY(-2px);
+    box-shadow: "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)";
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
+  }
+
+  &:disabled {
+    background: ${colors.light.grayscale[20]};
+    border-color: ${colors.light.grayscale[30]};
+    color: ${colors.light.grayscale[50]};
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+`;
+
 export const ActionButton = styled.button`
   background: ${colors.light.brand.primary100};
   color: ${colors.light.grayscale[0]};
