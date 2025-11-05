@@ -241,7 +241,7 @@ export const VideoTitle = styled.h3`
 export const VideoMeta = styled.div`
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.5rem;
   ${typography.styles.body4};
   color: ${colors.light.grayscale[60]};
 `;
@@ -256,7 +256,6 @@ export const ChannelHeader = styled.div`
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  margin-bottom: 1rem;
 `;
 
 export const ChannelImage = styled.img`
@@ -281,40 +280,6 @@ export const ChannelName = styled.div`
 export const ChannelSubscribers = styled.div`
   ${typography.styles.body4};
   color: ${colors.light.grayscale[60]};
-`;
-
-export const ChannelScore = styled.div`
-  padding: 0.75rem;
-  background: ${colors.light.grayscale[5]};
-  border-radius: 0.5rem;
-  border: 1px solid ${colors.light.grayscale[20]};
-`;
-
-export const ScoreRow = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.5rem;
-
-  &:last-child {
-    margin-bottom: 0;
-  }
-`;
-
-export const ScoreLabel = styled.span`
-  ${typography.styles.body3};
-  color: ${colors.light.grayscale[70]};
-`;
-
-export const ScoreValue = styled.span<{ score?: number }>`
-  ${typography.styles.title5};
-  color: ${(props) => {
-    if (!props.score) return colors.light.grayscale[90];
-    if (props.score >= 70) return colors.light.state.success;
-    if (props.score >= 50) return colors.light.etc.orange;
-    return colors.light.state.error;
-  }};
-  font-weight: ${typography.fontWeight.bold};
 `;
 
 // 오른쪽 섹션 (Scrollable)
@@ -354,7 +319,7 @@ export const ScoreDescription = styled.p`
   line-height: 1.6;
 `;
 
-// 차트 카드
+// 세로 막대 그래프 카드
 export const ChartCard = styled.div`
   background: ${colors.light.grayscale[0]};
   border: 1px solid ${colors.light.grayscale[20]};
@@ -369,30 +334,135 @@ export const ChartTitle = styled.h3`
   margin: 0 0 1.5rem 0;
 `;
 
-export const ChartBar = styled.div`
-  margin-bottom: 1.25rem;
+export const ChartContainer = styled.div`
+  display: flex;
+  justify-content: space-around;
+  /* align-items: flex-end; */
+  gap: 1rem;
+  height: 200px;
+  padding: 0 1rem;
+`;
 
-  &:last-child {
-    margin-bottom: 0;
-  }
+export const ChartColumn = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  flex: 1;
+  max-width: 80px;
+`;
+
+export const ChartBarVertical = styled.div<{ height: number; color: string }>`
+  width: 100%;
+  height: ${(props) => props.height}%;
+  background: ${(props) => props.color};
+  border-radius: 0.375rem 0.375rem 0 0;
+  position: relative;
+  transition: height 0.5s ease;
+  min-height: 20px;
+`;
+
+export const ChartValue = styled.div<{ score: number }>`
+  position: absolute;
+  top: -1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  ${typography.styles.body4};
+  font-weight: ${typography.fontWeight.bold};
+  color: ${(props) => {
+    if (props.score >= 70) return colors.light.state.success;
+    if (props.score >= 50) return colors.light.etc.orange;
+    return colors.light.state.error;
+  }};
+  white-space: nowrap;
 `;
 
 export const ChartLabel = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.5rem;
-`;
-
-export const ChartLabelText = styled.span`
-  ${typography.styles.body3};
+  ${typography.styles.body4};
   color: ${colors.light.grayscale[70]};
+  text-align: center;
   font-weight: ${typography.fontWeight.semibold};
 `;
 
-export const ChartLabelValue = styled.span<{ score: number }>`
+// Collapsible 섹션
+export const CollapsibleCard = styled.div`
+  background: ${colors.light.grayscale[0]};
+  border: 1px solid ${colors.light.grayscale[20]};
+  border-radius: 0.75rem;
+  overflow: hidden;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+`;
+
+export const CollapsibleHeader = styled.button<{ isOpen: boolean }>`
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem 1.5rem;
+  background: ${(props) =>
+    props.isOpen ? colors.light.grayscale[5] : colors.light.grayscale[0]};
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: ${colors.light.grayscale[5]};
+  }
+`;
+
+export const CollapsibleTitle = styled.h3`
+  ${typography.styles.title4};
+  color: ${colors.light.grayscale[90]};
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+`;
+
+export const CollapsibleIcon = styled.span<{ isOpen: boolean }>`
+  transform: ${(props) => (props.isOpen ? "rotate(180deg)" : "rotate(0deg)")};
+  transition: transform 0.2s ease;
+  font-size: 0.875rem;
+  color: ${colors.light.grayscale[60]};
+`;
+
+export const CollapsibleContent = styled.div<{ isOpen: boolean }>`
+  max-height: ${(props) => (props.isOpen ? "5000px" : "0")};
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+`;
+
+export const CollapsibleBody = styled.div`
+  padding: 0 1.5rem 1.5rem 1.5rem;
+`;
+
+// 채널 점수 섹션 (Collapsible 내부)
+export const ChannelScoreContent = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+`;
+
+export const ScoreRow = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem;
+  background: ${colors.light.grayscale[5]};
+  border: 1px solid ${colors.light.grayscale[20]};
+  border-radius: 0.5rem;
+`;
+
+export const ScoreLabel = styled.span`
+  ${typography.styles.body3};
+  color: ${colors.light.grayscale[70]};
+`;
+
+export const ScoreValue = styled.span<{ score?: number }>`
   ${typography.styles.title5};
   color: ${(props) => {
+    if (!props.score) return colors.light.grayscale[90];
     if (props.score >= 70) return colors.light.state.success;
     if (props.score >= 50) return colors.light.etc.orange;
     return colors.light.state.error;
@@ -400,40 +470,7 @@ export const ChartLabelValue = styled.span<{ score: number }>`
   font-weight: ${typography.fontWeight.bold};
 `;
 
-export const ChartBarBackground = styled.div`
-  width: 100%;
-  height: 8px;
-  background: ${colors.light.grayscale[10]};
-  border-radius: 999px;
-  overflow: hidden;
-`;
-
-export const ChartBarFill = styled.div<{ width: number; color: string }>`
-  width: ${(props) => props.width}%;
-  height: 100%;
-  background: ${(props) => props.color};
-  border-radius: 999px;
-  transition: width 0.5s ease;
-`;
-
-// 분석 카드
-export const AnalysisCard = styled.div`
-  background: ${colors.light.grayscale[0]};
-  border: 1px solid ${colors.light.grayscale[20]};
-  border-radius: 0.75rem;
-  padding: 1.5rem;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
-`;
-
-export const SectionTitle = styled.h3`
-  ${typography.styles.title4};
-  color: ${colors.light.grayscale[90]};
-  margin: 0 0 1rem 0;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-`;
-
+// 분석 내용
 export const AnalysisContent = styled.div`
   display: flex;
   flex-direction: column;

@@ -46,6 +46,7 @@ const Layout: React.FC = () => {
           ))}
         </S.Nav>
       </S.Sidebar>
+
       {/* 메인 콘텐츠 */}
       <S.MainContent>
         <Outlet />
