@@ -333,6 +333,57 @@ class DatabaseService {
     }
   }
 
+// 여러 개의 챌린지를 DB에 한 번의 트랜잭션으로 생성
+async createMultipleChallenges(
+  challengesData: Array<{
+    type: string;
+    title: string;
+    options: string;
+    category: string;
+    categoryDescription: string;
+    difficulty: string;
+    points: number;
+    correctAnswers: string;
+    explanation: string;
+    hints?: string | null;
+    isGenerated: boolean;
+    isActive: boolean;
+    dailyKey?: string;
+  }>
+): Promise<Challenge[]> {
+  console.log(
+    `🚀 DB 트랜잭션 시작: ${challengesData.length}개 챌린지 생성`
+  );
+  try {
+    // Prisma $transaction 사용하여 모든 create 작업을 하나의 트랜잭션으로 실행
+    const createdChallenges = await this.prisma.$transaction(
+      challengesData.map((data) => this.prisma.challenge.create({ data }))
+    );
+
+    console.log(
+      `✅ DB 트랜잭션 완료: ${createdChallenges.length}개 챌린지 생성됨`
+    );
+
+    // 생성된 챌린지 데이터 API 응답 타입(Challenge[])으로 변환하여 반환
+    return createdChallenges.map((c) => ({
+      id: c.id,
+      type: c.type as Challenge["type"],
+      title: c.title,
+      options: JSON.parse(c.options || "[]") as ChallengeOption[],
+      category: c.category || undefined,
+      categoryDescription: c.categoryDescription || undefined,
+      correctAnswers: JSON.parse(c.correctAnswers),
+      explanation: c.explanation,
+      difficulty: c.difficulty as Challenge["difficulty"],
+      points: c.points,
+      hints: c.hints ? JSON.parse(c.hints) : undefined,
+    }));
+  } catch (error) {
+    console.error("❌ 챌린지 일괄 생성 트랜잭션 실패:", error);
+    throw error;
+  }
+}
+
   async createChallenge(data: {
     type: string;
     title: string;

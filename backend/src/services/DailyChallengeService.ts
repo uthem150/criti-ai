@@ -54,9 +54,10 @@ export class DailyChallengeService {
   /**
    * 매일 실행되는 챌린지 생성 작업
    */
+  // 5개의 챌린지를 한 번의 API 호출로 생성하고 DB에 일괄 저장
   async generateDailyChallenges(dateKey?: string): Promise<Challenge[]> {
     const today = dateKey || this.getTodayDateString();
-    console.log(`🤖 ${today} 일일 챌린지 생성 시작`);
+    console.log(`🤖 ${today} 일일 챌린지 생성 시작 (일괄 생성)`);
 
     const challengeTemplates = [
       {
@@ -82,62 +83,67 @@ export class DailyChallengeService {
       },
     ];
 
-    const generatedChallenges: Challenge[] = [];
+    try {
+      console.log(
+        `🔄 Gemini API 호출 중: ${challengeTemplates.length}개 챌린지 동시 생성 요청`
+      );
 
-    for (const template of challengeTemplates) {
-      try {
-        console.log(
-          `🔄 챌린지 생성 중: ${template.difficulty} - ${template.topic}`
-        );
+      // 1. Gemini API로 5개 챌린지 한 번에 생성
+      const aiChallenges =
+        await this.geminiService.generateMultipleChallenges(challengeTemplates);
 
-        const aiChallenge = await this.geminiService.generateChallenge(
-          template.type,
-          template.difficulty
-        );
+      console.log(`✅ API 응답 완료: ${aiChallenges.length}개 챌린지 수신`);
 
-        // AI가 생성한 챌린지를 DB에 저장
-        const challenge = await databaseService.createChallenge({
-          type: template.type,
-          title: aiChallenge.title as string, // 질문
+      // 2. DB에 저장할 형태로 5개 챌린지 데이터 준비
+      const challengesToCreate = aiChallenges.map((aiChallenge, index) => {
+        // AI가 포인트를 제대로 생성 못했을 경우 대비
+        const template = challengeTemplates[index] || challengeTemplates[0];
+        const points = (aiChallenge.points as number) || 100;
+        const difficulty =
+          (aiChallenge.difficulty as string) || template.difficulty;
+
+        return {
+          type: (aiChallenge.type as string) || template.type,
+          title: aiChallenge.title as string,
           options: JSON.stringify(aiChallenge.options),
           category: aiChallenge.category as string,
           categoryDescription: aiChallenge.categoryDescription as string,
-          difficulty: template.difficulty,
-          points: aiChallenge.points as number,
+          difficulty: difficulty,
+          points: points,
           correctAnswers: JSON.stringify(aiChallenge.correctAnswers),
           explanation: aiChallenge.explanation as string,
           hints: aiChallenge.hints ? JSON.stringify(aiChallenge.hints) : null,
           isGenerated: true,
           isActive: true,
           dailyKey: today,
-        });
+        };
+      });
 
-        generatedChallenges.push(challenge);
-        console.log(`✅ 챌린지 생성 완료: ${challenge.title}`);
+      // 3. DB에 일괄 저장 (Transaction)
+      console.log(
+        `🔄 DB에 ${challengesToCreate.length}개 챌린지 일괄 저장 중...`
+      );
+      const generatedChallenges =
+        await databaseService.createMultipleChallenges(challengesToCreate);
 
-        // API 호출 간격 조절 (비용 절약)
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-      } catch (error) {
-        console.error(
-          `❌ 챌린지 생성 실패 (${template.difficulty} - ${template.topic}):`,
-          error
-        );
+      console.log(
+        `✅ ${today} 일일 챌린지 생성 완료: ${generatedChallenges.length}개`
+      );
+      return generatedChallenges;
+    } catch (error) {
+      console.error(`❌ 챌린지 일괄 생성 또는 저장 실패:`, error);
 
-        // 에러 시 기본 챌린지 추가
-        const fallbackChallenge = await this.createFallbackChallenge(
-          template,
-          today
-        );
-        if (fallbackChallenge) {
-          generatedChallenges.push(fallbackChallenge);
+      // 에러 시 기존 방식대로 폴백 챌린지 생성
+      console.log("🔄 폴백 챌린지 생성 시도...");
+      const fallbackChallenges: Challenge[] = [];
+      for (const template of challengeTemplates) {
+        const fb = await this.createFallbackChallenge(template, today);
+        if (fb) {
+          fallbackChallenges.push(fb);
         }
       }
+      return fallbackChallenges;
     }
-
-    console.log(
-      `✅ ${today} 일일 챌린지 생성 완료: ${generatedChallenges.length}개`
-    );
-    return generatedChallenges;
   }
 
   /**

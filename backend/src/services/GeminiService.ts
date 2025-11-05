@@ -585,6 +585,231 @@ ${request.content}
     console.log("✅ 하이라이트 텍스트 후처리 완료");
   }
 
+  // 여러 개의 챌린지 한 번의 API 호출로 생성
+  async generateMultipleChallenges(
+    templates: Array<{ type: string; difficulty: string; topic: string }>
+  ): Promise<Record<string, unknown>[]> {
+    console.log(`🤖 챌린지 ${templates.length}개 동시 생성 시작...`);
+
+    // 1. 5개 생성용 프롬프트 빌드
+    const prompt = this.buildMultipleChallengesPrompt(templates);
+
+    try {
+      // 2. 창의적 생성용 설정으로 API 호출
+      const response = await this.ai.models.generateContent({
+        model: "gemini-2.5-flash",
+        contents: prompt,
+        config: {
+          temperature: 0.8,
+          topK: 40,
+          topP: 0.95,
+        },
+      });
+
+      const responseText = response.text;
+      if (!responseText) {
+        throw new Error("AI 응답이 비어있습니다.");
+      }
+
+      console.log(
+        "🤖 AI 챌린지 5개 생성 응답 (시작 부분):",
+        responseText.substring(0, 300)
+      );
+
+      // 3. JSON 추출 (루트가 { "challenges": [...] } 형태라고 가정)
+      const jsonSlice = this.extractJsonObject(responseText);
+      const repaired = jsonrepair(jsonSlice);
+      const parsedResponse = JSON.parse(repaired);
+
+      // 4. "challenges" 배열 추출
+      const challenges = parsedResponse.challenges;
+
+      if (!Array.isArray(challenges) || challenges.length === 0) {
+        throw new Error("AI 응답에서 'challenges' 배열을 찾을 수 없습니다.");
+      }
+
+      if (challenges.length !== templates.length) {
+        console.warn(
+          `⚠️ AI가 요청한 ${templates.length}개가 아닌 ${challenges.length}개의 챌린지를 반환했습니다.`
+        );
+      }
+
+      // 5. 생성된 챌린지들 검증
+      challenges.forEach((challenge: Record<string, unknown>) => {
+        this.validateGeneratedChallenge(challenge); // 기존 검증 함수 재사용
+      });
+
+      console.log(`✅ 챌린지 ${challenges.length}개 동시 생성 및 검증 완료`);
+      return challenges;
+    } catch (error) {
+      console.error("❌ 챌린지 5개 동시 생성 오류:", error);
+      // 동시 생성 실패 시, 템플릿 기반으로 개별 폴백 챌린지 반환
+      return templates.map((t) =>
+        this.getFallbackChallenge(t.type, t.difficulty)
+      );
+    }
+  }
+
+  // 챌린지 5개 동시 생성을 위한 프롬프트
+  private buildMultipleChallengesPrompt(
+    templates: Array<{ type: string; difficulty: string; topic: string }>
+  ): string {
+    // 날짜 기반 시드를 추가하여 매일 다른 결과 보장
+    const today = new Date().toISOString().split("T")[0];
+    const randomSeed = Math.floor(Math.random() * 1000);
+
+    // 템플릿 목록 문자열로 변환
+    const templateStrings = templates
+      .map(
+        (t, i) =>
+          `  ${i + 1}. 타입: ${t.type}, 난이도: ${t.difficulty}, 주제: ${t.topic}`
+      )
+      .join("\n");
+
+    return `
+# 다양성 보장 시드 키
+날짜: ${today}
+시드: ${randomSeed}
+
+⚡ **중요**: 모든 챌린지는 서로 다른 주제와 시나리오로 생성해주세요!
+
+# 미디어 리터러시 교육용 챌린지 생성 전문가
+
+당신은 비판적 사고 능력을 기르는 교육용 챌린지를 생성하는 전문가입니다.
+사용자가 실제 뉴스나 콘텐츠에서 마주칠 수 있는 문제들을 학습할 수 있도록, **'질문 + 4개 문장 선택지'** 형식의 퀴즈를 만듭니다.
+
+## 📋 챌린지 사양
+
+**타입**: type (article-analysis)
+**난이도**: difficulty
+**형식**: 4지 선다형 (하나의 정답)
+
+## 🎯 난이도별 가이드라인
+
+### Beginner (초급)
+- **목표**: 명확하고 쉽게 식별 가능한 오류/편향 문장 1개
+- **선택지 구성**: 정답 1개 (명확한 오류) + 오답 3개 (주로 중립적이거나 사실 기반 문장)
+- **점수**: 80-120점
+
+### Intermediate (중급)
+- **목표**: 약간의 분석이 필요한 오류/편향 문장 1개
+- **선택지 구성**: 정답 1개 (미묘한 오류) + 오답 3개 (중립적 문장, 또는 다른 유형의 미묘한 오류를 포함한 문장)
+- **점수**: 120-180점
+
+### Advanced (고급)
+- **목표**: 복합적이고 미묘한 문제
+- **선택지 구성**: 정답 1개 (정교한 오류) + 오답 3개 (매우 그럴듯하지만 정답이 아닌 문장, 다른 유형의 오류 포함)
+- **점수**: 180-250점
+
+## 📋 챌린지 생성 목록 (총 ${templates.length}개)
+
+아래 명시된 사양에 맞춰 ${templates.length}개의 챌린지를 생성해야 합니다:
+${templateStrings}
+
+## 🎨 챌린지 카테고리 (필수 선택지 목록)
+
+아래 목록에서 문제 카테고리(category)를 하나 선택하거나, 이와 유사한 새로운 미디어 리터러시 관련 카테고리를 자유롭게 생성하세요.
+
+- "성급한 일반화": 적은 사례로 모든 경우에 적용하는 오류
+- "허위 이분법": 복잡한 문제를 단순히 둘 중 하나로만 나누는 오류
+- "인신공격": 논리 대신 사람을 비난하는 오류
+- "권위에 호소": 근거 없이 권위를 내세우는 오류
+- "감정적 편향": 이성적 판단보다 감정에 호소하는 표현
+- "과장된 표현": 사실보다 과도하게 부풀리거나 축소되는 표현
+- "허수아비 공격": 상대방 주장을 왜곡해서 공격하는 오류
+- "순환논리": 증명할 것을 근거로 사용하는 오류
+- "광고성 콘텐츠": 상품이나 서비스를 홍보하려는 의도가 숨어있음
+- "긴급성 유도": 시간 압박을 가해 성급한 판단을 유도하는 표현
+- "과장된 수치": 근거 없거나 의심스러운 통계나 수치
+- "선동적 언어": 감정을 자극해 특정 의견을 유도하는 언어
+- "인과관계의 오류": 단순히 먼저 일어났다고 원인으로 단정하는 오류
+(이 외에도 자유롭게 미디어 리터러시 관련 카테고리 생성 가능)
+
+## 🔥 생성 요구사항
+0.  **${templates.length}개 생성**: 위 챌린지 목록의 모든 항목을 생성합니다.
+1.  **카테고리 선택**: 위 목록에서 챌린지 주제(category)를 하나 선정합니다.
+2.  **용어 설명 추가**: 해당 카테고리가 무엇인지 1-2 문장으로 설명하는 \`categoryDescription\`을 생성합니다. (필수)
+3.  **제목(질문) 생성**: "다음 중 '[선택한 카테고리]'이/가 있는 기사 문장을 선택하세요." 형식으로 \`title\`을 생성합니다.
+4.  **선택지(Options) 생성**: 
+    - 4개의 문장 선택지를 생성합니다 (options 배열).
+    - 각 선택지는 { "id": "1", "text": "..." } 형식을 따릅니다.
+    - **정답 문장 (1개)**: 선택한 카테고리(예: '감정적 편향')의 특징이 명확히 드러나는 문장을 만듭니다.
+    - **오답 문장 (3개)**: 중립적이거나, 사실을 전달하거나, 혹은 *다른 유형*의 미묘한 문제를 가진 그럴듯한 문장을 만듭니다.
+
+5.  **정답(CorrectAnswers) 설정**: 정답 문장의 id를 배열에 담아 correctAnswers로 설정합니다. (예: ["2"])
+6.  **해설(Explanation) 작성**:
+    - 왜 해당 문장이 정답(선택한 카테고리)인지 명확히 설명합니다.
+    - (선택 사항) 다른 오답 선택지들이 왜 정답이 아닌지 간략히 설명합니다.
+
+7.  **힌트(Hints) 작성**:
+    - 2-3개의 단계적 힌트를 제공합니다.
+    - 직접적인 답 대신, 사고의 방향을 제시합니다. (예: "감정을 자극하는 단어가 있나요?")
+
+
+## 🌟 주제 다양성 (필수)
+
+## 🎨 콘텐츠 작성 원칙
+
+### DO (해야 할 것)
+✅ 실제 뉴스처럼 자연스러운 문체
+✅ 구체적이고 현실적인 상황 설정
+✅ 명확한 문제점이 포함된 논리 구조
+✅ 교육적 가치가 높은 예시
+✅ 난이도에 맞는 복잡성 조절
+
+### DON'T (하지 말 것)
+❌ 인공적이거나 억지스러운 표현
+❌ 지나치게 명백하거나 유치한 오류
+❌ 실제로는 일어나지 않을 상황
+❌ 특정 개인이나 단체 비방
+❌ 사실과 전혀 맞지 않는 내용
+
+## 📊 출력 형식 (매우 중요)
+
+반드시 아래 JSON 형식으로만 응답하세요.
+루트 객체는 "challenges" 키를 가지며, 값은 ${templates.length}개의 챌린지 객체 배열입니다.
+
+{
+  "challenges": [
+    {
+      "id": "challenge-[랜덤숫자]",
+      "type": type,
+      "title": "다음 중 '[선택한 카테고리]'이/가 있는 기사 문장을 선택하세요.",
+      "category": "[선택한 카테고리]",
+      "categoryDescription": "[선택한 카테고리에 대한 1-2 문장의 간결한 설명]",
+      "options": [
+        { "id": "1", "text": "오답용 중립적이거나 사실 기반 문장입니다." },
+        { "id": "2", "text": "정답용 문장입니다. [선택한 카테고리]의 특징이 드러납니다." },
+        { "id": "3", "text": "오답용 그럴듯한 다른 문장입니다." },
+        { "id": "4", "text": "오답용 또 다른 문장입니다." }
+      ],
+      "correctAnswers": ["2"],
+      "explanation": "2번 문장은 '[이유]' 때문에 '[선택한 카테고리]'에 해당합니다. 반면 1번과 3번은...",
+      "difficulty": difficulty,
+      "points": 100,
+      "hints": ["힌트 1", "힌트 2"]
+    },
+    // ... (여기에 총 ${templates.length}개의 챌린지 객체가 포함됩니다) ...
+    {
+      "id": "challenge-[랜덤숫자5]",
+      "type": "article-analysis",
+      "title": "...",
+      "category": "...",
+      "categoryDescription": "...",
+      "options": [...],
+      "correctAnswers": ["..."],
+      "explanation": "...",
+      "difficulty": "advanced",
+      "points": 200,
+      "hints": ["...", "..."]
+    }
+  ]
+}
+
+이제 ${templates.length}개의 챌린지를 "challenges" 배열에 담아 JSON으로 생성해주세요.
+`;
+  }
+
   async generateChallenge(
     type: string,
     difficulty: string
