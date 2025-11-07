@@ -17,6 +17,20 @@ export const GlobalStyles = () => (
         font-size: 16px;
         scroll-behavior: smooth;
         -webkit-text-size-adjust: 100%;
+
+        /* 모바일/WebView 터치 하이라이트 및 팝업 제거 */
+        -webkit-touch-callout: none;
+        -webkit-user-select: none; /* Webkit 기반 (Chrome, Safari) */
+        -moz-user-select: none; /* Firefox */
+        -ms-user-select: none; /* IE */
+        user-select: none; /* 표준 속성: 텍스트/이미지 선택 방지 */
+        -webkit-tap-highlight-color: rgba(
+          0,
+          0,
+          0,
+          0
+        ); /* 파란색 박스 제거 (투명) */
+        /* 모바일/WebView 터치 하이라이트 및 팝업 제거 끝 */
       }
 
       body {
@@ -29,6 +43,9 @@ export const GlobalStyles = () => (
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
         overflow-x: hidden;
+
+        /* 입력 필드를 제외한 모든 요소의 커서 깜박임 제거 */
+        caret-color: transparent;
       }
 
       #root {
@@ -77,6 +94,8 @@ export const GlobalStyles = () => (
       textarea,
       select {
         font-family: ${typography.fontFamily.primary};
+        /* 입력 필드에 커서 색상을 다시 보이도록 설정 */
+        caret-color: initial;
       }
 
       /* Accessibility */
