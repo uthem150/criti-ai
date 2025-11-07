@@ -86,9 +86,6 @@ const YoutubeAnalysisPage = () => {
   return (
     <S.Container>
       <S.ContentWrapper>
-        {/* 뒤로가기 (모바일) */}
-        <S.BackButton onClick={() => navigate("/")}>← 돌아가기</S.BackButton>
-
         {/* 입력 화면 */}
         {!analysis && !loading && (
           <S.InputCard>

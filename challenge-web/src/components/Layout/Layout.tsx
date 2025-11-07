@@ -2,6 +2,8 @@ import React from "react";
 import { useNavigate, useLocation, Outlet } from "react-router-dom";
 import { ROUTES } from "../../constants";
 import * as S from "./Layout.style";
+import Chart from "@/assets/icons/chart-bar.svg?react";
+import Seeding from "@/assets/icons/seeding.svg?react";
 
 const Layout: React.FC = () => {
   const navigate = useNavigate();
@@ -9,12 +11,12 @@ const Layout: React.FC = () => {
 
   const navItems = [
     {
-      icon: "📊",
+      icon: Chart,
       label: "유튜브 영상 분석",
       path: ROUTES.YOUTUBE_ANALYSIS,
     },
     {
-      icon: "🧠",
+      icon: Seeding,
       label: "비판적 사고 훈련",
       path: ROUTES.HOME,
     },
@@ -29,7 +31,7 @@ const Layout: React.FC = () => {
     <S.LayoutContainer>
       {/* 사이드바 */}
       <S.Sidebar>
-        <S.Logo>
+        <S.Logo onClick={() => navigate("/")}>
           <S.LogoText>CritiAI</S.LogoText>
         </S.Logo>
 
@@ -40,8 +42,13 @@ const Layout: React.FC = () => {
               active={location.pathname === item.path}
               onClick={() => navigate(item.path)}
             >
-              <S.NavIcon>{item.icon}</S.NavIcon>
-              <S.NavLabel>{item.label}</S.NavLabel>
+              <S.NavIcon
+                active={location.pathname === item.path}
+                as={item.icon}
+              />
+              <S.NavLabel active={location.pathname === item.path}>
+                {item.label}
+              </S.NavLabel>
             </S.NavItem>
           ))}
         </S.Nav>

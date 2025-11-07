@@ -17,30 +17,7 @@ export const ContentWrapper = styled.div`
   align-self: stretch;
 
   @media (max-width: 768px) {
-    padding: 1rem;
-  }
-`;
-
-// 뒤로가기 버튼
-export const BackButton = styled.button`
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem;
-  background: none;
-  border: none;
-  color: ${colors.light.grayscale[70]};
-  ${typography.styles.body2};
-  cursor: pointer;
-  margin-bottom: 1.5rem;
-  transition: color 0.2s ease;
-
-  &:hover {
-    color: ${colors.light.grayscale[100]};
-  }
-
-  @media (min-width: 1025px) {
-    display: none;
+    padding: 2rem;
   }
 `;
 
@@ -50,6 +27,10 @@ export const InputCard = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
+
+  @media (max-width: 768px) {
+    padding-top: 3rem;
+  }
 `;
 
 export const MiddleWrapper = styled.div`

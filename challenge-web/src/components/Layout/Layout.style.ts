@@ -1,17 +1,14 @@
-import styled from '@emotion/styled';
-import { colors, typography } from '../../styles/design-system';
+import styled from "@emotion/styled";
+import { colors, typography } from "../../styles/design-system";
 
 export const LayoutContainer = styled.div`
   display: flex;
   min-height: 100vh;
-  background: ${colors.light.grayscale[5]};
 `;
 
 export const Sidebar = styled.aside`
   width: 250px;
-  background: ${colors.light.grayscale[0]};
   border-right: 1px solid ${colors.light.grayscale[20]};
-  padding: 2rem 0;
   position: fixed;
   height: 100vh;
   overflow-y: auto;
@@ -22,33 +19,39 @@ export const Sidebar = styled.aside`
 `;
 
 export const Logo = styled.div`
-  padding: 0 1.5rem;
-  margin-bottom: 2rem;
+  padding: 1.75rem;
+  cursor: pointer;
 `;
 
 export const LogoText = styled.h1`
-  ${typography.styles.title2};
   color: ${colors.light.grayscale[100]};
-  margin: 0;
-  font-weight: ${typography.fontWeight.bold};
+  font-size: 1.25rem;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
 `;
 
 export const Nav = styled.nav`
   display: flex;
+  padding: 0 1.25rem;
   flex-direction: column;
-  gap: 0.5rem;
-  padding: 0 1rem;
+  align-items: flex-start;
+  flex: 1 0 0;
+  align-self: stretch;
 `;
 
 export const NavItem = styled.button<{ active: boolean }>`
   display: flex;
+  height: 3.25rem;
+  padding: 1rem 1.25rem;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem 1rem;
+  gap: 0.5rem;
+  align-self: stretch;
+
   background: ${(props) =>
-    props.active ? colors.light.brand.primary10 : 'transparent'};
+    props.active ? colors.light.brand.primary10 : "transparent"};
   border: none;
-  border-radius: 0.5rem;
+  border-radius: 0.75rem;
   cursor: pointer;
   transition: all 0.2s ease;
   text-align: left;
@@ -56,23 +59,33 @@ export const NavItem = styled.button<{ active: boolean }>`
 
   &:hover {
     background: ${(props) =>
-      props.active
-        ? colors.light.brand.primary10
-        : colors.light.grayscale[10]};
+      props.active ? colors.light.brand.primary10 : colors.light.grayscale[10]};
   }
 `;
 
-export const NavIcon = styled.span`
-  font-size: 1.25rem;
+export const NavIcon = styled.span<{ active: boolean }>`
+  width: 1.25rem;
+  height: 1.25rem;
+
   display: flex;
   align-items: center;
   justify-content: center;
+
+  & path {
+    stroke: ${(props) =>
+      props.active
+        ? colors.light.brand.primary100
+        : colors.light.grayscale[70]};
+  }
 `;
 
-export const NavLabel = styled.span`
+export const NavLabel = styled.span<{ active: boolean }>`
   ${typography.styles.body2};
-  color: ${colors.light.grayscale[90]};
+  color: ${colors.light.grayscale[70]};
   font-weight: ${typography.fontWeight.regular};
+
+  color: ${(props) =>
+    props.active ? colors.light.grayscale[100] : colors.light.grayscale[70]};
 `;
 
 export const MainContent = styled.main`
