@@ -93,16 +93,15 @@ const Layout: React.FC = () => {
           {navItems.map((item) => (
             <S.NavItem
               key={item.path}
-              active={location.pathname === item.path}
+              $active={location.pathname === item.path}
               onClick={() => navigate(item.path)}
               isOpen={isSidebarOpen}
             >
-              <S.NavIcon
-                active={location.pathname === item.path}
-                as={item.icon}
-              />
+              <S.NavIcon $active={location.pathname === item.path}>
+                <item.icon />
+              </S.NavIcon>
               <S.NavLabel
-                active={location.pathname === item.path}
+                $active={location.pathname === item.path}
                 isOpen={isSidebarOpen}
               >
                 {item.label}

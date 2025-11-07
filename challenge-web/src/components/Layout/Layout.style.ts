@@ -149,7 +149,7 @@ export const Nav = styled.nav`
   align-self: stretch;
 `;
 
-export const NavItem = styled.button<{ active: boolean; isOpen: boolean }>`
+export const NavItem = styled.button<{ $active: boolean; isOpen: boolean }>`
   display: flex;
   height: 3.25rem;
   padding: 1rem 1.25rem;
@@ -158,7 +158,7 @@ export const NavItem = styled.button<{ active: boolean; isOpen: boolean }>`
   align-self: stretch;
 
   background: ${(props) =>
-    props.active ? colors.light.brand.primary10 : "transparent"};
+    props.$active ? colors.light.brand.primary10 : "transparent"};
   border: none;
   border-radius: 0.75rem;
   cursor: pointer;
@@ -169,7 +169,9 @@ export const NavItem = styled.button<{ active: boolean; isOpen: boolean }>`
 
   &:hover {
     background: ${(props) =>
-      props.active ? colors.light.brand.primary10 : colors.light.grayscale[10]};
+      props.$active
+        ? colors.light.brand.primary10
+        : colors.light.grayscale[10]};
   }
 
   /* 데스크톱 닫힘 상태 */
@@ -180,7 +182,7 @@ export const NavItem = styled.button<{ active: boolean; isOpen: boolean }>`
   }
 `;
 
-export const NavIcon = styled.span<{ active: boolean }>`
+export const NavIcon = styled.span<{ $active: boolean }>`
   width: 1.25rem;
   height: 1.25rem;
   display: flex;
@@ -190,20 +192,20 @@ export const NavIcon = styled.span<{ active: boolean }>`
 
   & path {
     stroke: ${(props) =>
-      props.active
+      props.$active
         ? colors.light.brand.primary100
         : colors.light.grayscale[70]};
   }
 `;
 
-export const NavLabel = styled.span<{ active: boolean; isOpen: boolean }>`
+export const NavLabel = styled.span<{ $active: boolean; isOpen: boolean }>`
   ${typography.styles.body2};
   color: ${colors.light.grayscale[70]};
   font-weight: ${typography.fontWeight.regular};
   white-space: nowrap; // 줄바꿈 방지
 
   color: ${(props) =>
-    props.active ? colors.light.grayscale[100] : colors.light.grayscale[70]};
+    props.$active ? colors.light.grayscale[100] : colors.light.grayscale[70]};
 
   /* 데스크톱 닫힘 상태 */
   @media (min-width: 1025px) {
