@@ -234,8 +234,7 @@ export const LoadingText = styled.p`
 // 결과 레이아웃
 export const ResultLayout = styled.div`
   display: grid;
-  grid-template-columns: 1fr 1.2fr;
-  gap: 2rem;
+  grid-template-columns: 1fr 1fr;
   align-items: start;
   width: 100%; /* 너비 100% */
 
@@ -253,6 +252,7 @@ export const LeftSection = styled.div`
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
+  padding: 0 1.25rem;
 
   @media (max-width: 1024px) {
     position: relative;
@@ -393,46 +393,43 @@ export const ChannelSubscribers = styled.div`
 export const RightSection = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  padding: 0 1.25rem;
+`;
+
+export const RightWrapper = styled.div`
+  border: 1px solid ${colors.light.grayscale[20]};
+  background: ${colors.light.grayscale[0]};
+
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  border-radius: 0.75rem;
 `;
 
 // 총점 카드
 export const ScoreCard = styled.div`
-  background: ${colors.light.grayscale[0]};
-  border: 1px solid ${colors.light.grayscale[20]};
-  border-radius: 0.75rem;
-  padding: 2rem;
-  text-align: center;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  padding: 2rem 2rem 1.25rem 2rem; /* 상하 패딩 조정 */
+  text-align: left; /* 텍스트 왼쪽 정렬 */
 `;
 
 export const TotalScore = styled.div<{ score: number }>`
-  font-size: 4rem;
-  font-weight: ${typography.fontWeight.bold};
-  font-family: ${typography.fontFamily.primary};
+  ${typography.styles.headline2};
+
   color: ${(props) => {
     if (props.score >= 70) return colors.light.state.success;
     if (props.score >= 50) return colors.light.etc.orange;
     return colors.light.state.error;
   }};
   line-height: 1;
-  margin-bottom: 0.5rem;
+  margin-bottom: 1rem; /* Summary와의 간격 */
 `;
 
 export const ScoreDescription = styled.p`
-  ${typography.styles.body2};
-  color: ${colors.light.grayscale[70]};
-  margin: 1rem 0 0 0;
-  line-height: 1.6;
+  ${typography.styles.body3};
+  color: ${colors.light.grayscale[80]};
 `;
 
-// 세로 막대 그래프 카드
+// 세로 막대 그래프 카드 (차트 자체는 디자인 유지)
 export const ChartCard = styled.div`
-  background: ${colors.light.grayscale[0]};
-  border: 1px solid ${colors.light.grayscale[20]};
-  border-radius: 0.75rem;
-  padding: 1.5rem;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  padding: 1.25rem 2rem;
 `;
 
 export const ChartTitle = styled.h3`
@@ -444,10 +441,10 @@ export const ChartTitle = styled.h3`
 export const ChartContainer = styled.div`
   display: flex;
   justify-content: space-around;
-  /* align-items: flex-end; */
-  gap: 1rem;
-  height: 200px;
-  padding: 0 1rem;
+  gap: 1.25rem;
+  height: 15rem;
+  padding: 0 0.75rem;
+  align-self: stretch;
 `;
 
 export const ChartColumn = styled.div`
@@ -457,7 +454,6 @@ export const ChartColumn = styled.div`
   justify-content: flex-end;
   gap: 0.5rem;
   flex: 1;
-  max-width: 80px;
 `;
 
 export const ChartBarVertical = styled.div<{ height: number; color: string }>`
@@ -475,8 +471,8 @@ export const ChartValue = styled.div<{ score: number }>`
   top: -1.5rem;
   left: 50%;
   transform: translateX(-50%);
-  ${typography.styles.body4};
-  font-weight: ${typography.fontWeight.bold};
+  ${typography.styles.title5};
+
   color: ${(props) => {
     if (props.score >= 70) return colors.light.state.success;
     if (props.score >= 50) return colors.light.etc.orange;
@@ -486,79 +482,106 @@ export const ChartValue = styled.div<{ score: number }>`
 `;
 
 export const ChartLabel = styled.div`
-  ${typography.styles.body4};
+  ${typography.styles.caption3};
   color: ${colors.light.grayscale[70]};
   text-align: center;
-  font-weight: ${typography.fontWeight.semibold};
 `;
 
 // Collapsible 섹션
 export const CollapsibleCard = styled.div`
-  background: ${colors.light.grayscale[0]};
-  border: 1px solid ${colors.light.grayscale[20]};
-  border-radius: 0.75rem;
   overflow: hidden;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+
+  &:last-child {
+    border-bottom-left-radius: 0.75rem;
+    border-bottom-right-radius: 0.75rem;
+  }
 `;
 
 export const CollapsibleHeader = styled.button<{ isOpen: boolean }>`
-  width: 100%;
   display: flex;
-  justify-content: space-between;
+  height: 3.5rem;
+  padding: 0.75rem 2rem;
   align-items: center;
-  padding: 1.25rem 1.5rem;
-  background: ${(props) =>
-    props.isOpen ? colors.light.grayscale[5] : colors.light.grayscale[0]};
-  border: none;
+  gap: 1rem;
+  align-self: stretch;
+
+  width: 100%;
+  justify-content: space-between;
+  background: ${colors.light.grayscale[5]};
   cursor: pointer;
   transition: all 0.2s ease;
 
+  /* 열렸을 때만 하단 보더 표시 */
+  border-bottom: ${(props) =>
+    props.isOpen ? `1px solid ${colors.light.grayscale[20]}` : "none"};
+
   &:hover {
-    background: ${colors.light.grayscale[5]};
+    background: ${colors.light.grayscale[10]};
   }
 `;
 
 export const CollapsibleTitle = styled.h3`
-  ${typography.styles.title4};
-  color: ${colors.light.grayscale[90]};
+  ${typography.styles.title3};
+  color: ${colors.light.grayscale[100]};
   margin: 0;
   display: flex;
   align-items: center;
   gap: 0.5rem;
-`;
 
+  /* 💡 점수/개수 텍스트 스타일 수정 (이미지 통일) */
+  span {
+    ${typography.styles.title3}; /* Header 제목과 동일한 폰트 사이즈 */
+    font-weight: ${typography.fontWeight.bold};
+    padding: 0; /* 패딩 제거 */
+    background: none; /* 배경 제거 */
+    border-radius: 0;
+  }
+`;
 export const CollapsibleIcon = styled.span<{ isOpen: boolean }>`
+  /* 아이콘 중앙 정렬 및 크기 지정 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  width: 1.5rem;
+  height: 1.5rem;
+
+  /* 애니메이션 설정 */
   transform: ${(props) => (props.isOpen ? "rotate(180deg)" : "rotate(0deg)")};
   transition: transform 0.2s ease;
-  font-size: 0.875rem;
-  color: ${colors.light.grayscale[60]};
+
+  color: ${colors.light.grayscale[70]}; /* 100에서 70으로 조정 */
+
+  /* SVG 아이콘 크기 설정 */
+  svg {
+    width: 100%;
+    height: 100%;
+  }
 `;
 
 export const CollapsibleContent = styled.div<{ isOpen: boolean }>`
-  max-height: ${(props) => (props.isOpen ? "5000px" : "0")};
+  max-height: ${(props) => (props.isOpen ? "1500px" : "0")};
   overflow: hidden;
-  transition: max-height 0.3s ease;
+  transition: max-height 0.4s ease-in-out; // 0.3s에서 0.4s로, ease-out에서 ease-in-out으로 변경
+  background: ${colors.light.grayscale[0]};
 `;
 
 export const CollapsibleBody = styled.div`
-  padding: 0 1.5rem 1.5rem 1.5rem;
+  padding: 1.5rem;
 `;
 
-// 채널 점수 섹션 (Collapsible 내부)
+// 채널 점수 섹션
 export const ChannelScoreContent = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0rem;
 `;
 
 export const ScoreRow = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.75rem;
-  background: ${colors.light.grayscale[5]};
-  border: 1px solid ${colors.light.grayscale[20]};
-  border-radius: 0.5rem;
+  padding: 0.75rem 0;
 `;
 
 export const ScoreLabel = styled.span`
@@ -567,7 +590,7 @@ export const ScoreLabel = styled.span`
 `;
 
 export const ScoreValue = styled.span<{ score?: number }>`
-  ${typography.styles.title5};
+  ${typography.styles.body3};
   color: ${(props) => {
     if (!props.score) return colors.light.grayscale[90];
     if (props.score >= 70) return colors.light.state.success;
@@ -577,11 +600,11 @@ export const ScoreValue = styled.span<{ score?: number }>`
   font-weight: ${typography.fontWeight.bold};
 `;
 
-// 분석 내용
+// 분석 내용 (논리적 오류, 편향성 등)
 export const AnalysisContent = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0.75rem;
 `;
 
 export const AnalysisItem = styled.div`
