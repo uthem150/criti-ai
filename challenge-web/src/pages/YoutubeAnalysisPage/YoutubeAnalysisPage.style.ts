@@ -8,10 +8,13 @@ export const Container = styled.div`
 `;
 
 export const ContentWrapper = styled.div`
-  width: 100%;
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 2rem;
+  display: flex;
+  padding: 12.5rem 1.25rem;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.75rem;
+  flex: 1 0 0;
+  align-self: stretch;
 
   @media (max-width: 768px) {
     padding: 1rem;
@@ -43,28 +46,37 @@ export const BackButton = styled.button`
 
 // 입력 카드
 export const InputCard = styled.div`
-  border-radius: 0.75rem;
-  padding: 12.5rem 1.25rem;
-  margin-bottom: 2rem;
-  text-align: center;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`;
+
+export const MiddleWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
 `;
 
 export const TitleAndDescriptionWrapper = styled.div`
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  margin-bottom: 2.5rem;
 `;
 
 export const InputTitle = styled.h2`
   ${typography.styles.headline2};
   color: ${colors.light.grayscale[100]};
   margin-bottom: 0.5rem;
+  text-align: center;
 `;
 
 export const InputDescription = styled.p`
   ${typography.styles.body2};
   color: ${colors.light.grayscale[70]};
-  margin-bottom: 2rem;
+  text-align: center;
 `;
 
 export const InputGroup = styled.div`
@@ -80,9 +92,7 @@ export const InputGroup = styled.div`
   background: ${colors.light.grayscale[0]};
   box-shadow: 0 0 20px 0 ${colors.light.brand.primary20};
 
-  gap: 0.75rem;
-  max-width: 700px;
-  margin: 0 auto;
+  gap: 0.62rem;
 
   @media (max-width: 640px) {
     flex-direction: column;
@@ -115,21 +125,18 @@ export const Input = styled.input`
 `;
 
 export const SubmitButton = styled.button<{ disabled?: boolean }>`
-  padding: 0.875rem 1.5rem;
-  background: ${colors.light.brand.primary100};
-  color: ${colors.light.grayscale[0]};
-  border: none;
-  border-radius: 0.5rem;
-  ${typography.styles.title5};
-  cursor: ${(props) => (props.disabled ? "not-allowed" : "pointer")};
-  opacity: ${(props) => (props.disabled ? 0.6 : 1)};
-  transition: all 0.2s ease;
   display: flex;
-  align-items: center;
+  width: 2rem;
+  height: 2rem;
   justify-content: center;
-  gap: 0.5rem;
-  white-space: nowrap;
-  min-width: 120px;
+  align-items: center;
+  gap: 0.35713rem;
+
+  border-radius: 0.5rem;
+  opacity: 0.4;
+  background: ${colors.light.brand.primary100};
+  transition: all 0.2s ease;
+  cursor: ${(props) => (props.disabled ? "not-allowed" : "pointer")};
 
   &:hover:not(:disabled) {
     opacity: 0.9;
