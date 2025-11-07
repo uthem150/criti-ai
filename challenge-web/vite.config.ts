@@ -1,5 +1,5 @@
 import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
+import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import svgr from "vite-plugin-svgr";
 
@@ -7,11 +7,9 @@ import svgr from "vite-plugin-svgr";
 export default defineConfig(({ mode }) => ({
   plugins: [
     react({
-      jsxImportSource: "@emotion/react",
-      babel: {
-        // Emotion babel 플러그인은 프로덕션 빌드에만 적용 (개발 속도 향상)
-        plugins: mode === "production" ? ["@emotion/babel-plugin"] : [],
-      },
+      // Emotion SWC 플러그인 설정
+      // 개발 모드에서만 디버깅용 클래스 이름 활성화
+      plugins: [["@swc/plugin-emotion", { autoLabel: "dev-only" }]],
     }),
     svgr(),
   ],
