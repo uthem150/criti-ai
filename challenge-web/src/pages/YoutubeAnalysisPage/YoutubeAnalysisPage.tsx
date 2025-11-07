@@ -1,5 +1,4 @@
 import { useState, useRef } from "react";
-import { useNavigate } from "react-router-dom";
 import YouTube, { YouTubePlayer } from "react-youtube";
 import { useYoutubeAnalysis } from "../../hooks/useYoutubeAnalysis";
 import Send from "@/assets/icons/send.svg?react";
@@ -14,6 +13,7 @@ import {
 import { colors } from "../../styles/design-system";
 import * as S from "./YoutubeAnalysisPage.style";
 import styled from "@emotion/styled";
+import LoadingSpinner from "@/components/LoadingSpinner/LoadingSpinner";
 
 const StyledMagnifier = styled(Magnifier)`
   display: flex;
@@ -26,7 +26,6 @@ const StyledMagnifier = styled(Magnifier)`
 `;
 
 const YoutubeAnalysisPage = () => {
-  const navigate = useNavigate();
   const playerRef = useRef<YouTubePlayer | null>(null);
 
   const {
@@ -85,7 +84,7 @@ const YoutubeAnalysisPage = () => {
 
   return (
     <S.Container>
-      <S.ContentWrapper>
+      <S.ContentWrapper isAnalysis={!!analysis}>
         {/* 입력 화면 */}
         {!analysis && !loading && (
           <S.InputCard>
@@ -124,11 +123,10 @@ const YoutubeAnalysisPage = () => {
             )}
           </S.InputCard>
         )}
-
         {/* 로딩 화면 */}
         {loading && ( // 훅에서 제공하는 loading
           <S.LoadingCard>
-            <S.LoadingSpinner />
+            <LoadingSpinner />
             <S.LoadingText>
               영상을 분석하고 있습니다... 잠시만 기다려주세요.
             </S.LoadingText>
@@ -140,6 +138,8 @@ const YoutubeAnalysisPage = () => {
           <S.ResultLayout>
             {/* 왼쪽: 영상 + 채널 정보 (Sticky) */}
             <S.LeftSection>
+              {/* 뒤로가기 (모바일) */}
+              <S.BackButton onClick={handleReset}>←</S.BackButton>
               {/* 영상 플레이어 */}
               {analysis.videoInfo && (
                 <>
@@ -184,36 +184,38 @@ const YoutubeAnalysisPage = () => {
                   </S.VideoInfo>
 
                   {/* 채널 정보 */}
-                  <S.ChannelInfo>
-                    <S.ChannelHeader>
-                      {analysis.channelCredibility.channelImageUrl && (
-                        <S.ChannelImage
-                          src={analysis.channelCredibility.channelImageUrl}
-                          alt={analysis.videoInfo.channelName}
-                        />
-                      )}
-                      <S.ChannelTextInfo>
-                        <S.ChannelName>
-                          {analysis.videoInfo.channelName}
-                        </S.ChannelName>
-                        <S.ChannelSubscribers>
-                          구독자{" "}
-                          {formatLargeNumber(
-                            analysis.channelCredibility.subscriberCount
-                          )}
-                          명
-                        </S.ChannelSubscribers>
-                      </S.ChannelTextInfo>
-                    </S.ChannelHeader>
-                  </S.ChannelInfo>
+                  <S.LeftBottom>
+                    <S.ChannelInfo>
+                      <S.ChannelHeader>
+                        {analysis.channelCredibility.channelImageUrl && (
+                          <S.ChannelImage
+                            src={analysis.channelCredibility.channelImageUrl}
+                            alt={analysis.videoInfo.channelName}
+                          />
+                        )}
+                        <S.ChannelTextInfo>
+                          <S.ChannelName>
+                            {analysis.videoInfo.channelName}
+                          </S.ChannelName>
+                          <S.ChannelSubscribers>
+                            구독자{" "}
+                            {formatLargeNumber(
+                              analysis.channelCredibility.subscriberCount
+                            )}
+                            명
+                          </S.ChannelSubscribers>
+                        </S.ChannelTextInfo>
+                      </S.ChannelHeader>
+                    </S.ChannelInfo>
 
-                  {/* 다른 영상 분석 버튼 */}
-                  <S.InputGroup style={{ marginTop: "1.5rem" }}>
-                    <S.Input type="text" value={url} readOnly disabled />
-                    <S.SubmitButton onClick={handleReset}>
-                      <span>🔄</span>
-                    </S.SubmitButton>
-                  </S.InputGroup>
+                    {/* 다른 영상 분석 버튼 */}
+                    <S.InputGroup style={{ marginTop: "1.5rem" }}>
+                      <S.Input type="text" value={url} readOnly disabled />
+                      <S.SubmitButton onClick={handleReset}>
+                        <span>🔄</span>
+                      </S.SubmitButton>
+                    </S.InputGroup>
+                  </S.LeftBottom>
                 </>
               )}
             </S.LeftSection>

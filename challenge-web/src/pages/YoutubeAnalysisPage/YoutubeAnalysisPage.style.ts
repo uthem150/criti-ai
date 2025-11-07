@@ -5,9 +5,10 @@ import { colors, typography } from "../../styles/design-system";
 export const Container = styled.div`
   min-height: 100vh;
   background: ${colors.light.grayscale[5]};
+  display: flex;
 `;
 
-export const ContentWrapper = styled.div`
+export const ContentWrapper = styled.div<{ isAnalysis: boolean }>`
   display: flex;
   padding: 12.5rem 1.25rem;
   flex-direction: column;
@@ -15,9 +16,32 @@ export const ContentWrapper = styled.div`
   gap: 1.75rem;
   flex: 1 0 0;
   align-self: stretch;
+  justify-content: center;
+
+  padding: ${(props) =>
+    props.isAnalysis ? "2.5rem 1.25rem" : "12.5rem 1.25rem"};
 
   @media (max-width: 768px) {
     padding: 2rem;
+  }
+`;
+
+// 뒤로가기 버튼
+export const BackButton = styled.button`
+  display: flex;
+  align-items: center;
+  background: none;
+  color: ${colors.light.grayscale[70]};
+  ${typography.styles.body2};
+  cursor: pointer;
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: ${colors.light.grayscale[100]};
+  }
+
+  @media (max-width: 1025px) {
+    display: none;
   }
 `;
 
@@ -100,7 +124,7 @@ export const Input = styled.input`
   box-shadow: none;
   background: transparent;
 
-  color: ${colors.light.grayscale[40]};
+  color: ${colors.light.grayscale[100]};
   font-family: ${typography.fontFamily.primary};
   font-style: normal;
   font-weight: 400;
@@ -114,7 +138,6 @@ export const Input = styled.input`
   }
 
   &:disabled {
-    background: ${colors.light.grayscale[10]};
     cursor: not-allowed;
   }
 
@@ -195,28 +218,11 @@ export const ErrorMessage = styled.div`
 
 // 로딩
 export const LoadingCard = styled.div`
-  background: ${colors.light.grayscale[0]};
-  border: 1px solid ${colors.light.grayscale[20]};
-  border-radius: 0.75rem;
-  padding: 4rem 2rem;
-  text-align: center;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
-`;
-
-export const LoadingSpinner = styled.div`
-  width: 48px;
-  height: 48px;
-  border: 3px solid ${colors.light.grayscale[20]};
-  border-top-color: ${colors.light.brand.primary100};
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-  margin: 0 auto 1.5rem;
-
-  @keyframes spin {
-    to {
-      transform: rotate(360deg);
-    }
-  }
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+  justify-content: center; /* 수평 중앙 정렬 */
+  align-items: center; /* 수직 중앙 정렬 */
 `;
 
 export const LoadingText = styled.p`
@@ -241,14 +247,12 @@ export const ResultLayout = styled.div`
 // 왼쪽 섹션 (Sticky)
 export const LeftSection = styled.div`
   position: sticky;
-  top: 2rem;
-  background: ${colors.light.grayscale[0]};
-  border: 1px solid ${colors.light.grayscale[20]};
-  border-radius: 0.75rem;
-  padding: 1.5rem;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  top: 2.5rem;
   width: 100%; /* 너비 100% */
   box-sizing: border-box; /* 패딩 포함 */
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
 
   @media (max-width: 1024px) {
     position: relative;
@@ -292,6 +296,11 @@ export const VideoMeta = styled.div`
   gap: 0.5rem;
   ${typography.styles.body4};
   color: ${colors.light.grayscale[60]};
+`;
+
+export const LeftBottom = styled.div`
+  display: flex;
+  flex-direction: column;
 `;
 
 // 채널 정보
