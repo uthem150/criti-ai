@@ -81,6 +81,9 @@ export const InputDescription = styled.p`
 
 export const InputGroup = styled.div`
   display: flex;
+  flex-direction: row;
+  width: 100%;
+  box-sizing: border-box;
   height: 3rem;
   padding: 1rem 1.25rem;
   align-items: center;
@@ -92,15 +95,29 @@ export const InputGroup = styled.div`
   background: ${colors.light.grayscale[0]};
   box-shadow: 0 0 20px 0 ${colors.light.brand.primary20};
 
-  gap: 0.62rem;
-
+  /* 2. 모바일 스타일 (세로 배치 덮어쓰기) */
   @media (max-width: 640px) {
     flex-direction: column;
+    gap: 0.625rem;
+
+    /* 모바일에서는 그룹의 테두리/그림자 제거 */
+    border: none;
+    background: transparent;
+    box-shadow: none;
+    padding: 0;
+    min-height: auto;
   }
 `;
 
 export const Input = styled.input`
   flex: 1;
+  min-width: 0;
+  text-align: left;
+  height: auto;
+  padding: 0.875rem 1.25rem;
+  border: none;
+  box-shadow: none;
+  background: transparent;
 
   color: ${colors.light.grayscale[40]};
   font-family: ${typography.fontFamily.primary};
@@ -108,9 +125,6 @@ export const Input = styled.input`
   font-weight: 400;
   line-height: normal;
   letter-spacing: -0.02rem;
-
-  padding: 0.875rem 1.25rem;
-  border: none;
   outline: none;
   transition: all 0.2s ease;
 
@@ -122,15 +136,30 @@ export const Input = styled.input`
     background: ${colors.light.grayscale[10]};
     cursor: not-allowed;
   }
+
+  /* 모바일 스타일 (테두리/그림자 추가) */
+  @media (max-width: 640px) {
+    width: 100%;
+    box-sizing: border-box;
+    height: 3rem;
+    text-align: center;
+    flex: none;
+
+    /* 모바일에서는 인풋에 직접 스타일 적용 */
+    border-radius: 0.75rem;
+    border: 1px solid rgba(26, 167, 255, 0.6);
+    background: ${colors.light.grayscale[0]};
+    box-shadow: 0 0 20px 0 ${colors.light.brand.primary20};
+  }
 `;
 
 export const SubmitButton = styled.button<{ disabled?: boolean }>`
   display: flex;
   width: 2rem;
   height: 2rem;
+  flex-shrink: 0;
   justify-content: center;
   align-items: center;
-  gap: 0.35713rem;
 
   border-radius: 0.5rem;
   opacity: 0.4;
@@ -148,8 +177,20 @@ export const SubmitButton = styled.button<{ disabled?: boolean }>`
     transform: translateY(0);
   }
 
+  /* 모바일 스타일 */
   @media (max-width: 640px) {
     width: 100%;
+    min-height: 2rem;
+    border-radius: 0.75rem; /* 인풋과 동일하게 */
+    opacity: 1; /* 불투명하게 */
+    flex-shrink: 1; /* 초기화 */
+
+    /* 모바일용 hover */
+    &:hover:not(:disabled) {
+      opacity: 0.9;
+      transform: none;
+      box-shadow: none;
+    }
   }
 `;
 
@@ -162,6 +203,8 @@ export const ErrorMessage = styled.div`
   ${typography.styles.body3};
   margin-top: 1rem;
   max-width: 700px;
+  width: 100%;
+  box-sizing: border-box;
   margin-left: auto;
   margin-right: auto;
   display: flex;
@@ -207,6 +250,7 @@ export const ResultLayout = styled.div`
   grid-template-columns: 1fr 1.2fr;
   gap: 2rem;
   align-items: start;
+  width: 100%; /* 너비 100% */
 
   @media (max-width: 1024px) {
     grid-template-columns: 1fr;
@@ -222,6 +266,8 @@ export const LeftSection = styled.div`
   border-radius: 0.75rem;
   padding: 1.5rem;
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  width: 100%; /* 너비 100% */
+  box-sizing: border-box; /* 패딩 포함 */
 
   @media (max-width: 1024px) {
     position: relative;

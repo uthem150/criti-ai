@@ -107,7 +107,7 @@ const YoutubeAnalysisPage = () => {
               <S.InputGroup>
                 <S.Input
                   type="text"
-                  placeholder="https://www.youtube.com/watch?v=..."
+                  placeholder="유튜브 링크를 붙여넣어주세요"
                   value={url}
                   onChange={(e) => setUrl(e.target.value)}
                   onKeyPress={handleKeyPress}
