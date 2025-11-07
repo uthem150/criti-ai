@@ -3,12 +3,17 @@ import YouTube, { YouTubePlayer } from "react-youtube";
 import { useYoutubeAnalysis } from "../../hooks/useYoutubeAnalysis";
 import Send from "@/assets/icons/send.svg?react";
 import Magnifier from "@/assets/icons/magnifier.svg?react";
+import ArrowLLeft from "@/assets/icons/arrow-left.svg?react";
+
+import Eye from "@/assets/icons/eye.svg?react";
+import Like from "@/assets/icons/thumb-up.svg?react";
+import Calendar from "@/assets/icons/calendar.svg?react";
 
 import {
   formatTime,
-  formatNumber,
   formatLargeNumber,
   getScoreColor,
+  formatDate,
 } from "../../utils";
 import { colors } from "../../styles/design-system";
 import * as S from "./YoutubeAnalysisPage.style";
@@ -23,6 +28,21 @@ const StyledMagnifier = styled(Magnifier)`
   justify-content: center;
   align-items: center;
   aspect-ratio: 1/1;
+`;
+
+const StyledArrowLLeft = styled(ArrowLLeft)`
+  display: flex;
+  width: 2.5rem;
+  height: 2.5rem;
+  justify-content: center;
+  align-items: center;
+  aspect-ratio: 1/1;
+  cursor: pointer;
+
+  &:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+  }
 `;
 
 const YoutubeAnalysisPage = () => {
@@ -139,10 +159,44 @@ const YoutubeAnalysisPage = () => {
             {/* 왼쪽: 영상 + 채널 정보 (Sticky) */}
             <S.LeftSection>
               {/* 뒤로가기 (모바일) */}
-              <S.BackButton onClick={handleReset}>←</S.BackButton>
+              <StyledArrowLLeft onClick={handleReset} />
+
+              <S.VideoBadgesWrapper>
+                <S.VideoBadge type="time">
+                  {formatTime(analysis.videoInfo.duration)}
+                </S.VideoBadge>
+                <S.VideoBadge type="video">
+                  {analysis.videoInfo.isShorts ? "Shorts" : "Video"}
+                </S.VideoBadge>
+              </S.VideoBadgesWrapper>
+
               {/* 영상 플레이어 */}
               {analysis.videoInfo && (
                 <>
+                  {/* 영상 정보 */}
+                  <S.VideoInfo>
+                    <S.VideoTitle>{analysis.videoInfo.title}</S.VideoTitle>
+                    <S.VideoMeta>
+                      <S.VideoMetaGroup>
+                        {/* 1. 조회수 */}
+                        <S.VideoStatsWrapper>
+                          <Eye />
+                          {formatLargeNumber(analysis.videoInfo.viewCount)}
+                        </S.VideoStatsWrapper>
+                        {/* 2. 좋아요 */}
+                        <S.VideoStatsWrapper>
+                          <Like />
+                          {formatLargeNumber(analysis.videoInfo.likeCount)}
+                        </S.VideoStatsWrapper>
+                        {/* 3. 게시일 */}
+                        <S.VideoStatsWrapper>
+                          <Calendar />
+                          {formatDate(analysis.videoInfo.publishedAt)}
+                        </S.VideoStatsWrapper>
+                      </S.VideoMetaGroup>
+                    </S.VideoMeta>
+                  </S.VideoInfo>
+
                   <S.PlayerWrapper>
                     <YouTube
                       key={analysis.videoInfo.videoId}
@@ -168,20 +222,6 @@ const YoutubeAnalysisPage = () => {
                       }}
                     />
                   </S.PlayerWrapper>
-
-                  {/* 영상 정보 */}
-                  <S.VideoInfo>
-                    <S.VideoTitle>{analysis.videoInfo.title}</S.VideoTitle>
-                    <S.VideoMeta>
-                      <span>
-                        조회수 {formatNumber(analysis.videoInfo.viewCount)}
-                      </span>
-                      <span>•</span>
-                      <span>
-                        {analysis.videoInfo.isShorts ? "Shorts" : "Video"}
-                      </span>
-                    </S.VideoMeta>
-                  </S.VideoInfo>
 
                   {/* 채널 정보 */}
                   <S.LeftBottom>

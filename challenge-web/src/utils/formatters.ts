@@ -3,12 +3,32 @@
  */
 
 /**
+ * ISO 8601 형식의 날짜 문자열 "YYYY. M. D" 형식으로 포매팅
+ * @param isoString 'YYYY-MM-DDTHH:mm:ssZ' 형식의 문자열
+ * @returns 'YYYY. M. D' 형식의 문자열 (예: 2025. 11. 6)
+ */
+export const formatDate = (isoString: string) => {
+  if (!isoString) return "";
+
+  // Date 객체 생성. (Z가 붙어있으므로 UTC 기준)
+  const date = new Date(isoString);
+
+  // 로컬 시간대로 년, 월, 일 가져옴
+  const year = date.getFullYear();
+  // getMonth()는 0부터 시작하므로 1을 더함
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+
+  return `${year}. ${month}. ${day}`;
+};
+
+/**
  * 초를 분:초 형식으로 변환
  * @example formatTime(125) => "2:05"
  */
 export const formatTime = (seconds: number): string => {
   if (!seconds || seconds < 0) return "0:00";
-  
+
   const mins = Math.floor(seconds / 60);
   const secs = Math.floor(seconds % 60);
   return `${mins}:${secs.toString().padStart(2, "0")}`;
@@ -31,35 +51,35 @@ export const formatNumber = (num: number | null | undefined): string => {
  */
 export const formatLargeNumber = (num: number | null | undefined): string => {
   if (num === null || num === undefined) return "0";
-  
+
   // 1만 이상
   if (num >= 10000) {
     const man = Math.floor(num / 10000);
     const remainder = num % 10000;
-    
+
     // 나머지가 1000 이상이면 소수점 표시
     if (remainder >= 1000) {
       const decimal = Math.floor(remainder / 1000);
       return `${man.toLocaleString("ko-KR")}.${decimal}만`;
     }
-    
+
     return `${man.toLocaleString("ko-KR")}만`;
   }
-  
+
   // 1천 이상 1만 미만
   if (num >= 1000) {
     const thousand = Math.floor(num / 1000);
     const remainder = num % 1000;
-    
+
     // 나머지가 100 이상이면 소수점 표시
     if (remainder >= 100) {
       const decimal = Math.floor(remainder / 100);
       return `${thousand}.${decimal}천`;
     }
-    
+
     return `${thousand}천`;
   }
-  
+
   // 1000 미만
   return num.toString();
 };

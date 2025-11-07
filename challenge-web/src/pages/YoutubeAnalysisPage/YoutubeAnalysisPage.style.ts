@@ -119,7 +119,7 @@ export const Input = styled.input`
   min-width: 0;
   text-align: left;
   height: auto;
-  padding: 0.875rem 1.25rem;
+  padding: 0.875rem 1.25rem 0.875rem 0rem;
   border: none;
   box-shadow: none;
   background: transparent;
@@ -260,6 +260,37 @@ export const LeftSection = styled.div`
   }
 `;
 
+// --- 영상 정보 상단 뱃지 스타일 ---
+export const VideoBadgesWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.25rem; /* 뱃지 사이 간격 */
+`;
+
+export const VideoBadge = styled.span<{ type: "time" | "video" }>`
+  display: flex;
+  height: 1.75rem;
+  padding: 0.5625rem 0.625rem;
+  justify-content: center;
+  align-items: center;
+  gap: 0.625rem;
+
+  border-radius: 0.375rem;
+  ${typography.styles.caption3}
+  line-height: 1; /* 높이를 깔끔하게 */
+  text-transform: uppercase;
+
+  background: ${(props) =>
+    props.type === "time"
+      ? colors.light.transparency.black[5]
+      : colors.light.etc.redLight};
+
+  color: ${(props) =>
+    props.type === "time"
+      ? colors.light.transparency.black[80]
+      : colors.light.etc.red};
+`;
+
 // 비디오 플레이어
 export const PlayerWrapper = styled.div`
   position: relative;
@@ -280,22 +311,41 @@ export const PlayerWrapper = styled.div`
 `;
 
 export const VideoInfo = styled.div`
-  margin-bottom: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
 `;
 
 export const VideoTitle = styled.h3`
-  ${typography.styles.title4};
-  color: ${colors.light.grayscale[90]};
-  margin: 0 0 0.75rem 0;
-  line-height: 1.4;
+  ${typography.styles.title2};
+  color: ${colors.light.grayscale[100]};
 `;
 
 export const VideoMeta = styled.div`
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  ${typography.styles.body4};
+  gap: 0.75rem;
+`;
+
+export const VideoStatsWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  ${typography.styles.caption3}
   color: ${colors.light.grayscale[60]};
+
+  svg {
+    width: 1rem; /* 16px */
+    height: 1rem; /* 16px */
+    color: ${colors.light.grayscale[60]};
+  }
+`;
+
+// 메타 데이터 항목 전체를 감싸는 래퍼 (구분선 역할을 대체)
+export const VideoMetaGroup = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1.5rem; /* 항목 간의 간격 (조회수-좋아요-게시일) */
 `;
 
 export const LeftBottom = styled.div`
