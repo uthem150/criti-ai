@@ -24,6 +24,7 @@
     /* Path mapping */
     "paths": {
       "@/*": ["./src/*"],
+      "@/assets": ["./src/assets"],
       "@criti-ai/shared/*": ["../shared/src/*"]
     },
 
@@ -32,11 +33,10 @@
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
-    
     /* Performance optimization */
     "incremental": true
   },
-  "include": ["src/**/*", "../shared/src/**/*"],
+  "include": ["src/**/*", "../shared/src/**/*", "custom.d.ts"],
   "exclude": ["node_modules", "dist"],
   "references": [
     {

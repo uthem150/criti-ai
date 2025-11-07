@@ -2,6 +2,8 @@ import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import YouTube, { YouTubePlayer } from "react-youtube";
 import { useYoutubeAnalysis } from "../../hooks/useYoutubeAnalysis";
+import Send from "@/assets/icons/send.svg?react";
+
 import {
   formatTime,
   formatNumber,
@@ -78,10 +80,14 @@ const YoutubeAnalysisPage = () => {
         {/* 입력 화면 */}
         {!analysis && !loading && (
           <S.InputCard>
-            <S.InputTitle>신뢰도 분석을 원하는 링크를 입력하세요.</S.InputTitle>
-            <S.InputDescription>
-              분석하고 싶은 유튜브 영상 또는 쇼츠의 URL을 입력하세요.
-            </S.InputDescription>
+            <S.TitleAndDescriptionWrapper>
+              <S.InputTitle>
+                신뢰도 분석을 원하는 링크를 입력하세요.
+              </S.InputTitle>
+              <S.InputDescription>
+                분석하고 싶은 유튜브 영상 또는 쇼츠의 URL을 입력하세요.
+              </S.InputDescription>
+            </S.TitleAndDescriptionWrapper>
 
             <S.InputGroup>
               <S.Input
@@ -95,6 +101,7 @@ const YoutubeAnalysisPage = () => {
               <S.SubmitButton onClick={handleAnalyze} disabled={loading}>
                 <span>📤</span>
                 분석하기
+                <Send />
               </S.SubmitButton>
             </S.InputGroup>
 

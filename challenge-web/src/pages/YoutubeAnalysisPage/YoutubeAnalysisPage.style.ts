@@ -43,18 +43,21 @@ export const BackButton = styled.button`
 
 // 입력 카드
 export const InputCard = styled.div`
-  background: ${colors.light.grayscale[0]};
-  border: 1px solid ${colors.light.grayscale[20]};
   border-radius: 0.75rem;
-  padding: 3rem 2rem;
+  padding: 12.5rem 1.25rem;
   margin-bottom: 2rem;
   text-align: center;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+`;
+
+export const TitleAndDescriptionWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
 `;
 
 export const InputTitle = styled.h2`
   ${typography.styles.headline2};
-  color: ${colors.light.grayscale[90]};
+  color: ${colors.light.grayscale[100]};
   margin-bottom: 0.5rem;
 `;
 
@@ -66,6 +69,17 @@ export const InputDescription = styled.p`
 
 export const InputGroup = styled.div`
   display: flex;
+  height: 3rem;
+  padding: 1rem 1.25rem;
+  align-items: center;
+  gap: 0.625rem;
+  align-self: stretch;
+
+  border-radius: 0.75rem;
+  border: 1px solid rgba(26, 167, 255, 0.6);
+  background: ${colors.light.grayscale[0]};
+  box-shadow: 0 0 20px 0 ${colors.light.brand.primary20};
+
   gap: 0.75rem;
   max-width: 700px;
   margin: 0 auto;
@@ -77,18 +91,18 @@ export const InputGroup = styled.div`
 
 export const Input = styled.input`
   flex: 1;
-  padding: 0.875rem 1.25rem;
-  ${typography.styles.body2};
+
+  color: ${colors.light.grayscale[40]};
   font-family: ${typography.fontFamily.primary};
-  border: 1px solid ${colors.light.grayscale[30]};
-  border-radius: 0.5rem;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  letter-spacing: -0.02rem;
+
+  padding: 0.875rem 1.25rem;
+  border: none;
   outline: none;
   transition: all 0.2s ease;
-
-  &:focus {
-    border-color: ${colors.light.brand.primary100};
-    box-shadow: 0 0 0 3px ${colors.light.brand.primary10};
-  }
 
   &::placeholder {
     color: ${colors.light.grayscale[40]};
