@@ -569,12 +569,12 @@ export const CollapsibleTitle = styled.h3`
   align-items: center;
   gap: 0.5rem;
 
-  /* 💡 점수/개수 텍스트 스타일 수정 (이미지 통일) */
+  /* 점수/개수 텍스트 스타일 */
   span {
-    ${typography.styles.title3}; /* Header 제목과 동일한 폰트 사이즈 */
+    ${typography.styles.title3};
     font-weight: ${typography.fontWeight.bold};
-    padding: 0; /* 패딩 제거 */
-    background: none; /* 배경 제거 */
+    padding: 0;
+    background: none;
     border-radius: 0;
   }
 `;
@@ -779,4 +779,107 @@ export const EmptyState = styled.div`
   padding: 2rem;
   color: ${colors.light.grayscale[40]};
   ${typography.styles.body3};
+`;
+
+// 논리적 오류 전용 스타일
+export const FallacyTypeSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+
+  &:not(:last-child) {
+    border-bottom: 1px solid ${colors.light.grayscale[20]};
+  }
+`;
+
+export const FallacyTypeHeader = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+`;
+
+export const FallacyTypeName = styled.h3`
+  color: ${colors.light.grayscale[100]};
+  font-size: 1.25rem;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+  letter-spacing: -0.025rem;
+`;
+
+export const FallacyTypeDescription = styled.p`
+  ${typography.styles.body3};
+  color: ${colors.light.grayscale[60]};
+`;
+
+export const FallacyInstancesWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+`;
+
+//  각 카드(영역) 사이의 간격
+export const FallacyInstance = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+`;
+
+export const FallacyCard = styled.div`
+  border-radius: 0.375rem;
+  overflow: hidden; // 자식 컴포넌트가 둥근 모서리를 넘지 않도록
+`;
+
+// 카드 내부의 제목 역할
+export const FallacySectionTitle = styled.div`
+  background: ${colors.light.grayscale[10]};
+  ${typography.styles.title4};
+  color: ${colors.light.grayscale[100]};
+  padding: 0.75rem 1.25rem;
+`;
+
+// 카드 내부에 패딩을 적용할 컨텐츠 래퍼
+export const FallacyCardContent = styled.div`
+  background: ${colors.light.grayscale[5]};
+
+  display: flex;
+  padding: 1.25rem;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.75rem;
+  align-self: stretch;
+`;
+
+// 굵은 텍스트로
+export const FallacyQuote = styled.div`
+  ${typography.styles.title4};
+  color: ${colors.light.grayscale[100]};
+`;
+
+export const FallacyExplanation = styled.p`
+  ${typography.styles.body3};
+  color: ${colors.light.grayscale[70]};
+`;
+
+export const FallacyExamplesList = styled.ul`
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+`;
+
+export const FallacyExampleItem = styled.div`
+  ${typography.styles.body3};
+  color: ${colors.light.grayscale[70]};
+  padding-left: 1.5rem;
+  position: relative;
+
+  &::before {
+    content: "•";
+    position: absolute;
+    left: 0.5rem;
+    color: ${colors.light.grayscale[70]};
+  }
 `;

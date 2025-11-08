@@ -25,6 +25,7 @@ import {
   getClickbaitTypeTitle,
   getPoliticalBiasLabel,
 } from "@/utils/analysisMappers";
+import { TimestampedLogicalFallacy } from "@criti-ai/shared/types";
 
 const StyledMagnifier = styled(Magnifier)`
   display: flex;
@@ -509,7 +510,9 @@ const YoutubeAnalysisPage = () => {
                                     <S.ItemDescription>
                                       {analysis.biasAnalysis.politicalBias.indicators.map(
                                         (indicator, idx) => (
-                                          <div key={idx}>• {indicator}</div>
+                                          <S.FallacyExampleItem key={idx}>
+                                            {indicator}
+                                          </S.FallacyExampleItem>
                                         )
                                       )}
                                     </S.ItemDescription>
@@ -701,28 +704,104 @@ const YoutubeAnalysisPage = () => {
                     <S.CollapsibleContent isOpen={openSections.fallacies}>
                       <S.CollapsibleBody>
                         <S.AnalysisContent>
-                          {analysis.logicalFallacies.map((fallacy, idx) => (
-                            <S.AnalysisItem key={idx}>
-                              <S.ItemHeader>
-                                <S.ItemTitle>{fallacy.type}</S.ItemTitle>
-                                <div style={{ display: "flex", gap: "0.5rem" }}>
-                                  <S.ItemTimestamp
-                                    onClick={() =>
-                                      handleTimestampClick(fallacy.timestamp)
-                                    }
-                                  >
-                                    {formatTime(fallacy.timestamp)}
-                                  </S.ItemTimestamp>
-                                  <S.Badge severity={fallacy.severity}>
-                                    {fallacy.severity}
-                                  </S.Badge>
-                                </div>
-                              </S.ItemHeader>
-                              <S.ItemDescription>
-                                <strong>해당 내용:</strong> "
-                                {fallacy.affectedText}"
-                              </S.ItemDescription>
-                            </S.AnalysisItem>
+                          {/* 타입별로 그룹화 */}
+                          {Object.entries(
+                            analysis.logicalFallacies.reduce(
+                              (acc, fallacy) => {
+                                const type = fallacy.type;
+                                if (!acc[type]) {
+                                  acc[type] = {
+                                    description: fallacy.description,
+                                    instances: [],
+                                  };
+                                }
+                                acc[type].instances.push(fallacy);
+                                return acc;
+                              },
+                              // TypeScript에 reduce의 초기값 {}이 어떤 타입이 될 것인지 명확히 알려줌
+                              {} as Record<
+                                string,
+                                {
+                                  description: string;
+                                  instances: TimestampedLogicalFallacy[];
+                                }
+                              >
+                            )
+                          ).map(([type, data]) => (
+                            <S.FallacyTypeSection key={type}>
+                              {/* 타입 헤더 */}
+                              <S.FallacyTypeHeader>
+                                <S.FallacyTypeName>{type}</S.FallacyTypeName>
+                                <S.FallacyTypeDescription>
+                                  {data.description}
+                                </S.FallacyTypeDescription>
+                              </S.FallacyTypeHeader>
+
+                              {/* 해당 타입의 인스턴스들 */}
+                              <S.FallacyInstancesWrapper>
+                                {data.instances.map((fallacy, idx) => (
+                                  <S.FallacyInstance key={idx}>
+                                    {/* 카드 1: 문제가 된 부분 */}
+                                    <S.FallacyCard>
+                                      <S.FallacySectionTitle>
+                                        문제가 된 부분
+                                      </S.FallacySectionTitle>
+
+                                      <S.FallacyCardContent>
+                                        <S.AnalysisBadgeWrapper>
+                                          <S.ItemTimestamp
+                                            onClick={() =>
+                                              handleTimestampClick(
+                                                fallacy.timestamp
+                                              )
+                                            }
+                                          >
+                                            {formatTime(fallacy.timestamp)}
+                                          </S.ItemTimestamp>
+                                          <S.Badge severity={fallacy.severity}>
+                                            {fallacy.severity}
+                                          </S.Badge>
+                                        </S.AnalysisBadgeWrapper>
+
+                                        <S.FallacyQuote>
+                                          "{fallacy.affectedText}"
+                                        </S.FallacyQuote>
+
+                                        {fallacy.explanation && (
+                                          <S.FallacyExplanation>
+                                            {fallacy.explanation}
+                                          </S.FallacyExplanation>
+                                        )}
+                                      </S.FallacyCardContent>
+                                    </S.FallacyCard>
+
+                                    {/* 카드 2: 비슷한 예시 (예시가 있을 때만 렌더링) */}
+                                    {fallacy.examples &&
+                                      fallacy.examples.length > 0 && (
+                                        <S.FallacyCard>
+                                          <S.FallacySectionTitle>
+                                            비슷한 예시
+                                          </S.FallacySectionTitle>
+
+                                          <S.FallacyCardContent>
+                                            <S.FallacyExamplesList>
+                                              {fallacy.examples.map(
+                                                (example, exIdx) => (
+                                                  <S.FallacyExampleItem
+                                                    key={exIdx}
+                                                  >
+                                                    {example}
+                                                  </S.FallacyExampleItem>
+                                                )
+                                              )}
+                                            </S.FallacyExamplesList>
+                                          </S.FallacyCardContent>
+                                        </S.FallacyCard>
+                                      )}
+                                  </S.FallacyInstance>
+                                ))}
+                              </S.FallacyInstancesWrapper>
+                            </S.FallacyTypeSection>
                           ))}
                         </S.AnalysisContent>
                       </S.CollapsibleBody>

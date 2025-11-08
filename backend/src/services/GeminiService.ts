@@ -1668,8 +1668,8 @@ ${transcript.fullText.substring(0, 5000)}${transcript.fullText.length > 5000 ? "
   
   "logicalFallacies": [
     {
-      "type": "성급한 일반화",
-      "description": "오류에 대한 설명",
+      "type": "Appeal to Fear (공포에 호소하는 오류)",
+      "description": "논리적인 근거 대신 상대방의 공포심을 자극하여 자신의 주장을 받아들이게 하려는 오류입니다.",
       "affectedText": "오류가 포함된 정확한 텍스트",
       "timestamp": 150,
       "endTime": 165,
