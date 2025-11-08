@@ -977,11 +977,13 @@ export const ScoreBarValue = styled.div`
 export const AdSubSection = styled.div`
   display: flex;
   flex-direction: column;
+  gap: 0.75rem;
+  padding: 2rem 0rem 0rem 0rem;
 `;
 
 // "발견된 세부 지표" 같은 하위 섹션 제목
 export const AdSubSectionHeader = styled.h4`
-  ${typography.styles.title5};
+  ${typography.styles.title4};
   color: ${colors.light.grayscale[90]};
   margin: 0;
   padding-bottom: 0.75rem;
@@ -992,6 +994,42 @@ export const AdSubSectionHeader = styled.h4`
 export const AdIndicatorList = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 1.25rem; // 각 지표 사이의 간격
-  padding-top: 1.25rem;
+  gap: 0.75rem; // 각 지표 사이의 간격
+`;
+
+// 논지 분석: 상단 요약 래퍼
+export const AnalysisSummaryWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+`;
+
+// 논지 분석: 요약 텍스트
+export const SummaryText = styled.div`
+  ${typography.styles.body3};
+  color: ${colors.light.grayscale[70]};
+  line-height: 1.6;
+`;
+
+// 논지 분석: 일관성/근거 래퍼
+export const SummaryMetricsWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+`;
+
+// 논지 분석: 키워드 래퍼
+export const KeywordWrapper = styled.div`
+  display: flex;
+  gap: 0.375rem;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 0.75rem;
+`;
+
+// 논지 분석: 키워드 라벨
+export const KeywordLabel = styled.span`
+  ${typography.styles.caption3};
+  color: ${colors.light.grayscale[60]};
+  margin-right: 0.125rem;
 `;

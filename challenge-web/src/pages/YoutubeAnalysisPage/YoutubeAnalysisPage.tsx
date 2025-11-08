@@ -952,52 +952,124 @@ const YoutubeAnalysisPage = () => {
                   </S.CollapsibleCard>
                 )}
 
-                {/* 교차 검증 (Collapsible) */}
-                {analysis.keyClaims && analysis.keyClaims.length > 0 && (
-                  <S.CollapsibleCard>
-                    <S.CollapsibleHeader
-                      isOpen={openSections.claims}
-                      onClick={() => toggleSection("claims")}
-                    >
-                      <S.CollapsibleTitle>
-                        교차 검증
-                        <span style={{ color: colors.light.state.error }}>
-                          {analysis.keyClaims.length > 0 ? "검증 필요" : "완료"}
-                        </span>
-                      </S.CollapsibleTitle>
-                      <S.CollapsibleIcon isOpen={openSections.claims}>
-                        <ChevronDown />
-                      </S.CollapsibleIcon>
-                    </S.CollapsibleHeader>
-                    <S.CollapsibleContent isOpen={openSections.claims}>
-                      <S.CollapsibleBody>
-                        <S.AnalysisContent>
-                          {analysis.keyClaims.map((claim, idx) => (
-                            <S.AnalysisItem key={idx}>
-                              <S.ItemHeader>
-                                <S.ItemTitle>{claim.claim}</S.ItemTitle>
-                                <div style={{ display: "flex", gap: "0.5rem" }}>
-                                  <S.ItemTimestamp
-                                    onClick={() =>
-                                      handleTimestampClick(claim.timestamp)
+                {/* 논지 분석 (Collapsible)*/}
+                {analysis.argumentAnalysis &&
+                  analysis.argumentAnalysis.claims.length > 0 && (
+                    <S.CollapsibleCard>
+                      <S.CollapsibleHeader
+                        isOpen={openSections.claims}
+                        onClick={() => toggleSection("claims")}
+                      >
+                        <S.CollapsibleTitle>
+                          논지 분석
+                          <span
+                            style={{
+                              color: colors.light.brand.primary100,
+                              marginLeft: "0.5rem",
+                            }}
+                          >
+                            {analysis.argumentAnalysis.claims.length}개
+                          </span>
+                        </S.CollapsibleTitle>
+                        <S.CollapsibleIcon isOpen={openSections.claims}>
+                          <ChevronDown />
+                        </S.CollapsibleIcon>
+                      </S.CollapsibleHeader>
+                      <S.CollapsibleContent isOpen={openSections.claims}>
+                        <S.CollapsibleBody>
+                          <S.AnalysisContent>
+                            {/* === 1. 종합 분석 요약 === */}
+                            <S.AnalysisSummaryWrapper>
+                              <S.SummaryMetricsWrapper>
+                                <S.ScoreRow>
+                                  <S.ScoreLabel>논리 일관성</S.ScoreLabel>
+                                  <S.ScoreValue>
+                                    {
+                                      {
+                                        high: "높음",
+                                        medium: "중간",
+                                        low: "낮음",
+                                        contradictory: "모순됨",
+                                      }[analysis.argumentAnalysis.consistency]
                                     }
-                                  >
-                                    {formatTime(claim.timestamp)}
-                                  </S.ItemTimestamp>
-                                  {claim.needsFactCheck && (
-                                    <S.Badge severity="medium">
-                                      팩트체크 필요
-                                    </S.Badge>
-                                  )}
-                                </div>
-                              </S.ItemHeader>
-                            </S.AnalysisItem>
-                          ))}
-                        </S.AnalysisContent>
-                      </S.CollapsibleBody>
-                    </S.CollapsibleContent>
-                  </S.CollapsibleCard>
-                )}
+                                  </S.ScoreValue>
+                                </S.ScoreRow>
+                                <S.ScoreRow>
+                                  <S.ScoreLabel>근거 제시</S.ScoreLabel>
+                                  <S.ScoreValue>
+                                    {
+                                      {
+                                        strong: "충분함",
+                                        partial: "일부 제시",
+                                        unsubstantiated: "근거 없음",
+                                      }[analysis.argumentAnalysis.evidenceBasis]
+                                    }
+                                  </S.ScoreValue>
+                                </S.ScoreRow>
+                              </S.SummaryMetricsWrapper>
+                              <S.SummaryText>
+                                {analysis.argumentAnalysis.summary}
+                              </S.SummaryText>
+                            </S.AnalysisSummaryWrapper>
+
+                            {/* === 2. 핵심 주장 목록 === */}
+                            <S.AdSubSection>
+                              <S.AdSubSectionHeader>
+                                영상 속 핵심 주장
+                              </S.AdSubSectionHeader>
+
+                              <S.AdIndicatorList>
+                                {analysis.argumentAnalysis.claims.map(
+                                  (claim, idx) => (
+                                    <S.AnalysisItem key={idx}>
+                                      <S.ItemHeader>
+                                        <div>
+                                          <S.ItemTimestamp
+                                            onClick={() =>
+                                              handleTimestampClick(
+                                                claim.timestamp
+                                              )
+                                            }
+                                          >
+                                            {formatTime(claim.timestamp)}
+                                          </S.ItemTimestamp>
+                                        </div>
+                                        <S.ItemTitle>{claim.claim}</S.ItemTitle>
+                                      </S.ItemHeader>
+
+                                      {/* 검증 키워드 표시 (새로 추가된 부분) */}
+                                      {claim.verificationKeywords.length >
+                                        0 && (
+                                        <S.KeywordWrapper>
+                                          <S.KeywordLabel>
+                                            검증 키워드:
+                                          </S.KeywordLabel>
+                                          {claim.verificationKeywords.map(
+                                            (keyword, kwIdx) => (
+                                              <S.Badge
+                                                severity="low"
+                                                key={kwIdx}
+                                                style={{
+                                                  cursor: "default",
+                                                  fontWeight: 400,
+                                                }}
+                                              >
+                                                {keyword}
+                                              </S.Badge>
+                                            )
+                                          )}
+                                        </S.KeywordWrapper>
+                                      )}
+                                    </S.AnalysisItem>
+                                  )
+                                )}
+                              </S.AdIndicatorList>
+                            </S.AdSubSection>
+                          </S.AnalysisContent>
+                        </S.CollapsibleBody>
+                      </S.CollapsibleContent>
+                    </S.CollapsibleCard>
+                  )}
               </S.RightWrapper>
             </S.RightSection>
           </S.ResultLayout>
