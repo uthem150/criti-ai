@@ -406,8 +406,49 @@ export const RightWrapper = styled.div`
 
 // 총점 카드
 export const ScoreCard = styled.div`
-  padding: 2rem 2rem 1.25rem 2rem; /* 상하 패딩 조정 */
-  text-align: left; /* 텍스트 왼쪽 정렬 */
+  padding: 2rem 2rem 1.25rem 2rem;
+  text-align: left;
+`;
+
+// 채널 이름 및 점수 카드 스타일
+export const ChannelScoreCard = styled.div`
+  display: flex;
+  height: 3.375rem;
+  padding: 1rem 0;
+  justify-content: center;
+  align-items: center;
+  gap: 0.375rem;
+  align-self: stretch;
+
+  background: ${colors.light.etc.blueLight};
+  border-radius: 0.75rem;
+`;
+
+export const ChannelNameInCard = styled.span`
+  ${typography.styles.title4}
+  color: ${colors.light.etc.blue};
+`;
+
+export const ChannelScoreInCard = styled.span`
+  ${typography.styles.caption3}
+  color: ${colors.light.transparency.black[60]};
+`;
+
+// 긴 텍스트를 위한 항목
+export const LongTextScoreRow = styled.div`
+  display: flex;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid ${colors.light.grayscale[20]};
+`;
+
+export const LongTextScoreValue = styled.p`
+  /* 긴 내용 텍스트 스타일 */
+  ${typography.styles.body3}
+  color: ${colors.light.grayscale[70]};
+  margin: 0;
+  padding: 0;
+  white-space: pre-wrap; /* 줄 바꿈 처리 */
 `;
 
 export const TotalScore = styled.div<{ score: number }>`
@@ -560,28 +601,34 @@ export const CollapsibleIcon = styled.span<{ isOpen: boolean }>`
 `;
 
 export const CollapsibleContent = styled.div<{ isOpen: boolean }>`
-  max-height: ${(props) => (props.isOpen ? "1500px" : "0")};
-  overflow: hidden;
-  transition: max-height 0.4s ease-in-out; // 0.3s에서 0.4s로, ease-out에서 ease-in-out으로 변경
+  display: grid;
+  grid-template-rows: ${(props) => (props.isOpen ? "1fr" : "0fr")};
+
+  transition: grid-template-rows 0.4s ease-in-out;
   background: ${colors.light.grayscale[0]};
 `;
-
 export const CollapsibleBody = styled.div`
-  padding: 1.5rem;
+  overflow: hidden;
 `;
 
 // 채널 점수 섹션
 export const ChannelScoreContent = styled.div`
+  padding: 1.5rem;
   display: flex;
   flex-direction: column;
-  gap: 0rem;
+  gap: 1rem;
+`;
+
+export const ChannelDetail = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
 `;
 
 export const ScoreRow = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.75rem 0;
 `;
 
 export const ScoreLabel = styled.span`
@@ -589,15 +636,9 @@ export const ScoreLabel = styled.span`
   color: ${colors.light.grayscale[70]};
 `;
 
-export const ScoreValue = styled.span<{ score?: number }>`
-  ${typography.styles.body3};
-  color: ${(props) => {
-    if (!props.score) return colors.light.grayscale[90];
-    if (props.score >= 70) return colors.light.state.success;
-    if (props.score >= 50) return colors.light.etc.orange;
-    return colors.light.state.error;
-  }};
-  font-weight: ${typography.fontWeight.bold};
+export const ScoreValue = styled.span`
+  ${typography.styles.title5};
+  color: ${colors.light.grayscale[100]};
 `;
 
 // 분석 내용 (논리적 오류, 편향성 등)

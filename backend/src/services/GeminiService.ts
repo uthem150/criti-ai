@@ -208,17 +208,17 @@ ${request.content}
 다른 설명 없이 반드시 아래 JSON 형식으로만 응답하세요:
 
 {
-  "overallScore": "0-100 사이의 정수. 종합 신뢰도 점수",
+  "overallScore": 0-100 사이의 정수. 종합 신뢰도 점수,
   "analysisSummary": "이 콘텐츠에 대한 핵심 분석 결과를 1-2문장으로 요약",
   
   "sourceCredibility": {
-    "score": "0-100 사이의 정수. 출처 신뢰도 점수",
+    "score": 0-100 사이의 정수. 출처 신뢰도 점수,
     "level": "'trusted' | 'neutral' | 'caution' | 'unreliable' 중 하나",
     "domain": "${new URL(request.url).hostname}",
     "reputation": {
       "description": "출처에 대한 2-3문장의 간결한 설명 (Google 검색 결과 반영)",
       "factors": ["분석 근거가 된 요소들의 배열", "예: 주요 언론사", "사실 확인 시스템", "편집 원칙"],
-      "historicalReliability": "0-100 사이의 정수. 과거 신뢰도",
+      "historicalReliability": 0-100 사이의 정수. 과거 신뢰도,
       "expertiseArea": ["해당 출처의 전문 분야들"]
     }
   },
@@ -238,7 +238,7 @@ ${request.content}
     },
     "politicalBias": {
       "direction": "'left' | 'center' | 'right' | 'neutral'",
-      "confidence": "0-100 사이의 정수. 정치적 편향 판단의 확신도",
+      "confidence": 0-100 사이의 정수. 정치적 편향 판단의 확신도,
       "indicators": ["정치적 편향을 나타내는 구체적 지표들"]
     },
     "clickbaitElements": [
@@ -254,9 +254,9 @@ ${request.content}
   
   "advertisementAnalysis": {
     "isAdvertorial": "true/false. 광고성 콘텐츠 여부",
-    "confidence": "0-100 사이의 정수. 광고성 판단 확신도",
-    "nativeAdScore": "0-100 사이의 정수. 네이티브 광고 점수 (높을수록 광고적)",
-    "commercialIntentScore": "0-100 사이의 정수. 상업적 의도 점수",
+    "confidence": 0-100 사이의 정수. 광고성 판단 확신도,
+    "nativeAdScore": 0-100 사이의 정수. 네이티브 광고 점수 (높을수록 광고적),
+    "commercialIntentScore": 0-100 사이의 정수. 상업적 의도 점수,
     "indicators": [
       {
         "type": "'product_mention' | 'affiliate_link' | 'sponsored_content' | 'promotional_language' | 'call_to_action' | 'brand_focus'",
@@ -302,11 +302,11 @@ ${request.content}
   },
   
   "detailedScores": {
-    "sourceScore": "0-100. 출처 점수",
-    "objectivityScore": "0-100. 객관성 점수 (편향성 역산)",
-    "logicScore": "0-100. 논리성 점수",
-    "advertisementScore": "0-100. 광고성 점수 (높을수록 덜 광고적)",
-    "evidenceScore": "0-100. 근거 충실도 점수"
+    "sourceScore": 0-100. 출처 점수,
+    "objectivityScore": 0-100. 객관성 점수 (편향성 역산),
+    "logicScore": 0-100. 논리성 점수,
+    "advertisementScore": 0-100. 광고성 점수 (높을수록 덜 광고적),
+    "evidenceScore": 0-100. 근거 충실도 점수
   }
 }
 
@@ -424,29 +424,42 @@ ${request.content}
   /**
    * JSON 블록 추출 (코드펜스 및 불필요한 텍스트 제거)
    */
+  /**
+   * JSON 블록 추출 (코드펜스 및 불필요한 텍스트 제거)
+   */
   private extractJsonObject(raw: string): string {
-    // 1) 코드펜스 제거
-    const cleaned = raw
-      .replace(/```(?:json)?/gi, "")
-      .replace(/```/g, "")
-      .trim();
+    let cleaned = raw.trim();
 
-    // 2) 이미 순수 JSON이면 빠른 반환
-    if (cleaned.startsWith("{") && cleaned.endsWith("}")) {
-      return cleaned;
-    }
+    // 1. 모든 종류의 Markdown 코드 펜스 제거
+    // ```json\n 형태 (대소문자 무관)
+    cleaned = cleaned.replace(/^```json\s*/i, "");
+    // ```\n 형태
+    cleaned = cleaned.replace(/^```\s*/, "");
+    // 끝의 ``` 제거
+    cleaned = cleaned.replace(/\s*```\s*$/, "");
 
-    // 3) {} 블록 추출
+    cleaned = cleaned.trim();
+
+    // 2. 한국어 따옴표를 영어 따옴표로 변환
+    cleaned = cleaned.replace(/"/g, '"').replace(/"/g, '"');
+    cleaned = cleaned.replace(/'/g, "'").replace(/'/g, "'");
+
+    // 3. {} 블록 추출
     const first = cleaned.indexOf("{");
     const last = cleaned.lastIndexOf("}");
 
     if (first === -1 || last === -1 || first >= last) {
       throw new Error(
-        `JSON 블록을 찾지 못했습니다. 원본: ${raw.substring(0, 100)}...`
+        `JSON 블록을 찾지 못했습니다. 원본: ${raw.substring(0, 200)}...`
       );
     }
 
-    return cleaned.slice(first, last + 1);
+    // 첫번째 { 와 마지막 } 사이의 내용만 추출
+    const jsonStr = cleaned.slice(first, last + 1);
+
+    console.log("🔍 추출된 JSON (처음 200자):", jsonStr.substring(0, 200));
+
+    return jsonStr;
   }
 
   private parseAnalysisResult(analysisText: string): TrustAnalysis {
@@ -1579,7 +1592,7 @@ ${transcript.fullText.substring(0, 5000)}${transcript.fullText.length > 5000 ? "
     "language": "${transcript.language}"
    },
   
-  "overallScore": 75,
+  "overallScore": 0-100 사이의 정수,
   "analysisSummary": "이 비디오에 대한 핵심 분석 결과 1-2문장 요약",
   
   "channelCredibility": {
@@ -1979,7 +1992,7 @@ ${transcript.fullText.substring(0, 5000)}${transcript.fullText.length > 5000 ? "
     "language": "ko"
   },
   
-  "overallScore": 75,
+  "overallScore": 0-100 사이의 정수,
   "analysisSummary": "이 비디오에 대한 핵심 분석 결과 1-2문장 요약",
   
   "channelCredibility": {
@@ -2030,9 +2043,9 @@ ${transcript.fullText.substring(0, 5000)}${transcript.fullText.length > 5000 ? "
   
   "advertisementAnalysis": {
     "isAdvertorial": true,
-    "confidence": 85,
-    "nativeAdScore": 70,
-    "commercialIntentScore": 80,
+    "confidence": 0-100 사이의 정수,
+    "nativeAdScore": 0-100 사이의 정수,
+    "commercialIntentScore": 0-100 사이의 정수,
     "indicators": [
       {
         "type": "product_mention | affiliate_link | sponsored_content | promotional_language | call_to_action | brand_focus",
@@ -2075,12 +2088,12 @@ ${transcript.fullText.substring(0, 5000)}${transcript.fullText.length > 5000 ? "
   ],
   
   "detailedScores": {
-    "channelScore": 80,
-    "objectivityScore": 60,
-    "logicScore": 70,
-    "advertisementScore": 50,
-    "evidenceScore": 75,
-    "thumbnailAccuracy": 40
+    "channelScore": 0-100 사이의 정수,
+    "objectivityScore": 0-100 사이의 정수,
+    "logicScore": 0-100 사이의 정수,
+    "advertisementScore": 0-100 사이의 정수,
+    "evidenceScore": 0-100 사이의 정수,
+    "thumbnailAccuracy": 0-100 사이의 정수
   },
   
   "warnings": [
@@ -2174,10 +2187,7 @@ ${transcript.fullText.substring(0, 5000)}${transcript.fullText.length > 5000 ? "
       return parsed;
     } catch (error) {
       console.error("❌ 유튜브 분석 JSON 파싱 오류:", error);
-      console.error(
-        "📄 원본 응답 (처음 1000자):",
-        analysisText.substring(0, 1000)
-      );
+      console.error("📄 원본 응답 (처음 1000자):", analysisText);
 
       const errorMessage =
         error instanceof Error ? error.message : "알 수 없는 오류";

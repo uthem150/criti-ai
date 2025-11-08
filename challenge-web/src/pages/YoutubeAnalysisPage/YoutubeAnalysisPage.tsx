@@ -389,55 +389,50 @@ const YoutubeAnalysisPage = () => {
                       <S.ChannelScoreContent>
                         {/* 1. 채널 이름 및 신뢰도 점수 (이미지 디자인) */}
 
-                        <S.ScoreRow>
-                          <S.ScoreLabel>
+                        <S.ChannelScoreCard>
+                          <S.ChannelNameInCard>
                             {analysis.videoInfo.channelName}
-                          </S.ScoreLabel>
-
-                          <S.ScoreValue
-                            score={analysis.channelCredibility.score}
-                          >
+                          </S.ChannelNameInCard>
+                          <S.ChannelScoreInCard>
                             {analysis.channelCredibility.score}점
-                          </S.ScoreValue>
-                        </S.ScoreRow>
-                        {/* 2. 구독자 수 */}
+                          </S.ChannelScoreInCard>
+                        </S.ChannelScoreCard>
 
-                        <S.ScoreRow>
-                          <S.ScoreLabel>구독자 수</S.ScoreLabel>
-
-                          <S.ScoreValue>
-                            {formatLargeNumber(
-                              analysis.channelCredibility.subscriberCount
-                            )}
-                            명
-                          </S.ScoreValue>
-                        </S.ScoreRow>
-
-                        {/* 3. 과거 신뢰도 (score를 사용) */}
-                        <S.ScoreRow>
-                          <S.ScoreLabel>과거 신뢰도</S.ScoreLabel>
-
-                          <S.ScoreValue
-                            score={analysis.channelCredibility.score}
-                          >
-                            {analysis.channelCredibility.score}%
-                          </S.ScoreValue>
-                        </S.ScoreRow>
-
-                        {/* 4. 전문 분야 (reputation.description 사용) */}
-
-                        {analysis.channelCredibility.reputation.description && (
+                        <S.ChannelDetail>
+                          {/* 2. 구독자 수 (기존 S.ScoreRow 유지) */}
                           <S.ScoreRow>
-                            <S.ScoreLabel>전문 분야</S.ScoreLabel>
+                            <S.ScoreLabel>구독자 수</S.ScoreLabel>
 
                             <S.ScoreValue>
-                              {
-                                analysis.channelCredibility.reputation
-                                  .description
-                              }
+                              {formatLargeNumber(
+                                analysis.channelCredibility.subscriberCount
+                              )}
+                              명
                             </S.ScoreValue>
                           </S.ScoreRow>
-                        )}
+
+                          {/* 3. 과거 신뢰도 (score를 사용) */}
+                          <S.ScoreRow>
+                            <S.ScoreLabel>채널 신뢰도</S.ScoreLabel>
+
+                            <S.ScoreValue>
+                              {analysis.channelCredibility.score}%
+                            </S.ScoreValue>
+                          </S.ScoreRow>
+
+                          {/* 4. 전문 분야 (reputation.description 사용) */}
+                          {analysis.channelCredibility.reputation
+                            .description && (
+                            <S.LongTextScoreRow>
+                              <S.LongTextScoreValue>
+                                {
+                                  analysis.channelCredibility.reputation
+                                    .description
+                                }
+                              </S.LongTextScoreValue>
+                            </S.LongTextScoreRow>
+                          )}
+                        </S.ChannelDetail>
                       </S.ChannelScoreContent>
                     </S.CollapsibleBody>
                   </S.CollapsibleContent>
