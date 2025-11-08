@@ -1,3 +1,4 @@
+import { TimestampedAdvertisementIndicator } from "@criti-ai/shared/types";
 import { colors } from "../styles/design-system";
 
 // category를 한글 제목으로 매핑하는 함수
@@ -60,5 +61,27 @@ export const getPoliticalBiasColor = (direction: string) => {
       return colors.light.state.success;
     default:
       return colors.light.grayscale[40];
+  }
+};
+
+// indicator.type 한글로 변환
+export const getAdvertisementIndicatorTypeLabel = (
+  type: TimestampedAdvertisementIndicator["type"]
+) => {
+  switch (type) {
+    case "product_mention":
+      return "제품 언급";
+    case "affiliate_link":
+      return "제휴 링크";
+    case "sponsored_content":
+      return "스폰서 콘텐츠";
+    case "promotional_language":
+      return "홍보성 발언";
+    case "call_to_action":
+      return "행동 유도";
+    case "brand_focus":
+      return "브랜드 집중";
+    default:
+      return type;
   }
 };

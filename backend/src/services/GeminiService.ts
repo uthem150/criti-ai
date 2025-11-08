@@ -1653,7 +1653,7 @@ ${transcript.fullText.substring(0, 5000)}${transcript.fullText.length > 5000 ? "
         "evidence": "광고성 표현 원문",
         "timestamp": 120,
         "explanation": "왜 광고성인지",
-        "weight": 8,
+        "severity": "low | medium | high",
         "contextText": "주변 문맥"
       }
     ],
@@ -2052,7 +2052,7 @@ ${transcript.fullText.substring(0, 5000)}${transcript.fullText.length > 5000 ? "
         "evidence": "광고성 표현 원문",
         "timestamp": 120,
         "explanation": "왜 광고성인지",
-        "weight": 8,
+        "severity": "low | medium | high",
         "contextText": "주변 문맥"
       }
     ],
@@ -2187,8 +2187,10 @@ ${transcript.fullText.substring(0, 5000)}${transcript.fullText.length > 5000 ? "
       return parsed;
     } catch (error) {
       console.error("❌ 유튜브 분석 JSON 파싱 오류:", error);
-      console.error("📄 원본 응답 (처음 1000자):", analysisText);
-
+      console.error(
+        "📄 원본 응답 (처음 1000자):",
+        analysisText.substring(0, 1000)
+      );
       const errorMessage =
         error instanceof Error ? error.message : "알 수 없는 오류";
       throw new Error(`유튜브 분석 결과 파싱 실패 - 원인: ${errorMessage}`);

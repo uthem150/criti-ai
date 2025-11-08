@@ -21,6 +21,7 @@ import * as S from "./YoutubeAnalysisPage.style";
 import styled from "@emotion/styled";
 import LoadingSpinner from "@/components/LoadingSpinner/LoadingSpinner";
 import {
+  getAdvertisementIndicatorTypeLabel,
   getCategoryTitle,
   getClickbaitTypeTitle,
   getPoliticalBiasLabel,
@@ -494,7 +495,7 @@ const YoutubeAnalysisPage = () => {
                                           : "low"
                                     }
                                   >
-                                    확신도{" "}
+                                    확신도
                                     {
                                       analysis.biasAnalysis.politicalBias
                                         .confidence
@@ -810,17 +811,24 @@ const YoutubeAnalysisPage = () => {
                 )}
 
                 {/* 광고성 분석 (Collapsible) */}
-                {analysis.advertisementAnalysis.indicators.length > 0 && (
+                {analysis.advertisementAnalysis && (
                   <S.CollapsibleCard>
                     <S.CollapsibleHeader
                       isOpen={openSections.advertisement}
                       onClick={() => toggleSection("advertisement")}
                     >
                       <S.CollapsibleTitle>
-                        광고성 분석
-                        {analysis.advertisementAnalysis.isAdvertorial && (
-                          <S.Badge severity="high">광고 콘텐츠</S.Badge>
-                        )}
+                        광고성 요소
+                        {/* 파란색/빨간색 텍스트로 결과 표시 */}
+                        <S.AnalysisResultText
+                          isNegative={
+                            analysis.advertisementAnalysis.isAdvertorial
+                          }
+                        >
+                          {analysis.advertisementAnalysis.isAdvertorial
+                            ? "발견됨"
+                            : "미발견"}
+                        </S.AnalysisResultText>
                       </S.CollapsibleTitle>
                       <S.CollapsibleIcon isOpen={openSections.advertisement}>
                         <ChevronDown />
@@ -829,24 +837,114 @@ const YoutubeAnalysisPage = () => {
                     <S.CollapsibleContent isOpen={openSections.advertisement}>
                       <S.CollapsibleBody>
                         <S.AnalysisContent>
-                          {analysis.advertisementAnalysis.indicators.map(
-                            (indicator, idx) => (
-                              <S.AnalysisItem key={idx}>
-                                <S.ItemHeader>
-                                  <S.ItemTitle>{indicator.type}</S.ItemTitle>
-                                  <S.ItemTimestamp
-                                    onClick={() =>
-                                      handleTimestampClick(indicator.timestamp)
-                                    }
-                                  >
-                                    {formatTime(indicator.timestamp)}
-                                  </S.ItemTimestamp>
-                                </S.ItemHeader>
-                                <S.ItemDescription>
-                                  <strong>근거:</strong> "{indicator.evidence}"
-                                </S.ItemDescription>
-                              </S.AnalysisItem>
-                            )
+                          {/* === 1. 요약 박스 === */}
+                          <S.AdSummaryBox
+                            isAdvertorial={
+                              analysis.advertisementAnalysis.isAdvertorial
+                            }
+                          >
+                            <S.SummaryTitle>
+                              {analysis.advertisementAnalysis.isAdvertorial
+                                ? "광고성 콘텐츠"
+                                : "일반 콘텐츠"}
+                            </S.SummaryTitle>
+                            <S.SummaryConfidence>
+                              확신도:{" "}
+                              {analysis.advertisementAnalysis.confidence}%
+                            </S.SummaryConfidence>
+                          </S.AdSummaryBox>
+
+                          {/* === 2. 막대 그래프 점수 === */}
+                          <S.ScoreBarWrapper>
+                            <S.ScoreBarItem>
+                              <S.ScoreBarLabel>네이티브 광고</S.ScoreBarLabel>
+                              <S.ScoreBarContainer>
+                                <S.ScoreBarFill
+                                  score={
+                                    analysis.advertisementAnalysis.nativeAdScore
+                                  }
+                                />
+                              </S.ScoreBarContainer>
+                              <S.ScoreBarValue>
+                                {analysis.advertisementAnalysis.nativeAdScore}
+                              </S.ScoreBarValue>
+                            </S.ScoreBarItem>
+
+                            <S.ScoreBarItem>
+                              <S.ScoreBarLabel>상업적 의도</S.ScoreBarLabel>
+                              <S.ScoreBarContainer>
+                                <S.ScoreBarFill
+                                  score={
+                                    analysis.advertisementAnalysis
+                                      .commercialIntentScore
+                                  }
+                                />
+                              </S.ScoreBarContainer>
+                              <S.ScoreBarValue>
+                                {
+                                  analysis.advertisementAnalysis
+                                    .commercialIntentScore
+                                }
+                              </S.ScoreBarValue>
+                            </S.ScoreBarItem>
+                          </S.ScoreBarWrapper>
+
+                          {/* === 3. 세부 지표 리스트 === */}
+                          {analysis.advertisementAnalysis.indicators.length >
+                            0 && (
+                            <S.AdSubSection>
+                              <S.AdSubSectionHeader>
+                                발견된 세부 지표
+                              </S.AdSubSectionHeader>
+                              <S.AdIndicatorList>
+                                {analysis.advertisementAnalysis.indicators.map(
+                                  (indicator, idx) => (
+                                    <S.AnalysisItem key={idx}>
+                                      <S.ItemHeader>
+                                        <S.AnalysisBadgeWrapper>
+                                          <S.ItemTimestamp
+                                            onClick={() =>
+                                              handleTimestampClick(
+                                                indicator.timestamp
+                                              )
+                                            }
+                                          >
+                                            {formatTime(indicator.timestamp)}
+                                          </S.ItemTimestamp>
+                                          <S.Badge
+                                            severity={
+                                              indicator.severity === "high"
+                                                ? "high"
+                                                : indicator.severity ===
+                                                    "medium"
+                                                  ? "medium"
+                                                  : "low"
+                                            }
+                                          >
+                                            {indicator.severity}
+                                          </S.Badge>
+                                        </S.AnalysisBadgeWrapper>
+
+                                        <S.ItemTitle>
+                                          {/* 헬퍼 함수 사용해 한글로 변환 */}
+                                          {getAdvertisementIndicatorTypeLabel(
+                                            indicator.type
+                                          )}
+                                        </S.ItemTitle>
+                                      </S.ItemHeader>
+                                      <S.ItemDescription>
+                                        <strong>문맥:</strong> "
+                                        {indicator.contextText}"
+                                      </S.ItemDescription>
+                                      <S.ItemDescription>
+                                        <strong>설명:</strong>{" "}
+                                        {indicator.explanation}
+                                      </S.ItemDescription>
+                                    </S.AnalysisItem>
+                                  )
+                                )}
+                              </S.AdIndicatorList>
+                            </S.AdSubSection>
                           )}
                         </S.AnalysisContent>
                       </S.CollapsibleBody>

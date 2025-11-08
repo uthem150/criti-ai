@@ -344,7 +344,7 @@ export interface TimestampedAdvertisementIndicator {
   evidence: string;
   timestamp: number; // 발생 시간 (초)
   explanation: string;
-  weight: number;
+  severity: "low" | "medium" | "high";
   contextText: string; // 주변 문맥
 }
 

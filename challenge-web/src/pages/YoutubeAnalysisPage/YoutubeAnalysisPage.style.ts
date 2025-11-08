@@ -78,7 +78,7 @@ export const InputTitle = styled.h2`
   text-align: center;
 `;
 
-export const InputDescription = styled.p`
+export const InputDescription = styled.div`
   ${typography.styles.body2};
   color: ${colors.light.grayscale[70]};
   text-align: center;
@@ -225,7 +225,7 @@ export const LoadingCard = styled.div`
   align-items: center; /* 수직 중앙 정렬 */
 `;
 
-export const LoadingText = styled.p`
+export const LoadingText = styled.div`
   ${typography.styles.body2};
   color: ${colors.light.grayscale[70]};
   margin: 0;
@@ -442,7 +442,7 @@ export const LongTextScoreRow = styled.div`
   border-top: 1px solid ${colors.light.grayscale[20]};
 `;
 
-export const LongTextScoreValue = styled.p`
+export const LongTextScoreValue = styled.div`
   /* 긴 내용 텍스트 스타일 */
   ${typography.styles.body3}
   color: ${colors.light.grayscale[70]};
@@ -463,7 +463,7 @@ export const TotalScore = styled.div<{ score: number }>`
   margin-bottom: 1rem; /* Summary와의 간격 */
 `;
 
-export const ScoreDescription = styled.p`
+export const ScoreDescription = styled.div`
   ${typography.styles.body3};
   color: ${colors.light.grayscale[80]};
 `;
@@ -723,11 +723,13 @@ export const ItemTimestamp = styled.button`
   }
 `;
 
-export const ItemDescription = styled.p`
+export const ItemDescription = styled.div`
   ${typography.styles.body3};
   color: ${colors.light.grayscale[70]};
   line-height: 1.6;
   margin: 0.5rem 0 0 0;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
 `;
 
 export const Badge = styled.span<{
@@ -807,7 +809,7 @@ export const FallacyTypeName = styled.h3`
   letter-spacing: -0.025rem;
 `;
 
-export const FallacyTypeDescription = styled.p`
+export const FallacyTypeDescription = styled.div`
   ${typography.styles.body3};
   color: ${colors.light.grayscale[60]};
 `;
@@ -856,7 +858,7 @@ export const FallacyQuote = styled.div`
   color: ${colors.light.grayscale[100]};
 `;
 
-export const FallacyExplanation = styled.p`
+export const FallacyExplanation = styled.div`
   ${typography.styles.body3};
   color: ${colors.light.grayscale[70]};
 `;
@@ -882,4 +884,114 @@ export const FallacyExampleItem = styled.div`
     left: 0.5rem;
     color: ${colors.light.grayscale[70]};
   }
+`;
+
+// CollapsibleHeader의 제목 옆에 표시될 파란색/빨간색 결과 텍스트
+export const AnalysisResultText = styled.span<{ isNegative: boolean }>`
+  ${typography.styles.title3};
+  font-weight: ${typography.fontWeight.bold};
+  color: ${(props) =>
+    props.isNegative
+      ? colors.light.state.error
+      : colors.light.brand.primary100};
+  margin-left: 0.5rem;
+`;
+
+// 광고성 분석 상단 요약 박스
+export const AdSummaryBox = styled.div<{ isAdvertorial: boolean }>`
+  display: flex;
+  height: 3.375rem;
+  padding: 1rem 0;
+  justify-content: center;
+  align-items: center;
+  gap: 0.375rem;
+  align-self: stretch;
+  border-radius: 0.75rem;
+
+  background: ${(props) =>
+    props.isAdvertorial
+      ? colors.light.state.errorLight
+      : colors.light.state.successLight};
+
+  color: ${(props) =>
+    props.isAdvertorial
+      ? colors.light.state.error
+      : colors.light.state.success};
+`;
+
+export const SummaryTitle = styled.span`
+  ${typography.styles.title4};
+`;
+
+export const SummaryConfidence = styled.span`
+  ${typography.styles.caption3};
+  color: ${colors.light.transparency.black[60]};
+`;
+
+// 막대 그래프 점수 영역 래퍼
+export const ScoreBarWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+`;
+
+// 개별 점수 막대 (라벨 + 막대 + 값)
+export const ScoreBarItem = styled.div`
+  display: flex;
+  align-items: center;
+`;
+
+// 점수 라벨 ("네이티브 광고")
+export const ScoreBarLabel = styled.div`
+  width: 5.75rem; // 라벨 너비 고정
+  ${typography.styles.caption3}
+  color: ${colors.light.grayscale[60]};
+`;
+
+// 막대 그래프의 회색 배경 (트랙)
+export const ScoreBarContainer = styled.div`
+  flex: 1; // 남은 공간 모두 차지
+  height: 10px;
+  background: ${colors.light.grayscale[10]};
+  border-radius: 5px;
+  overflow: hidden; // ScoreBarFill이 밖으로 나가지 않도록
+`;
+
+// 실제 점수 나타내는 파란색 막대
+export const ScoreBarFill = styled.div<{ score: number }>`
+  width: ${(props) => props.score}%; // 점수(0-100) %로 변환
+  height: 100%;
+  background: ${colors.light.brand.primary100};
+  border-radius: 5px;
+  transition: width 0.3s ease-out;
+`;
+
+// 점수 숫자
+export const ScoreBarValue = styled.div`
+  width: 2rem; // 숫자 너비 고정
+  text-align: right;
+  ${typography.styles.title5};
+  color: ${colors.light.brand.primary100};
+`;
+
+export const AdSubSection = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
+
+// "발견된 세부 지표" 같은 하위 섹션 제목
+export const AdSubSectionHeader = styled.h4`
+  ${typography.styles.title5};
+  color: ${colors.light.grayscale[90]};
+  margin: 0;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid ${colors.light.grayscale[20]};
+`;
+
+// 세부 지표 리스트 래퍼
+export const AdIndicatorList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem; // 각 지표 사이의 간격
+  padding-top: 1.25rem;
 `;
