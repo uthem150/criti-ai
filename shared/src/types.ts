@@ -360,6 +360,29 @@ export interface TimestampedLogicalFallacy {
   examples?: string[];
 }
 
+/**
+ * 논지 분석 내의 개별 핵심 주장 (단순 추출)
+ * (기존 keyClaims 배열의 아이템 타입을 대체)
+ */
+export interface KeyClaim {
+  claim: string; // 핵심 주장 텍스트
+  timestamp: number; // 발생 시간 (초)
+  verificationKeywords: string[]; // (외부) 검증을 위한 키워드 추출
+}
+
+/**
+ * 논지 분석 (영상 내부의 일관성 및 근거)
+ */
+export interface ArgumentAnalysis {
+  // 1. 종합 분석 (영상 전체를 보고 판단)
+  consistency: "high" | "medium" | "low" | "contradictory"; // 주장/논리의 일관성
+  evidenceBasis: "strong" | "partial" | "unsubstantiated"; // 영상 '내부' 근거 제시 수준
+  summary: string; // 영상의 논지 분석 요약
+
+  // 2. 단순 추출 (영상에서 주장 + 키워드 뽑아냄)
+  claims: KeyClaim[];
+}
+
 // 유튜브 비디오 신뢰도 분석 결과
 export interface YoutubeTrustAnalysis {
   // 기본 비디오 정보
@@ -369,6 +392,16 @@ export interface YoutubeTrustAnalysis {
   // 전체 분석 결과
   overallScore: number; // 0-100
   analysisSummary: string;
+
+  // 세부 점수
+  detailedScores: {
+    channelScore: number;
+    objectivityScore: number;
+    logicScore: number;
+    advertisementScore: number;
+    evidenceScore: number;
+    thumbnailAccuracy: number; // 썸네일과 내용의 일치도
+  };
 
   // 채널 신뢰도
   channelCredibility: {
@@ -409,34 +442,13 @@ export interface YoutubeTrustAnalysis {
   // 타임라인 기반 논리적 오류
   logicalFallacies: TimestampedLogicalFallacy[];
 
-  // 핵심 주장 (타임스탬프 포함)
-  keyClaims: Array<{
-    claim: string;
-    timestamp: number;
-    needsFactCheck: boolean;
-    verificationKeywords: string[];
-  }>;
-
-  // 세부 점수
-  detailedScores: {
-    channelScore: number;
-    objectivityScore: number;
-    logicScore: number;
-    advertisementScore: number;
-    evidenceScore: number;
-    thumbnailAccuracy: number; // 썸네일과 내용의 일치도
-  };
+  /**
+   * 논지 분석 (핵심 주장 및 내부 논리)
+   */
+  argumentAnalysis: ArgumentAnalysis;
 
   // 경고 사항
   warnings: AnalysisWarning[];
-
-  // 타임라인 하이라이트 (주요 문제 발생 시점)
-  timelineHighlights: Array<{
-    timestamp: number;
-    type: "bias" | "fallacy" | "advertisement" | "claim";
-    severity: "low" | "medium" | "high";
-    description: string;
-  }>;
 }
 
 // 유튜브 분석 요청

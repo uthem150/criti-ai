@@ -1679,22 +1679,29 @@ ${transcript.fullText.substring(0, 5000)}${transcript.fullText.length > 5000 ? "
     }
   ],
   
-  "keyClaims": [
-    {
-      "claim": "핵심 주장 텍스트",
-      "timestamp": 200,
-      "needsFactCheck": true,
-      "verificationKeywords": ["검증용 키워드들"]
-    }
-  ],
+  "argumentAnalysis": {
+    // 1. 종합 분석 (영상 전체를 보고 판단)
+    "consistency": "medium", // "high" | "medium" | "low" | "contradictory"
+    "evidenceBasis": "partial", // "strong" | "partial" | "unsubstantiated"
+    "summary": "영상은 전반적으로 일관된 주장을 하지만, 일부 주장에 대해서는 근거 제시가 부족합니다.",
+
+    // 2. 단순 추출 (영상에서 주장 + 키워드 뽑아냄)
+    "claims": [
+      {
+        "claim": "핵심 주장 1 텍스트 (예: '이 제품은 100% 천연 성분입니다')",
+        "timestamp": 200,
+        "verificationKeywords": ["100% 천연 성분", "제품명"]
+      }
+    ]
+  },
   
   "detailedScores": {
-    "channelScore": 80,
-    "objectivityScore": 60,
-    "logicScore": 70,
-    "advertisementScore": 50,
-    "evidenceScore": 75,
-    "thumbnailAccuracy": 40
+    "channelScore": 0-100 사이의 정수,
+    "objectivityScore": 0-100 사이의 정수,
+    "logicScore": 0-100 사이의 정수,
+    "advertisementScore": 0-100 사이의 정수,
+    "evidenceScore": 0-100 사이의 정수,
+    "thumbnailAccuracy": 0-100 사이의 정수
   },
   
   "warnings": [
@@ -1705,15 +1712,6 @@ ${transcript.fullText.substring(0, 5000)}${transcript.fullText.length > 5000 ? "
       "actionRecommendation": "권장 조치"
     }
   ],
-  
-  "timelineHighlights": [
-    {
-      "timestamp": 45,
-      "type": "bias | fallacy | advertisement | claim",
-      "severity": "low | medium | high",
-      "description": "이 시점에 발생하는 문제 설명"
-    }
-  ]
 }
 
 # FINAL CRITICAL INSTRUCTIONS
@@ -2078,14 +2076,21 @@ ${transcript.fullText.substring(0, 5000)}${transcript.fullText.length > 5000 ? "
     }
   ],
   
-  "keyClaims": [
-    {
-      "claim": "핵심 주장 텍스트",
-      "timestamp": 200,
-      "needsFactCheck": true,
-      "verificationKeywords": ["검증용 키워드들"]
-    }
-  ],
+  "argumentAnalysis": {
+    // 1. 종합 분석 (영상 전체를 보고 판단)
+    "consistency": "medium", // "high" | "medium" | "low" | "contradictory"
+    "evidenceBasis": "partial", // "strong" | "partial" | "unsubstantiated"
+    "summary": "영상은 전반적으로 일관된 주장을 하지만, 일부 주장에 대해서는 근거 제시가 부족합니다.",
+
+    // 2. 단순 추출 (영상에서 주장 + 키워드 뽑아냄)
+    "claims": [
+      {
+        "claim": "핵심 주장 1 텍스트 (예: '이 제품은 100% 천연 성분입니다')",
+        "timestamp": 200,
+        "verificationKeywords": ["100% 천연 성분", "제품명"]
+      }
+    ]
+  },
   
   "detailedScores": {
     "channelScore": 0-100 사이의 정수,
@@ -2102,15 +2107,6 @@ ${transcript.fullText.substring(0, 5000)}${transcript.fullText.length > 5000 ? "
       "severity": "low | medium | high | critical",
       "message": "경고 메시지",
       "actionRecommendation": "권장 조치"
-    }
-  ],
-  
-  "timelineHighlights": [
-    {
-      "timestamp": 45,
-      "type": "bias | fallacy | advertisement | claim",
-      "severity": "low | medium | high",
-      "description": "이 시점에 발생하는 문제 설명"
     }
   ]
 }
