@@ -613,7 +613,7 @@ export const CollapsibleBody = styled.div`
 
 // 채널 점수 섹션
 export const ChannelScoreContent = styled.div`
-  padding: 1.5rem;
+  padding: 2rem;
   display: flex;
   flex-direction: column;
   gap: 1rem;
@@ -641,26 +641,54 @@ export const ScoreValue = styled.span`
   color: ${colors.light.grayscale[100]};
 `;
 
+export const BiasAnalysisWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+`;
+
+export const BiasTitle = styled.h3`
+  color: ${colors.light.grayscale[100]};
+
+  font-size: 1.125rem;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 140%;
+  letter-spacing: -0.0225rem;
+`;
+
 // 분석 내용 (논리적 오류, 편향성 등)
 export const AnalysisContent = styled.div`
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+`;
+
+export const AnalysisItemWrapper = styled.div`
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
 `;
 
 export const AnalysisItem = styled.div`
-  padding: 1rem;
   background: ${colors.light.grayscale[5]};
-  border: 1px solid ${colors.light.grayscale[20]};
-  border-radius: 0.5rem;
+  border-radius: 0.75rem;
+
+  display: flex;
+  padding: 1.25rem;
+  flex-direction: column;
+`;
+
+export const AnalysisBadgeWrapper = styled.div`
+  display: flex;
+  gap: 0.5rem;
 `;
 
 export const ItemHeader = styled.div`
   display: flex;
-  justify-content: space-between;
-  align-items: start;
-  gap: 1rem;
-  margin-bottom: 0.5rem;
+  flex-direction: column;
+  gap: 0.75rem;
 `;
 
 export const ItemTitle = styled.div`
@@ -671,13 +699,15 @@ export const ItemTitle = styled.div`
 `;
 
 export const ItemTimestamp = styled.button`
-  ${typography.styles.body4};
-  color: ${colors.light.brand.primary100};
-  background: ${colors.light.etc.blueLight};
-  padding: 0.25rem 0.625rem;
-  border-radius: 0.25rem;
-  border: none;
-  font-weight: ${typography.fontWeight.semibold};
+  display: flex;
+  height: 1.5rem;
+  padding: 0.5625rem 0.5rem;
+  justify-content: center;
+  align-items: center;
+  gap: 0.625rem;
+  border-radius: 0.375rem;
+  background-color: ${colors.light.transparency.black[5]};
+
   cursor: pointer;
   user-select: none;
   transition: all 0.2s ease;
@@ -703,13 +733,17 @@ export const ItemDescription = styled.p`
 export const Badge = styled.span<{
   severity?: "low" | "medium" | "high" | "critical";
 }>`
-  display: inline-block;
-  padding: 0.25rem 0.625rem;
-  border-radius: 0.25rem;
-  ${typography.styles.body4};
-  font-weight: ${typography.fontWeight.bold};
+  display: flex;
+  height: 1.5rem;
+  padding: 0.5625rem 0.5rem;
+  justify-content: center;
+  align-items: center;
+  gap: 0.625rem;
+  ${typography.styles.caption4};
   text-transform: uppercase;
   white-space: nowrap;
+  border-radius: 0.375rem;
+
   background: ${(props) => {
     switch (props.severity) {
       case "critical":

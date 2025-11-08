@@ -20,6 +20,11 @@ import { colors } from "../../styles/design-system";
 import * as S from "./YoutubeAnalysisPage.style";
 import styled from "@emotion/styled";
 import LoadingSpinner from "@/components/LoadingSpinner/LoadingSpinner";
+import {
+  getCategoryTitle,
+  getClickbaitTypeTitle,
+  getPoliticalBiasLabel,
+} from "@/utils/analysisMappers";
 
 const StyledMagnifier = styled(Magnifier)`
   display: flex;
@@ -62,8 +67,7 @@ const YoutubeAnalysisPage = () => {
   // Collapsible 상태 관리
   const [openSections, setOpenSections] = useState({
     channel: false,
-    warnings: false,
-    clickbait: false,
+    emotionalBias: false,
     emotional: false,
     fallacies: false,
     advertisement: false,
@@ -388,7 +392,6 @@ const YoutubeAnalysisPage = () => {
                     <S.CollapsibleBody>
                       <S.ChannelScoreContent>
                         {/* 1. 채널 이름 및 신뢰도 점수 (이미지 디자인) */}
-
                         <S.ChannelScoreCard>
                           <S.ChannelNameInCard>
                             {analysis.videoInfo.channelName}
@@ -411,7 +414,7 @@ const YoutubeAnalysisPage = () => {
                             </S.ScoreValue>
                           </S.ScoreRow>
 
-                          {/* 3. 과거 신뢰도 (score를 사용) */}
+                          {/* 3. 신뢰도 (score 사용) */}
                           <S.ScoreRow>
                             <S.ScoreLabel>채널 신뢰도</S.ScoreLabel>
 
@@ -439,83 +442,240 @@ const YoutubeAnalysisPage = () => {
                 </S.CollapsibleCard>
 
                 {/* 편향성 분석 (Collapsible) */}
-                {analysis.biasAnalysis.clickbaitElements.length +
+                {(analysis.biasAnalysis.clickbaitElements.length > 0 ||
                   analysis.biasAnalysis.emotionalBias.manipulativeWords.length >
-                  0 && (
+                    0 ||
+                  analysis.biasAnalysis.politicalBias) && (
                   <S.CollapsibleCard>
                     <S.CollapsibleHeader
-                      isOpen={openSections.clickbait}
-                      onClick={() => toggleSection("clickbait")}
+                      isOpen={openSections.emotionalBias}
+                      onClick={() => toggleSection("emotionalBias")}
                     >
                       <S.CollapsibleTitle>
                         편향성 분석
                         <span style={{ color: colors.light.etc.orange }}>
-                          {
+                          {analysis.biasAnalysis.clickbaitElements.length +
                             analysis.biasAnalysis.emotionalBias
-                              .manipulativeWords.length
-                          }
+                              .manipulativeWords.length}
                           건
                         </span>
                       </S.CollapsibleTitle>
-                      <S.CollapsibleIcon isOpen={openSections.clickbait}>
+
+                      <S.CollapsibleIcon isOpen={openSections.emotionalBias}>
                         <ChevronDown />
                       </S.CollapsibleIcon>
                     </S.CollapsibleHeader>
-                    <S.CollapsibleContent isOpen={openSections.clickbait}>
+
+                    <S.CollapsibleContent isOpen={openSections.emotionalBias}>
                       <S.CollapsibleBody>
-                        {/* 감정적 표현 */}
-                        {analysis.biasAnalysis.emotionalBias.manipulativeWords
-                          .length > 0 && (
-                          <div style={{ marginBottom: "1rem" }}>
-                            <h4
-                              style={{
-                                margin: "0 0 0.75rem 0",
-                                fontSize: "0.9375rem",
-                              }}
-                            >
-                              감정적 표현
-                            </h4>
-                            <S.AnalysisContent>
-                              {analysis.biasAnalysis.emotionalBias.manipulativeWords.map(
-                                (word, idx) => (
-                                  <S.AnalysisItem key={idx}>
-                                    <S.ItemHeader>
-                                      <S.ItemTitle>"{word.word}"</S.ItemTitle>
-                                      <div
-                                        style={{
-                                          display: "flex",
-                                          gap: "0.5rem",
-                                        }}
-                                      >
-                                        <S.ItemTimestamp
-                                          onClick={() =>
-                                            handleTimestampClick(word.timestamp)
-                                          }
-                                        >
-                                          {formatTime(word.timestamp)}
-                                        </S.ItemTimestamp>
-                                        <S.Badge
-                                          severity={
-                                            word.impact === "high"
-                                              ? "high"
-                                              : word.impact === "medium"
-                                                ? "medium"
-                                                : "low"
-                                          }
-                                        >
-                                          {word.impact}
-                                        </S.Badge>
-                                      </div>
-                                    </S.ItemHeader>
+                        <S.AnalysisContent>
+                          {/* 1. 정치적 편향 - 항상 표시 (direction 값이 있으면) */}
+                          {analysis.biasAnalysis.politicalBias && (
+                            <S.BiasAnalysisWrapper>
+                              <S.BiasTitle>정치적 편향</S.BiasTitle>
+
+                              <S.AnalysisItem>
+                                <S.ItemHeader>
+                                  <S.ItemTitle>
+                                    {getPoliticalBiasLabel(
+                                      analysis.biasAnalysis.politicalBias
+                                        .direction
+                                    )}
+                                  </S.ItemTitle>
+                                  <S.Badge
+                                    severity={
+                                      analysis.biasAnalysis.politicalBias
+                                        .confidence >= 70
+                                        ? "high"
+                                        : analysis.biasAnalysis.politicalBias
+                                              .confidence >= 50
+                                          ? "medium"
+                                          : "low"
+                                    }
+                                  >
+                                    확신도{" "}
+                                    {
+                                      analysis.biasAnalysis.politicalBias
+                                        .confidence
+                                    }
+                                    %
+                                  </S.Badge>
+                                </S.ItemHeader>
+
+                                {analysis.biasAnalysis.politicalBias
+                                  .indicators &&
+                                  analysis.biasAnalysis.politicalBias.indicators
+                                    .length > 0 && (
                                     <S.ItemDescription>
-                                      {word.contextText}
+                                      {analysis.biasAnalysis.politicalBias.indicators.map(
+                                        (indicator, idx) => (
+                                          <div key={idx}>• {indicator}</div>
+                                        )
+                                      )}
                                     </S.ItemDescription>
-                                  </S.AnalysisItem>
+                                  )}
+                              </S.AnalysisItem>
+                            </S.BiasAnalysisWrapper>
+                          )}
+
+                          {/* 2. 감정적 표현 - 카테고리별 그룹화 */}
+                          {analysis.biasAnalysis.emotionalBias.manipulativeWords
+                            .length > 0 && (
+                            <>
+                              {Object.entries(
+                                analysis.biasAnalysis.emotionalBias.manipulativeWords.reduce(
+                                  (acc, word) => {
+                                    const category = word.category;
+                                    if (!acc[category]) {
+                                      acc[category] = [];
+                                    }
+                                    acc[category].push(word);
+                                    return acc;
+                                  },
+                                  {} as Record<
+                                    string,
+                                    Array<
+                                      (typeof analysis.biasAnalysis.emotionalBias.manipulativeWords)[number]
+                                    >
+                                  >
                                 )
-                              )}
-                            </S.AnalysisContent>
-                          </div>
-                        )}
+                              ).map(([category, words]) => (
+                                <S.BiasAnalysisWrapper key={category}>
+                                  <S.BiasTitle>
+                                    {getCategoryTitle(category)}
+                                  </S.BiasTitle>
+
+                                  <S.AnalysisItemWrapper>
+                                    {words.map((word, idx) => (
+                                      <S.AnalysisItem key={idx}>
+                                        <S.ItemHeader>
+                                          <S.AnalysisBadgeWrapper>
+                                            <S.ItemTimestamp
+                                              onClick={() =>
+                                                handleTimestampClick(
+                                                  word.timestamp
+                                                )
+                                              }
+                                            >
+                                              {formatTime(word.timestamp)}
+                                            </S.ItemTimestamp>
+                                            <S.Badge
+                                              severity={
+                                                word.impact === "high"
+                                                  ? "high"
+                                                  : word.impact === "medium"
+                                                    ? "medium"
+                                                    : "low"
+                                              }
+                                            >
+                                              {word.impact}
+                                            </S.Badge>
+                                          </S.AnalysisBadgeWrapper>
+                                          <S.ItemTitle>
+                                            "{word.word}"
+                                          </S.ItemTitle>
+                                        </S.ItemHeader>
+
+                                        <S.ItemDescription>
+                                          <strong>문맥:</strong>{" "}
+                                          {word.contextText}
+                                        </S.ItemDescription>
+
+                                        <S.ItemDescription
+                                          style={{ marginTop: "0.5rem" }}
+                                        >
+                                          <strong>설명:</strong>{" "}
+                                          {word.explanation}
+                                        </S.ItemDescription>
+                                      </S.AnalysisItem>
+                                    ))}
+                                  </S.AnalysisItemWrapper>
+                                </S.BiasAnalysisWrapper>
+                              ))}
+                            </>
+                          )}
+
+                          {/* 3. 클릭베이트 분석 - 타입별 그룹화 */}
+                          {analysis.biasAnalysis.clickbaitElements.length >
+                            0 && (
+                            <>
+                              {Object.entries(
+                                analysis.biasAnalysis.clickbaitElements.reduce(
+                                  (acc, element) => {
+                                    const type = element.type;
+                                    if (!acc[type]) {
+                                      acc[type] = [];
+                                    }
+                                    acc[type].push(element);
+                                    return acc;
+                                  },
+                                  {} as Record<
+                                    string,
+                                    Array<
+                                      (typeof analysis.biasAnalysis.clickbaitElements)[number]
+                                    >
+                                  >
+                                )
+                              ).map(([type, elements]) => (
+                                <S.BiasAnalysisWrapper key={type}>
+                                  <S.BiasTitle>
+                                    {getClickbaitTypeTitle(type)}
+                                  </S.BiasTitle>
+
+                                  <S.AnalysisItemWrapper>
+                                    {elements.map((element, idx) => (
+                                      <S.AnalysisItem key={idx}>
+                                        <S.ItemHeader>
+                                          <S.AnalysisBadgeWrapper>
+                                            <S.ItemTimestamp
+                                              onClick={() =>
+                                                handleTimestampClick(
+                                                  element.timestamp
+                                                )
+                                              }
+                                            >
+                                              {formatTime(element.timestamp)}
+                                            </S.ItemTimestamp>
+                                            <S.Badge
+                                              severity={
+                                                element.severity === "high"
+                                                  ? "high"
+                                                  : element.severity ===
+                                                      "medium"
+                                                    ? "medium"
+                                                    : "low"
+                                              }
+                                            >
+                                              {element.severity}
+                                            </S.Badge>
+                                            {element.isInTitle && (
+                                              <S.Badge severity="low">
+                                                제목
+                                              </S.Badge>
+                                            )}
+                                            {element.isInThumbnail && (
+                                              <S.Badge severity="low">
+                                                썸네일
+                                              </S.Badge>
+                                            )}
+                                          </S.AnalysisBadgeWrapper>
+                                          <S.ItemTitle>
+                                            "{element.text}"
+                                          </S.ItemTitle>
+                                        </S.ItemHeader>
+
+                                        <S.ItemDescription>
+                                          <strong>설명:</strong>{" "}
+                                          {element.explanation}
+                                        </S.ItemDescription>
+                                      </S.AnalysisItem>
+                                    ))}
+                                  </S.AnalysisItemWrapper>
+                                </S.BiasAnalysisWrapper>
+                              ))}
+                            </>
+                          )}
+                        </S.AnalysisContent>
                       </S.CollapsibleBody>
                     </S.CollapsibleContent>
                   </S.CollapsibleCard>
