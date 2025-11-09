@@ -194,7 +194,6 @@ const ALL_POSSIBLE_BADGES: Omit<Badge, "earnedAt">[] = [
 ];
 
 export default function BadgesPage() {
-  const navigate = useNavigate();
   const [activeCategory, setActiveCategory] = useState("all");
   const [earnedBadges, setEarnedBadges] = useState<Badge[]>([]);
   const [loading, setLoading] = useState(true);

@@ -237,5 +237,6 @@ export const MainContent = styled.main<{
   /* 모바일 */
   @media (max-width: 1024px) {
     margin-left: 0;
+    min-width: 0;
   }
 `;
