@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import type { Badge } from "@criti-ai/shared";
 import { challengeApiService } from "../../services/challengeApiService";
 import * as S from "./BadgesPage.style";
+import LoadingSpinner from "@/components/LoadingSpinner/LoadingSpinner";
 
 interface BadgeCategory {
   id: string;
@@ -239,10 +240,10 @@ export default function BadgesPage() {
   if (loading) {
     return (
       <S.Container>
-        <div style={{ textAlign: "center", padding: "3rem" }}>
-          <div style={{ fontSize: "3rem", marginBottom: "1rem" }}>🔄</div>
+        <S.LoadingCard>
+          <LoadingSpinner />
           <div>뱃지를 불러오는 중...</div>
-        </div>
+        </S.LoadingCard>
       </S.Container>
     );
   }

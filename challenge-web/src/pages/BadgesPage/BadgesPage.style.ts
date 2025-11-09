@@ -17,6 +17,15 @@ export const Container = styled.div`
   }
 `;
 
+export const LoadingCard = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  gap: 1rem;
+`;
+
 export const Header = styled.header`
   margin-bottom: 2rem;
 

@@ -6,6 +6,7 @@ import { useChallengeData } from "../../hooks/useChallengeData";
 import { useChallengeSubmit } from "../../hooks/useChallengeSubmit";
 import * as S from "./ChallengePage.style";
 import styled from "@emotion/styled";
+import LoadingSpinner from "@/components/LoadingSpinner/LoadingSpinner";
 
 const StyledMagnifier = styled(Magnifier)`
   display: flex;
@@ -263,15 +264,16 @@ const ChallengePage: React.FC<ChallengePageProps> = ({
       <S.Container>
         <S.ContentWrapper isStarted={false}>
           <S.ContentCard>
-            <div style={{ textAlign: "center", padding: "60px 20px" }}>
-              <div style={{ fontSize: "48px", marginBottom: "16px" }}>⏳</div>
+            <S.LoadingCard>
+              <LoadingSpinner />
+
               <div style={{ fontSize: "18px", marginBottom: "8px" }}>
                 오늘의 챌린지를 불러오는 중...
               </div>
               <div style={{ fontSize: "14px", color: "#666" }}>
                 잠시만 기다려주세요
               </div>
-            </div>
+            </S.LoadingCard>
           </S.ContentCard>
         </S.ContentWrapper>
       </S.Container>

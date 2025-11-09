@@ -50,6 +50,15 @@ export const ProgressFill = styled.div<{ progress: number }>`
   transition: width 0.3s ease;
 `;
 
+export const LoadingCard = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  gap: 1rem;
+`;
+
 // 콘텐츠 카드
 export const ContentCard = styled.div`
   width: 100%;
