@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import type { Badge } from "@criti-ai/shared";
 // 훅
 import { useChallengeData } from "../../hooks/useChallengeData";
 import { useChallengeSubmit } from "../../hooks/useChallengeSubmit";
@@ -71,8 +70,8 @@ const ChallengePage: React.FC<ChallengePageProps> = ({
     getTodayCompletedChallenges()
   );
 
-  // 획득한 뱃지 (예시)
-  const [earnedBadge, setEarnedBadge] = useState<Badge | null>(null);
+  // 완료 후 진행도 로드 플래그
+  const [hasLoadedFinalProgress, setHasLoadedFinalProgress] = useState(false);
 
   // 1. 챌린지 데이터 관리 훅
   const {
@@ -156,7 +155,9 @@ const ChallengePage: React.FC<ChallengePageProps> = ({
           saveTodayCompletedChallenge(currentChallenge.id);
           setTodayCompleted((prev) => [...prev, currentChallenge.id]);
         } else if (result.isCorrect) {
-          console.log("✅ 정답이지만 오늘 이미 푼 문제입니다. 점수 추가 안 함.");
+          console.log(
+            "✅ 정답이지만 오늘 이미 푼 문제입니다. 점수 추가 안 함."
+          );
         }
       }
     } catch (error) {
@@ -181,7 +182,7 @@ const ChallengePage: React.FC<ChallengePageProps> = ({
     setChallengeIndex(0);
     resetChallenge();
     setHasStarted(true);
-    setEarnedBadge(null);
+    setHasLoadedFinalProgress(false);
   };
 
   /**
@@ -197,44 +198,37 @@ const ChallengePage: React.FC<ChallengePageProps> = ({
   const totalScore = correctCount * 10; // 각 문제당 10점
 
   /**
-   * 모든 문제를 완료했을 때 뱃지 부여
+   * 모든 문제 완료했을 때 서버에서 진행도 다시 불러와서 새 뱃지 확인
+   * (한 번만 실행)
    */
   useEffect(() => {
-    if (isAllCompleted && !earnedBadge) {
-      // 뱃지 결정 로직
-      const percentage = (correctCount / challenges.length) * 100;
-      let badge: Badge;
-
-      if (percentage >= 70) {
-        badge = {
-          id: "challenge_master",
-          name: "감정 마스터",
-          description: "감정이 아닌 논리로 판단하는 능력자!",
-          icon: "🎯",
-          earnedAt: new Date().toISOString(),
-          category: "training",
-        };
-      } else {
-        badge = {
-          id: "challenge_novice",
-          name: "감정 폭주자",
-          description: "한 번 더 냉정하게 바라보면 괜찮겠어요!",
-          icon: "💪",
-          earnedAt: new Date().toISOString(),
-          category: "training",
-        };
-      }
-
-      setEarnedBadge(badge);
-
-      // userProgress에 뱃지 추가
-      if (userProgress && !userProgress.badges.some((b) => b.id === badge.id)) {
-        updateUserProgress({
-          badges: [...userProgress.badges, badge],
-        });
-      }
+    if (isAllCompleted && !hasLoadedFinalProgress) {
+      // 서버에서 최신 진행도 다시 불러옴
+      loadInitialData();
+      setHasLoadedFinalProgress(true);
     }
-  }, [isAllCompleted, correctCount, challenges.length, earnedBadge, userProgress, updateUserProgress]);
+  }, [isAllCompleted, hasLoadedFinalProgress]);
+
+  /**
+   * 가장 최근에 획득한 training 카테고리 뱃지 가져오기
+   */
+  const getLatestTrainingBadge = () => {
+    if (!userProgress?.badges || userProgress.badges.length === 0) {
+      return null;
+    }
+
+    // training 카테고리 뱃지만 필터링하고 가장 최근 것 반환
+    const trainingBadges = userProgress.badges
+      .filter((badge) => badge.category === "training")
+      .sort(
+        (a, b) =>
+          new Date(b.earnedAt).getTime() - new Date(a.earnedAt).getTime()
+      );
+
+    return trainingBadges.length > 0 ? trainingBadges[0] : null;
+  };
+
+  const earnedBadge = getLatestTrainingBadge();
 
   // --- 렌더링 ---
 
@@ -336,6 +330,7 @@ const ChallengePage: React.FC<ChallengePageProps> = ({
                     </S.ResultItemStatus>
                   </S.ResultItemHeader>
                   <S.ResultItemTitle>{result.title}</S.ResultItemTitle>
+
                   <S.AnswerLabel>
                     {result.isCorrect ? "정답" : "내가 고른 답"}
                   </S.AnswerLabel>
@@ -345,6 +340,7 @@ const ChallengePage: React.FC<ChallengePageProps> = ({
                       .map((opt) => opt.text)
                       .join(", ")}
                   </S.AnswerBox>
+
                   {!result.isCorrect && (
                     <>
                       <S.AnswerLabel>정답</S.AnswerLabel>
@@ -357,6 +353,16 @@ const ChallengePage: React.FC<ChallengePageProps> = ({
                           .join(", ")}
                       </S.AnswerBox>
                     </>
+                  )}
+
+                  {/* 해설 */}
+                  {result.explanation && (
+                    <S.ExplanationSection style={{ marginTop: "16px" }}>
+                      <S.ExplanationTitle>📝 해설</S.ExplanationTitle>
+                      <S.ExplanationText>
+                        {result.explanation}
+                      </S.ExplanationText>
+                    </S.ExplanationSection>
                   )}
                 </S.ResultItem>
               ))}
@@ -380,7 +386,9 @@ const ChallengePage: React.FC<ChallengePageProps> = ({
               <br />
               가짜뉴스를 판별하는 능력을 기르세요!
             </S.WelcomeSubtitle>
-            <S.StartButton onClick={handleStart}>훈련하기 시작하기</S.StartButton>
+            <S.StartButton onClick={handleStart}>
+              훈련하기 시작하기
+            </S.StartButton>
           </S.WelcomeContainer>
         </S.ContentWrapper>
       </S.Container>
@@ -424,28 +432,31 @@ const ChallengePage: React.FC<ChallengePageProps> = ({
               </S.OptionsContainer>
 
               {/* 힌트 섹션 (문제 풀 때 표시) */}
-              {showHints && currentChallenge?.hints && currentChallenge.hints.length > 0 && (
-                <S.HintSection>
-                  <S.HintContent>
-                    {currentChallenge.hints.map((hint, index) => (
-                      <div key={index} style={{ marginBottom: "12px" }}>
-                        <strong>💡 힌트 {index + 1}:</strong> {hint}
-                      </div>
-                    ))}
-                  </S.HintContent>
-                </S.HintSection>
-              )}
+              {showHints &&
+                currentChallenge?.hints &&
+                currentChallenge.hints.length > 0 && (
+                  <S.HintSection>
+                    <S.HintContent>
+                      {currentChallenge.hints.map((hint, index) => (
+                        <div key={index} style={{ marginBottom: "12px" }}>
+                          <strong>💡 힌트 {index + 1}:</strong> {hint}
+                        </div>
+                      ))}
+                    </S.HintContent>
+                  </S.HintSection>
+                )}
 
               {/* 힌트 버튼과 제출 버튼 */}
               <S.ButtonContainer>
-                {currentChallenge?.hints && currentChallenge.hints.length > 0 && (
-                  <S.HintButton
-                    onClick={() => setShowHints(!showHints)}
-                    disabled={false}
-                  >
-                    {showHints ? "💡 힌트 숨기기" : "💡 힌트 보기"}
-                  </S.HintButton>
-                )}
+                {currentChallenge?.hints &&
+                  currentChallenge.hints.length > 0 && (
+                    <S.HintButton
+                      onClick={() => setShowHints(!showHints)}
+                      disabled={false}
+                    >
+                      {showHints ? "💡 힌트 숨기기" : "💡 힌트 보기"}
+                    </S.HintButton>
+                  )}
                 <S.SubmitButton
                   onClick={handleSubmit}
                   disabled={userAnswers.length === 0 || submitLoading}
