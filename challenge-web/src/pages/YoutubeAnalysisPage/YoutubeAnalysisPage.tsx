@@ -36,6 +36,18 @@ const StyledMagnifier = styled(Magnifier)`
   justify-content: center;
   align-items: center;
   aspect-ratio: 1/1;
+
+  animation: bounce 2s infinite;
+
+  @keyframes bounce {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
 `;
 
 const StyledArrowLeft = styled(ArrowLeft)`

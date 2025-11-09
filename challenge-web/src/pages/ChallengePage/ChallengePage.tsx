@@ -1,8 +1,33 @@
 import React, { useEffect, useState } from "react";
+import Magnifier from "@/assets/icons/magnifier.svg?react";
+
 // 훅
 import { useChallengeData } from "../../hooks/useChallengeData";
 import { useChallengeSubmit } from "../../hooks/useChallengeSubmit";
 import * as S from "./ChallengePage.style";
+import styled from "@emotion/styled";
+
+const StyledMagnifier = styled(Magnifier)`
+  display: flex;
+  width: 7.5rem;
+  height: 7.5rem;
+  padding: 0.32975rem;
+  justify-content: center;
+  align-items: center;
+  aspect-ratio: 1/1;
+
+  animation: bounce 2s infinite;
+
+  @keyframes bounce {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+`;
 
 interface ChallengePageProps {
   onNavigateBack?: () => void;
@@ -315,7 +340,7 @@ const ChallengePage: React.FC<ChallengePageProps> = ({
               )}
 
               <S.RestartButton onClick={handleRestart}>
-                새로운 문제 풀기
+                문제 다시 풀기
               </S.RestartButton>
             </S.ScoreSection>
 
@@ -323,48 +348,93 @@ const ChallengePage: React.FC<ChallengePageProps> = ({
             <S.ResultsList>
               {challengeResults.map((result, index) => (
                 <S.ResultItem key={result.challengeId}>
-                  <S.ResultItemHeader>
-                    <S.ResultItemNumber>{index + 1}번</S.ResultItemNumber>
-                    <S.ResultItemStatus correct={result.isCorrect}>
-                      {result.isCorrect ? "정답이에요!" : "땡! 틀렸어요."}
-                    </S.ResultItemStatus>
-                  </S.ResultItemHeader>
-                  <S.ResultItemTitle>{result.title}</S.ResultItemTitle>
+                  <S.ResultSection>
+                    <S.ResultItemHeader>
+                      <S.ResultItemNumber>{index + 1}번</S.ResultItemNumber>
+                      <S.ResultItemTitle>{result.title}</S.ResultItemTitle>
 
-                  <S.AnswerLabel>
-                    {result.isCorrect ? "정답" : "내가 고른 답"}
-                  </S.AnswerLabel>
-                  <S.AnswerBox correct={result.isCorrect}>
-                    {challenges[index]?.options
-                      .filter((opt) => result.userAnswers.includes(opt.id))
-                      .map((opt) => opt.text)
-                      .join(", ")}
-                  </S.AnswerBox>
-
-                  {!result.isCorrect && (
-                    <>
-                      <S.AnswerLabel>정답</S.AnswerLabel>
-                      <S.AnswerBox correct={true}>
-                        {challenges[index]?.options
-                          .filter((opt) =>
-                            result.correctAnswers.includes(opt.id)
-                          )
+                      <S.ResultTitle correct={isCorrect}>
+                        {isCorrect ? "정답이에요!" : "땡! 틀렸어요."}
+                      </S.ResultTitle>
+                    </S.ResultItemHeader>
+                    {/* 내가 고른 답 / 정답 */}
+                    <S.AnswerExplanation>
+                      <S.AnswerLabel>
+                        {isCorrect ? "정답" : "내가 고른 답"}
+                      </S.AnswerLabel>
+                      <S.AnswerBox correct={isCorrect}>
+                        {currentChallenge?.options
+                          .filter((opt) => userAnswers.includes(opt.id))
                           .map((opt) => opt.text)
                           .join(", ")}
                       </S.AnswerBox>
-                    </>
-                  )}
 
-                  {/* 해설 */}
-                  {result.explanation && (
-                    <S.ExplanationSection style={{ marginTop: "16px" }}>
-                      <S.ExplanationTitle>📝 해설</S.ExplanationTitle>
-                      <S.ExplanationText>
-                        {result.explanation}
-                      </S.ExplanationText>
-                    </S.ExplanationSection>
-                  )}
+                      {!isCorrect && (
+                        <>
+                          <S.AnswerLabel>정답</S.AnswerLabel>
+                          <S.AnswerBox correct={true}>
+                            {currentChallenge?.options
+                              .filter((opt) => resultAnswers.includes(opt.id))
+                              .map((opt) => opt.text)
+                              .join(", ")}
+                          </S.AnswerBox>
+                        </>
+                      )}
+                    </S.AnswerExplanation>
+
+                    {/* 해설 */}
+                    {explanation && (
+                      <S.ExplanationSection>
+                        <S.ExplanationTitle>📝 해설</S.ExplanationTitle>
+                        <S.ExplanationText>{explanation}</S.ExplanationText>
+                      </S.ExplanationSection>
+                    )}
+                  </S.ResultSection>
                 </S.ResultItem>
+
+                // <S.ResultItem key={result.challengeId}>
+                //   <S.ResultItemHeader>
+                //     <S.ResultItemNumber>{index + 1}번</S.ResultItemNumber>
+                //     <S.ResultItemStatus correct={result.isCorrect}>
+                //       {result.isCorrect ? "정답이에요!" : "땡! 틀렸어요."}
+                //     </S.ResultItemStatus>
+                //   </S.ResultItemHeader>
+                //   <S.ResultItemTitle>{result.title}</S.ResultItemTitle>
+
+                //   <S.AnswerLabel>
+                //     {result.isCorrect ? "정답" : "내가 고른 답"}
+                //   </S.AnswerLabel>
+                //   <S.AnswerBox correct={result.isCorrect}>
+                //     {challenges[index]?.options
+                //       .filter((opt) => result.userAnswers.includes(opt.id))
+                //       .map((opt) => opt.text)
+                //       .join(", ")}
+                //   </S.AnswerBox>
+
+                //   {!result.isCorrect && (
+                //     <>
+                //       <S.AnswerLabel>정답</S.AnswerLabel>
+                //       <S.AnswerBox correct={true}>
+                //         {challenges[index]?.options
+                //           .filter((opt) =>
+                //             result.correctAnswers.includes(opt.id)
+                //           )
+                //           .map((opt) => opt.text)
+                //           .join(", ")}
+                //       </S.AnswerBox>
+                //     </>
+                //   )}
+
+                //   {/* 해설 */}
+                //   {result.explanation && (
+                //     <S.ExplanationSection style={{ marginTop: "16px" }}>
+                //       <S.ExplanationTitle>📝 해설</S.ExplanationTitle>
+                //       <S.ExplanationText>
+                //         {result.explanation}
+                //       </S.ExplanationText>
+                //     </S.ExplanationSection>
+                //   )}
+                // </S.ResultItem>
               ))}
             </S.ResultsList>
           </S.CompletionContainer>
@@ -379,7 +449,7 @@ const ChallengePage: React.FC<ChallengePageProps> = ({
       <S.Container>
         <S.ContentWrapper isStarted={false}>
           <S.WelcomeContainer>
-            <S.WelcomeIcon>🔍</S.WelcomeIcon>
+            <StyledMagnifier />
             <S.WelcomeTitle>비판적 사고 훈련을 시작해볼까요?</S.WelcomeTitle>
             <S.WelcomeSubtitle>
               AI가 생성한 챌린지를 통해
@@ -387,7 +457,7 @@ const ChallengePage: React.FC<ChallengePageProps> = ({
               가짜뉴스를 판별하는 능력을 기르세요!
             </S.WelcomeSubtitle>
             <S.StartButton onClick={handleStart}>
-              훈련하기 시작하기
+              문제풀이 시작하기
             </S.StartButton>
           </S.WelcomeContainer>
         </S.ContentWrapper>

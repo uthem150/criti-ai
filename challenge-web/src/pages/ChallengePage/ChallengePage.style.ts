@@ -3,20 +3,22 @@ import { colors, typography } from "../../styles/design-system";
 
 // 전체 컨테이너
 export const Container = styled.div`
-  min-height: 100vh;
-  background: ${colors.light.grayscale[5]};
+  max-height: 100vh;
   display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: ${colors.light.grayscale[5]};
 `;
 
 export const ContentWrapper = styled.div<{ isStarted: boolean }>`
   display: flex;
-  padding: ${(props) => (props.isStarted ? "2.5rem 1.25rem" : "12.5rem 1.25rem")};
+  padding: ${(props) => (props.isStarted ? "5rem 2.5rem" : "0rem 1.25rem")};
+  /* width: 37.5rem; */
+  width: 80%;
+
   flex-direction: column;
   align-items: center;
-  gap: 1.75rem;
   flex: 1 0 0;
-  align-self: stretch;
-  justify-content: ${(props) => (props.isStarted ? "flex-start" : "center")};
 
   @media (max-width: 768px) {
     padding: 2rem;
@@ -26,8 +28,7 @@ export const ContentWrapper = styled.div<{ isStarted: boolean }>`
 // 진행바
 export const ProgressBarContainer = styled.div`
   width: 100%;
-  max-width: 800px;
-  margin-bottom: 1rem;
+  margin-bottom: 2.5rem;
 `;
 
 export const ProgressBar = styled.div`
@@ -52,43 +53,22 @@ export const ProgressFill = styled.div<{ progress: number }>`
 // 콘텐츠 카드
 export const ContentCard = styled.div`
   width: 100%;
-  max-width: 800px;
-  background: ${colors.light.grayscale[0]};
-  border-radius: 16px;
-  padding: 48px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-
-  @media (max-width: 768px) {
-    padding: 24px;
-    border-radius: 12px;
-  }
 `;
 
 // 환영 화면
 export const WelcomeContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
   text-align: center;
   max-width: 600px;
-`;
-
-export const WelcomeIcon = styled.div`
-  font-size: 120px;
-  margin-bottom: 32px;
-  animation: bounce 2s infinite;
-
-  @keyframes bounce {
-    0%,
-    100% {
-      transform: translateY(0);
-    }
-    50% {
-      transform: translateY(-10px);
-    }
-  }
+  min-height: 100vh;
 `;
 
 export const WelcomeTitle = styled.h2`
-  ${typography.styles.headline1};
-  color: ${colors.light.grayscale[90]};
+  ${typography.styles.headline2};
+  color: ${colors.light.grayscale[100]};
   margin: 0 0 16px 0;
 
   @media (max-width: 768px) {
@@ -104,12 +84,19 @@ export const WelcomeSubtitle = styled.p`
 `;
 
 export const StartButton = styled.button`
-  background: ${colors.light.grayscale[90]};
-  color: ${colors.light.grayscale[0]};
-  border: none;
-  padding: 16px 48px;
-  border-radius: 12px;
-  ${typography.styles.title3};
+  display: flex;
+  height: 3.5rem;
+  padding: 0.9375rem 1.25rem;
+  justify-content: center;
+  align-items: center;
+  gap: 0.625rem;
+  align-self: stretch;
+  border-radius: 0.75rem;
+
+  background: ${colors.light.brand.primary100};
+  color: ${colors.light.static.white};
+
+  ${typography.styles.title4};
   cursor: pointer;
   transition: all 0.2s;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
@@ -126,19 +113,19 @@ export const StartButton = styled.button`
 
 // 문제 화면
 export const QuestionNumber = styled.div`
-  ${typography.styles.body3};
-  color: ${colors.light.grayscale[60]};
-  margin-bottom: 16px;
+  ${typography.styles.title2};
+  text-align: center;
+  color: ${colors.light.grayscale[50]};
+  margin-bottom: 0.75rem;
 `;
 
 export const QuestionTitle = styled.h3`
-  ${typography.styles.headline2};
+  ${typography.styles.title1};
   color: ${colors.light.grayscale[90]};
-  margin: 0 0 32px 0;
-  line-height: 1.4;
+  margin-bottom: 3.75rem;
+  text-align: center;
 
   @media (max-width: 768px) {
-    ${typography.styles.title1};
   }
 `;
 
@@ -146,23 +133,26 @@ export const QuestionTitle = styled.h3`
 export const OptionsContainer = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  margin-bottom: 32px;
+  gap: 1rem;
+  margin-bottom: 3.75rem;
 `;
 
 export const OptionButton = styled.button<{ selected: boolean }>`
   display: flex;
+  padding: 1.25rem 1.75rem;
   align-items: center;
-  gap: 16px;
-  padding: 20px;
+  gap: 0.75rem;
+  align-self: stretch;
+  border-radius: 1.25rem;
+
   background: ${(props) =>
-    props.selected ? colors.light.brand.primary10 : colors.light.grayscale[5]};
-  border: 2px solid
+    props.selected ? colors.light.brand.primary10 : colors.light.grayscale[0]};
+
+  border: 1px solid
     ${(props) =>
       props.selected
         ? colors.light.brand.primary100
         : colors.light.grayscale[20]};
-  border-radius: 12px;
   cursor: pointer;
   transition: all 0.2s;
   text-align: left;
@@ -174,9 +164,9 @@ export const OptionButton = styled.button<{ selected: boolean }>`
 `;
 
 export const OptionIcon = styled.div<{ selected: boolean }>`
-  width: 36px;
-  height: 36px;
-  border-radius: 8px;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 2rem;
   background: ${(props) =>
     props.selected
       ? colors.light.brand.primary100
@@ -192,10 +182,8 @@ export const OptionIcon = styled.div<{ selected: boolean }>`
 `;
 
 export const OptionText = styled.div`
-  flex: 1;
-  ${typography.styles.body1};
-  color: ${colors.light.grayscale[90]};
-  line-height: 1.5;
+  ${typography.styles.caption2};
+  color: ${colors.light.grayscale[100]};
 `;
 
 // 힌트 버튼 및 제출 버튼 컨테이너
@@ -303,6 +291,8 @@ export const SubmitButton = styled.button`
 
 // 결과 섹션
 export const ResultSection = styled.div`
+  display: flex;
+  flex-direction: column;
   text-align: center;
   animation: fadeIn 0.3s ease-out;
 
@@ -317,8 +307,8 @@ export const ResultSection = styled.div`
 `;
 
 export const ResultBadge = styled.div<{ correct: boolean }>`
-  width: 80px;
-  height: 80px;
+  width: 2rem;
+  height: 2rem;
   border-radius: 50%;
   background: ${(props) =>
     props.correct ? colors.light.state.success : colors.light.state.error};
@@ -326,7 +316,7 @@ export const ResultBadge = styled.div<{ correct: boolean }>`
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 48px;
+  font-size: 2rem;
   margin: 0 auto 24px;
   animation: scaleIn 0.3s ease-out;
 
@@ -341,7 +331,7 @@ export const ResultBadge = styled.div<{ correct: boolean }>`
 `;
 
 export const ResultTitle = styled.h4<{ correct: boolean }>`
-  ${typography.styles.headline2};
+  ${typography.styles.title3};
   color: ${(props) =>
     props.correct ? colors.light.state.success : colors.light.state.error};
   margin: 0 0 24px 0;
@@ -350,48 +340,43 @@ export const ResultTitle = styled.h4<{ correct: boolean }>`
 // 답 설명
 export const AnswerExplanation = styled.div`
   text-align: left;
-  margin-bottom: 24px;
+  margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
 `;
 
 export const AnswerLabel = styled.div`
-  ${typography.styles.body3};
-  color: ${colors.light.grayscale[60]};
-  margin-bottom: 8px;
-  margin-top: 16px;
-
-  &:first-of-type {
-    margin-top: 0;
-  }
+  ${typography.styles.title4};
+  color: ${colors.light.grayscale[100]};
+  margin-bottom: 0.3rem;
 `;
 
 export const AnswerBox = styled.div<{ correct: boolean }>`
-  padding: 16px;
+  padding: 1.25rem 1.75rem;
+  margin-bottom: 1.5rem;
   background: ${(props) =>
     props.correct
       ? colors.light.state.successLight
       : colors.light.state.errorLight};
-  border: 2px solid
+
+  border: 1px solid
     ${(props) =>
       props.correct ? colors.light.state.success : colors.light.state.error};
-  border-radius: 12px;
-  ${typography.styles.body2};
-  color: ${colors.light.grayscale[90]};
-  line-height: 1.5;
+
+  border-radius: 1.25rem;
+  ${typography.styles.caption2};
+  color: ${colors.light.grayscale[100]};
 `;
 
 export const ExplanationSection = styled.div`
-  margin-top: 24px;
-  padding: 20px;
-  background: ${colors.light.grayscale[5]};
-  border-radius: 12px;
   text-align: left;
+  margin-bottom: 1.5rem;
 `;
 
 export const ExplanationTitle = styled.div`
   ${typography.styles.title4};
-  color: ${colors.light.grayscale[90]};
+  color: ${colors.light.grayscale[100]};
   margin-bottom: 12px;
-  font-weight: ${typography.fontWeight.semibold};
 `;
 
 export const ExplanationText = styled.div`
@@ -403,16 +388,21 @@ export const ExplanationText = styled.div`
 
 // 다음 버튼
 export const NextButton = styled.button`
-  width: 100%;
-  padding: 16px;
-  background: ${colors.light.grayscale[90]};
+  display: flex;
+  height: 3.5rem;
+  padding: 0.9375rem 1.5rem 0.9375rem 1.75rem;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  align-self: stretch;
+
+  background: ${colors.light.grayscale[100]};
   color: ${colors.light.grayscale[0]};
   border: none;
-  border-radius: 12px;
-  ${typography.styles.title3};
+  border-radius: 0.7rem;
+  ${typography.styles.title4};
   cursor: pointer;
   transition: all 0.2s;
-  margin-top: 24px;
 
   &:hover {
     background: ${colors.light.grayscale[100]};
@@ -529,8 +519,9 @@ export const ResultItem = styled.div`
 
 export const ResultItemHeader = styled.div`
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 12px;
+  gap: 0.5rem;
   margin-bottom: 16px;
 `;
 
@@ -547,8 +538,7 @@ export const ResultItemStatus = styled.div<{ correct: boolean }>`
 `;
 
 export const ResultItemTitle = styled.div`
-  ${typography.styles.body1};
-  color: ${colors.light.grayscale[90]};
-  margin-bottom: 16px;
-  line-height: 1.5;
+  ${typography.styles.title2};
+  color: ${colors.light.grayscale[100]};
+  margin-bottom: 1rem;
 `;

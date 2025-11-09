@@ -3,7 +3,7 @@ import { colors, typography } from "../../styles/design-system";
 
 // 전체 컨테이너
 export const Container = styled.div`
-  min-height: 100vh;
+  max-height: 100vh;
   background: ${colors.light.grayscale[5]};
   display: flex;
 `;
