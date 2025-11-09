@@ -1,336 +1,255 @@
 import styled from "@emotion/styled";
 import { colors, typography } from "../../styles/design-system";
 
-export const PageContainer = styled.div`
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 1.5rem;
+// 전체 컨테이너
+export const Container = styled.div`
   min-height: 100vh;
   background: ${colors.light.grayscale[5]};
+  display: flex;
+`;
+
+export const ContentWrapper = styled.div<{ isStarted: boolean }>`
+  display: flex;
+  padding: ${(props) => (props.isStarted ? "2.5rem 1.25rem" : "12.5rem 1.25rem")};
+  flex-direction: column;
+  align-items: center;
+  gap: 1.75rem;
+  flex: 1 0 0;
+  align-self: stretch;
+  justify-content: ${(props) => (props.isStarted ? "flex-start" : "center")};
 
   @media (max-width: 768px) {
-    padding: 1rem;
+    padding: 2rem;
   }
 `;
 
-export const Header = styled.header`
-  text-align: center;
-  margin-bottom: 2rem;
-  padding: 2rem 0;
-  background: linear-gradient(
-    135deg,
-    ${colors.light.brand.primary100},
-    ${colors.light.etc.purple}
-  );
-  border-radius: 0.75rem;
-  color: ${colors.light.grayscale[0]};
-  box-shadow: "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)";
+// 진행바
+export const ProgressBarContainer = styled.div`
+  width: 100%;
+  max-width: 800px;
+  margin-bottom: 1rem;
 `;
 
-export const HeaderTitle = styled.h1`
-  margin: 0 0 0.5rem 0;
+export const ProgressBar = styled.div`
+  width: 100%;
+  height: 8px;
+  background: ${colors.light.grayscale[20]};
+  border-radius: 4px;
+  overflow: hidden;
+`;
+
+export const ProgressFill = styled.div<{ progress: number }>`
+  width: ${(props) => props.progress}%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    ${colors.light.brand.primary100},
+    ${colors.light.etc.blue}
+  );
+  transition: width 0.3s ease;
+`;
+
+// 콘텐츠 카드
+export const ContentCard = styled.div`
+  width: 100%;
+  max-width: 800px;
+  background: ${colors.light.grayscale[0]};
+  border-radius: 16px;
+  padding: 48px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+
+  @media (max-width: 768px) {
+    padding: 24px;
+    border-radius: 12px;
+  }
+`;
+
+// 환영 화면
+export const WelcomeContainer = styled.div`
+  text-align: center;
+  max-width: 600px;
+`;
+
+export const WelcomeIcon = styled.div`
+  font-size: 120px;
+  margin-bottom: 32px;
+  animation: bounce 2s infinite;
+
+  @keyframes bounce {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+`;
+
+export const WelcomeTitle = styled.h2`
   ${typography.styles.headline1};
-  color: ${colors.light.grayscale[0]};
+  color: ${colors.light.grayscale[90]};
+  margin: 0 0 16px 0;
 
   @media (max-width: 768px) {
     ${typography.styles.headline2};
   }
 `;
 
-export const HeaderSubtitle = styled.p`
-  margin: 0;
-  ${typography.styles.title3};
-  opacity: 0.95;
-  color: ${colors.light.grayscale[0]};
-
-  @media (max-width: 768px) {
-    ${typography.styles.body1};
-  }
+export const WelcomeSubtitle = styled.p`
+  ${typography.styles.body1};
+  color: ${colors.light.grayscale[70]};
+  line-height: 1.6;
+  margin: 0 0 40px 0;
 `;
 
-export const NavButtonContainer = styled.div`
-  display: flex;
-  justify-content: center;
-  gap: 0.75rem;
-  margin-bottom: 1.5rem;
-  flex-wrap: wrap;
-`;
-
-export const NavButton = styled.button`
-  padding: 0.75rem 1.5rem;
-  background: linear-gradient(
-    135deg,
-    ${colors.light.brand.primary100},
-    ${colors.light.etc.blue}
-  );
+export const StartButton = styled.button`
+  background: ${colors.light.grayscale[90]};
   color: ${colors.light.grayscale[0]};
   border: none;
-  border-radius: 0.5rem;
-  ${typography.styles.title5};
+  padding: 16px 48px;
+  border-radius: 12px;
+  ${typography.styles.title3};
   cursor: pointer;
-  transition: "250ms ease-in-out";
-  box-shadow: "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)";
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow: "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)";
-    opacity: 0.95;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
   }
 
   &:active {
     transform: translateY(0);
   }
-
-  @media (max-width: 768px) {
-    padding: 0.5rem 1rem;
-    ${typography.styles.body3};
-  }
 `;
 
-export const StatsBar = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
-  margin-bottom: 2rem;
-
-  @media (max-width: 768px) {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.75rem;
-  }
-`;
-
-export const StatItem = styled.div`
-  background: ${colors.light.grayscale[0]};
-  padding: 1rem;
-  border-radius: 0.5rem;
-  text-align: center;
-  box-shadow: "0 1px 2px 0 rgb(0 0 0 / 0.05)";
-  border: 1px solid ${colors.light.grayscale[20]};
-  transition: "250ms ease-in-out";
-
-  &:hover {
-    box-shadow: "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)";
-    transform: translateY(-2px);
-  }
-`;
-
-export const StatLabel = styled.div`
+// 문제 화면
+export const QuestionNumber = styled.div`
   ${typography.styles.body3};
-  color: ${colors.light.grayscale[70]};
-  margin-bottom: 0.25rem;
+  color: ${colors.light.grayscale[60]};
+  margin-bottom: 16px;
 `;
 
-export const StatValue = styled.div`
-  ${typography.styles.title2};
-  color: ${colors.light.brand.primary100};
-`;
-
-export const BadgeContainer = styled.div`
-  background: ${colors.light.grayscale[0]};
-  padding: 1.5rem;
-  border-radius: 0.5rem;
-  margin-bottom: 2rem;
-  box-shadow: "0 1px 2px 0 rgb(0 0 0 / 0.05)";
-
-  h3 {
-    margin: 0 0 1rem 0;
-    color: ${colors.light.grayscale[90]};
-    ${typography.styles.title2};
-  }
-
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-`;
-
-export const Badge = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem;
-  background: ${colors.light.grayscale[5]};
-  border-radius: 0.375rem;
-  border: 1px solid ${colors.light.grayscale[20]};
-  transition: "250ms ease-in-out";
-
-  &:hover {
-    box-shadow: "0 1px 2px 0 rgb(0 0 0 / 0.05)";
-  }
-
-  .icon {
-    ${typography.styles.headline2};
-  }
-
-  .name {
-    font-weight: ${typography.fontWeight.semibold};
-    color: ${colors.light.grayscale[90]};
-    ${typography.styles.body2};
-  }
-
-  .description {
-    ${typography.styles.body3};
-    color: ${colors.light.grayscale[70]};
-  }
-`;
-
-export const ChallengeContainer = styled.div`
-  margin-bottom: 2rem;
-`;
-
-export const ChallengeCard = styled.div`
-  background: ${colors.light.grayscale[0]};
-  padding: 2rem;
-  border-radius: 0.75rem;
-  box-shadow: "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)";
-  border: 1px solid ${colors.light.grayscale[20]};
-`;
-
-export const ChallengeTitle = styled.h2`
-  margin: 0 0 1.5rem 0;
-  color: ${colors.light.grayscale[90]};
+export const QuestionTitle = styled.h3`
   ${typography.styles.headline2};
+  color: ${colors.light.grayscale[90]};
+  margin: 0 0 32px 0;
+  line-height: 1.4;
 
   @media (max-width: 768px) {
     ${typography.styles.title1};
   }
 `;
 
-// 용어 설명 스타일
-export const ChallengeCategoryDescription = styled.div`
-  background: ${colors.light.grayscale[5]};
-  padding: 1rem;
-  border-radius: 0.375rem;
-  border-left: 4px solid ${colors.light.etc.blue}; // 파란색으로 구분
-  margin-bottom: 2rem;
-  line-height: 1.6;
-  ${typography.styles.body2};
-  color: ${colors.light.grayscale[80]};
-
-  strong {
-    font-weight: ${typography.fontWeight.semibold};
-    color: ${colors.light.etc.blue};
-  }
-`;
-
-export const ChallengeContent = styled.div`
-  background: ${colors.light.grayscale[5]};
-  padding: 1.5rem;
-  border-radius: 0.375rem;
-  border-left: 4px solid ${colors.light.brand.primary100};
-  margin-bottom: 2rem;
-  line-height: 1.7;
-  ${typography.styles.body2};
-  color: ${colors.light.grayscale[90]};
-  white-space: pre-line;
-`;
-
+// 선택지
 export const OptionsContainer = styled.div`
-  display: grid;
-  grid-template-columns: 1fr; // 1열로 고정 (사용자 이미지 참고)
-  gap: 0.75rem; // 간격 좁힘
-  margin-bottom: 2rem; // 하단 여백 늘림
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 32px;
 `;
 
-interface OptionButtonProps {
-  selected: boolean;
-}
-
-export const OptionButton = styled.button<OptionButtonProps>`
-  padding: 1rem;
+export const OptionButton = styled.button<{ selected: boolean }>`
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  background: ${(props) =>
+    props.selected ? colors.light.brand.primary10 : colors.light.grayscale[5]};
   border: 2px solid
     ${(props) =>
       props.selected
         ? colors.light.brand.primary100
         : colors.light.grayscale[20]};
-  background: ${(props) =>
-    props.selected ? colors.light.brand.primary10 : colors.light.grayscale[0]};
-  color: ${(props) =>
-    props.selected
-      ? colors.light.brand.primary100
-      : colors.light.grayscale[90]};
-  border-radius: 0.5rem;
+  border-radius: 12px;
   cursor: pointer;
-  transition: all "250ms ease-in-out";
+  transition: all 0.2s;
   text-align: left;
-  min-height: 60px;
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  ${typography.styles.body2};
 
   &:hover {
     border-color: ${colors.light.brand.primary100};
-    background: ${(props) =>
-      props.selected
-        ? colors.light.brand.primary20
-        : colors.light.brand.primary10};
-    transform: translateY(-2px);
-    box-shadow: "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)";
-  }
-
-  &:active {
-    transform: translateY(0);
-  }
-
-  /* 옵션 번호 스타일 */
-  .option-number {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.9rem;
-    font-weight: ${typography.fontWeight.semibold};
-    width: 28px; // 크기 조절
-    height: 28px; // 크기 조절
-    border-radius: 0.375rem;
-    background: ${(props) =>
-      props.selected
-        ? colors.light.brand.primary100
-        : colors.light.grayscale[20]};
-    color: ${(props) =>
-      props.selected ? colors.light.grayscale[0] : colors.light.grayscale[70]};
-    flex-shrink: 0;
-    transition: all 250ms ease-in-out;
-  }
-
-  /* 옵션 텍스트 스타일 */
-  .option-text {
-    flex-grow: 1;
-    line-height: 1.5;
-    color: ${colors.light.grayscale[90]};
-  }
-
-  /* 선택 시 텍스트 색상 (재정의) */
-  &:hover .option-text,
-  &.selected .option-text {
-    color: ${(props) =>
-      props.selected
-        ? colors.light.brand.primary100
-        : colors.light.grayscale[90]};
+    transform: translateX(4px);
   }
 `;
 
-export const HintContainer = styled.div`
-  margin-bottom: 1.5rem;
+export const OptionIcon = styled.div<{ selected: boolean }>`
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: ${(props) =>
+    props.selected
+      ? colors.light.brand.primary100
+      : colors.light.grayscale[20]};
+  color: ${(props) =>
+    props.selected ? colors.light.grayscale[0] : colors.light.grayscale[70]};
   display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
+  align-items: center;
+  justify-content: center;
+  ${typography.styles.title4};
+  flex-shrink: 0;
+  transition: all 0.2s;
 `;
 
-export const HintText = styled.div`
+export const OptionText = styled.div`
+  flex: 1;
+  ${typography.styles.body1};
+  color: ${colors.light.grayscale[90]};
+  line-height: 1.5;
+`;
+
+// 힌트 버튼 및 제출 버튼 컨테이너
+export const ButtonContainer = styled.div`
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
+`;
+
+export const HintButton = styled.button`
+  flex: 1;
+  padding: 16px;
+  background: ${colors.light.grayscale[0]};
+  color: ${colors.light.brand.primary100};
+  border: 2px solid ${colors.light.brand.primary100};
+  border-radius: 12px;
+  ${typography.styles.title4};
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover:not(:disabled) {
+    background: ${colors.light.brand.primary10};
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  &:disabled {
+    background: ${colors.light.grayscale[20]};
+    border-color: ${colors.light.grayscale[30]};
+    color: ${colors.light.grayscale[50]};
+    cursor: not-allowed;
+  }
+
+  @media (max-width: 768px) {
+    flex: none;
+    width: 100%;
+  }
+`;
+
+// 힌트 섹션
+export const HintSection = styled.div`
   background: ${colors.light.grayscale[5]};
   border: 1px solid ${colors.light.grayscale[20]};
   border-left: 4px solid ${colors.light.etc.purple};
-  padding: 1rem;
-  border-radius: 0.375rem;
-  ${typography.styles.body2};
-  color: ${colors.light.grayscale[80]};
-  line-height: 1.6;
-  animation: fadeIn 0.3s ease-out;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 24px;
+  animation: slideDown 0.3s ease-out;
 
-  @keyframes fadeIn {
+  @keyframes slideDown {
     from {
       opacity: 0;
       transform: translateY(-10px);
@@ -340,146 +259,296 @@ export const HintText = styled.div`
       transform: translateY(0);
     }
   }
+`;
+
+export const HintContent = styled.div`
+  ${typography.styles.body2};
+  color: ${colors.light.grayscale[80]};
+  line-height: 1.6;
 
   strong {
-    font-weight: ${typography.fontWeight.semibold};
     color: ${colors.light.etc.purple};
+    font-weight: ${typography.fontWeight.semibold};
   }
 `;
 
-// 힌트 버튼과 제출 버튼 묶는 컨테이너
-export const ActionButtonsContainer = styled.div`
-  display: flex;
-  gap: 0.75rem;
-  align-items: center;
-  flex-wrap: wrap; // 모바일에서 줄바꿈
-`;
-
-// 힌트 버튼 (보조 버튼)
-export const HintButton = styled.button`
-  background: ${colors.light.grayscale[0]};
-  color: ${colors.light.brand.primary100};
-  border: 1px solid ${colors.light.brand.primary100};
-  padding: 0.75rem 1.5rem; // ActionButton과 동일한 크기
-  border-radius: 0.375rem;
-  ${typography.styles.title5};
-  cursor: pointer;
-  transition: all 250ms ease-in-out;
-  box-shadow: "0 1px 2px 0 rgb(0 0 0 / 0.05)";
-
-  &:hover:not(:disabled) {
-    background: ${colors.light.brand.primary10};
-    transform: translateY(-2px);
-    box-shadow: "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)";
-  }
-
-  &:active:not(:disabled) {
-    transform: translateY(0);
-  }
-
-  &:disabled {
-    background: ${colors.light.grayscale[20]};
-    border-color: ${colors.light.grayscale[30]};
-    color: ${colors.light.grayscale[50]};
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
-  }
-`;
-
-export const ActionButton = styled.button`
-  background: ${colors.light.brand.primary100};
+// 제출 버튼
+export const SubmitButton = styled.button`
+  flex: 2;
+  padding: 16px;
+  background: ${colors.light.grayscale[90]};
   color: ${colors.light.grayscale[0]};
   border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 0.375rem;
-  ${typography.styles.title5};
+  border-radius: 12px;
+  ${typography.styles.title3};
   cursor: pointer;
-  transition: all "250ms ease-in-out";
-  min-width: 120px;
-  box-shadow: "0 1px 2px 0 rgb(0 0 0 / 0.05)";
+  transition: all 0.2s;
 
   &:hover:not(:disabled) {
-    opacity: 0.9;
+    background: ${colors.light.grayscale[100]};
     transform: translateY(-2px);
-    box-shadow: "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)";
-  }
-
-  &:active:not(:disabled) {
-    transform: translateY(0);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   }
 
   &:disabled {
     background: ${colors.light.grayscale[40]};
     cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
+  }
+
+  @media (max-width: 768px) {
+    flex: none;
+    width: 100%;
   }
 `;
 
-export const ResultContainer = styled.div`
-  padding: 1.5rem;
-  border-radius: 0.5rem;
-  margin-top: 1rem;
-  animation: slideUp 0.3s ease-out;
+// 결과 섹션
+export const ResultSection = styled.div`
+  text-align: center;
+  animation: fadeIn 0.3s ease-out;
 
-  @keyframes slideUp {
+  @keyframes fadeIn {
     from {
       opacity: 0;
-      transform: translateY(20px);
     }
     to {
       opacity: 1;
-      transform: translateY(0);
     }
   }
 `;
 
-interface ResultTextProps {
-  isCorrect: boolean;
-}
+export const ResultBadge = styled.div<{ correct: boolean }>`
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: ${(props) =>
+    props.correct ? colors.light.state.success : colors.light.state.error};
+  color: ${colors.light.grayscale[0]};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+  margin: 0 auto 24px;
+  animation: scaleIn 0.3s ease-out;
 
-export const ResultText = styled.div<ResultTextProps>`
-  ${typography.styles.title1};
+  @keyframes scaleIn {
+    from {
+      transform: scale(0);
+    }
+    to {
+      transform: scale(1);
+    }
+  }
+`;
+
+export const ResultTitle = styled.h4<{ correct: boolean }>`
+  ${typography.styles.headline2};
   color: ${(props) =>
-    props.isCorrect ? colors.light.state.success : colors.light.state.error};
-  margin-bottom: 1rem;
-  text-align: center;
+    props.correct ? colors.light.state.success : colors.light.state.error};
+  margin: 0 0 24px 0;
+`;
+
+// 답 설명
+export const AnswerExplanation = styled.div`
+  text-align: left;
+  margin-bottom: 24px;
+`;
+
+export const AnswerLabel = styled.div`
+  ${typography.styles.body3};
+  color: ${colors.light.grayscale[60]};
+  margin-bottom: 8px;
+  margin-top: 16px;
+
+  &:first-of-type {
+    margin-top: 0;
+  }
+`;
+
+export const AnswerBox = styled.div<{ correct: boolean }>`
+  padding: 16px;
+  background: ${(props) =>
+    props.correct
+      ? colors.light.state.successLight
+      : colors.light.state.errorLight};
+  border: 2px solid
+    ${(props) =>
+      props.correct ? colors.light.state.success : colors.light.state.error};
+  border-radius: 12px;
+  ${typography.styles.body2};
+  color: ${colors.light.grayscale[90]};
+  line-height: 1.5;
+`;
+
+export const ExplanationSection = styled.div`
+  margin-top: 24px;
+  padding: 20px;
+  background: ${colors.light.grayscale[5]};
+  border-radius: 12px;
+  text-align: left;
+`;
+
+export const ExplanationTitle = styled.div`
+  ${typography.styles.title4};
+  color: ${colors.light.grayscale[90]};
+  margin-bottom: 12px;
+  font-weight: ${typography.fontWeight.semibold};
 `;
 
 export const ExplanationText = styled.div`
   ${typography.styles.body2};
-  line-height: 1.7;
-  color: ${colors.light.grayscale[90]};
-  margin-bottom: 1rem;
-  white-space: pre-wrap; // \n 줄바꿈이 적용되도록 pre-wrap 사용
+  color: ${colors.light.grayscale[80]};
+  line-height: 1.6;
+  white-space: pre-wrap;
+`;
 
-  &:last-child {
-    margin-bottom: 0;
-  }
+// 다음 버튼
+export const NextButton = styled.button`
+  width: 100%;
+  padding: 16px;
+  background: ${colors.light.grayscale[90]};
+  color: ${colors.light.grayscale[0]};
+  border: none;
+  border-radius: 12px;
+  ${typography.styles.title3};
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 24px;
 
-  strong,
-  b {
-    color: ${colors.light.brand.primary100};
-    font-weight: ${typography.fontWeight.semibold};
+  &:hover {
+    background: ${colors.light.grayscale[100]};
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   }
 `;
 
-export const NavigationButtons = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 1rem;
+// 완료 화면
+export const CompletionContainer = styled.div`
+  width: 100%;
+  max-width: 800px;
+  text-align: center;
+`;
+
+export const ScoreSection = styled.div`
+  background: ${colors.light.grayscale[0]};
+  border-radius: 16px;
+  padding: 48px;
+  margin-bottom: 32px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 
   @media (max-width: 768px) {
-    flex-direction: column;
-
-    > div {
-      width: 100%;
-      display: flex;
-      justify-content: center;
-      gap: 0.75rem;
-    }
+    padding: 24px;
   }
+`;
+
+export const ScoreTitle = styled.h2`
+  ${typography.styles.headline1};
+  color: ${colors.light.state.error};
+  margin: 0 0 16px 0;
+
+  @media (max-width: 768px) {
+    ${typography.styles.headline2};
+  }
+`;
+
+export const ScoreSubtitle = styled.p`
+  ${typography.styles.body1};
+  color: ${colors.light.grayscale[70]};
+  margin: 0 0 32px 0;
+  line-height: 1.6;
+`;
+
+export const BadgeDisplay = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin: 24px 0;
+  padding: 20px;
+  background: ${colors.light.grayscale[5]};
+  border-radius: 12px;
+`;
+
+export const BadgeIcon = styled.div`
+  font-size: 48px;
+`;
+
+export const BadgeInfo = styled.div`
+  text-align: left;
+`;
+
+export const BadgeName = styled.div`
+  ${typography.styles.title3};
+  color: ${colors.light.grayscale[90]};
+  font-weight: ${typography.fontWeight.semibold};
+`;
+
+export const BadgeDescription = styled.div`
+  ${typography.styles.body3};
+  color: ${colors.light.grayscale[70]};
+  margin-top: 4px;
+`;
+
+export const RestartButton = styled.button`
+  width: 100%;
+  padding: 16px;
+  background: ${colors.light.grayscale[90]};
+  color: ${colors.light.grayscale[0]};
+  border: none;
+  border-radius: 12px;
+  ${typography.styles.title3};
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background: ${colors.light.grayscale[100]};
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+`;
+
+export const ResultsListTitle = styled.h3`
+  ${typography.styles.title1};
+  color: ${colors.light.grayscale[90]};
+  margin: 32px 0 24px 0;
+  text-align: left;
+`;
+
+export const ResultsList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+`;
+
+export const ResultItem = styled.div`
+  background: ${colors.light.grayscale[0]};
+  border: 1px solid ${colors.light.grayscale[20]};
+  border-radius: 12px;
+  padding: 24px;
+  text-align: left;
+`;
+
+export const ResultItemHeader = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+`;
+
+export const ResultItemNumber = styled.div`
+  ${typography.styles.title4};
+  color: ${colors.light.grayscale[60]};
+`;
+
+export const ResultItemStatus = styled.div<{ correct: boolean }>`
+  ${typography.styles.body2};
+  color: ${(props) =>
+    props.correct ? colors.light.state.success : colors.light.state.error};
+  font-weight: ${typography.fontWeight.semibold};
+`;
+
+export const ResultItemTitle = styled.div`
+  ${typography.styles.body1};
+  color: ${colors.light.grayscale[90]};
+  margin-bottom: 16px;
+  line-height: 1.5;
 `;

@@ -1,48 +1,78 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import type { Badge } from "@criti-ai/shared";
 // 훅
 import { useChallengeData } from "../../hooks/useChallengeData";
 import { useChallengeSubmit } from "../../hooks/useChallengeSubmit";
-import {
-  PageContainer,
-  Header,
-  HeaderTitle,
-  ChallengeCategoryDescription,
-  HeaderSubtitle,
-  NavButtonContainer,
-  NavButton,
-  StatsBar,
-  StatItem,
-  StatLabel,
-  StatValue,
-  ChallengeContainer,
-  ChallengeCard,
-  ChallengeTitle,
-  OptionsContainer,
-  OptionButton,
-  HintContainer,
-  HintText,
-  ActionButtonsContainer,
-  HintButton,
-  ActionButton,
-  ResultContainer,
-  ResultText,
-  ExplanationText,
-  NavigationButtons,
-  BadgeContainer,
-  Badge,
-} from "./ChallengePage.style";
+import * as S from "./ChallengePage.style";
 
 interface ChallengePageProps {
   onNavigateBack?: () => void;
 }
 
+// 오늘 날짜를 YYYY-MM-DD 형식으로 반환
+const getTodayDate = (): string => {
+  const today = new Date();
+  return today.toISOString().split("T")[0];
+};
+
+// localStorage에서 오늘 완료한 문제 ID 목록 가져오기
+const getTodayCompletedChallenges = (): string[] => {
+  try {
+    const today = getTodayDate();
+    const storageKey = `completed_challenges_${today}`;
+    const data = localStorage.getItem(storageKey);
+    return data ? JSON.parse(data) : [];
+  } catch {
+    return [];
+  }
+};
+
+// localStorage에 오늘 완료한 문제 ID 저장
+const saveTodayCompletedChallenge = (challengeId: string) => {
+  try {
+    const today = getTodayDate();
+    const storageKey = `completed_challenges_${today}`;
+    const completed = getTodayCompletedChallenges();
+    if (!completed.includes(challengeId)) {
+      completed.push(challengeId);
+      localStorage.setItem(storageKey, JSON.stringify(completed));
+    }
+  } catch (error) {
+    console.error("localStorage 저장 실패:", error);
+  }
+};
+
+// 챌린지 결과 저장 타입
+interface ChallengeResult {
+  challengeId: string;
+  title: string;
+  isCorrect: boolean;
+  userAnswers: string[];
+  correctAnswers: string[];
+  explanation: string;
+}
+
 const ChallengePage: React.FC<ChallengePageProps> = ({
   onNavigateBack: _onNavigateBack,
 }) => {
-  const navigate = useNavigate();
-  // 힌트 상태
-  const [visibleHints, setVisibleHints] = useState<string[]>([]);
+  // 챌린지 시작 여부
+  const [hasStarted, setHasStarted] = useState(false);
+
+  // 힌트 표시 여부
+  const [showHints, setShowHints] = useState(false);
+
+  // 완료된 챌린지 결과 저장
+  const [challengeResults, setChallengeResults] = useState<ChallengeResult[]>(
+    []
+  );
+
+  // 오늘 완료한 챌린지 ID 목록
+  const [todayCompleted, setTodayCompleted] = useState<string[]>(
+    getTodayCompletedChallenges()
+  );
+
+  // 획득한 뱃지 (예시)
+  const [earnedBadge, setEarnedBadge] = useState<Badge | null>(null);
 
   // 1. 챌린지 데이터 관리 훅
   const {
@@ -54,7 +84,7 @@ const ChallengePage: React.FC<ChallengePageProps> = ({
     error,
     loadInitialData,
     goToNext,
-    goToPrevious,
+    setChallengeIndex,
     updateUserProgress,
   } = useChallengeData();
 
@@ -64,7 +94,8 @@ const ChallengePage: React.FC<ChallengePageProps> = ({
     showResult,
     isCorrect,
     submitLoading,
-    explanation, // 해설
+    explanation,
+    resultAnswers,
     toggleAnswer,
     submitChallenge,
     resetChallenge,
@@ -75,286 +106,404 @@ const ChallengePage: React.FC<ChallengePageProps> = ({
     loadInitialData();
   }, []);
 
+  // 4. 문제가 바뀔 때마다 힌트 상태 초기화
+  useEffect(() => {
+    setShowHints(false);
+  }, [challengeIndex]);
+
   /**
-   * 답안 제출 (컴포넌트 레벨)
-   * 훅 호출하고, 결과에 따라 userProgress 업데이트
+   * 챌린지 시작
+   */
+  const handleStart = () => {
+    setHasStarted(true);
+  };
+
+  /**
+   * 답안 제출
    */
   const handleSubmit = async () => {
     if (!currentChallenge) return;
 
     try {
-      // 훅 submitChallenge 함수 호출
       const result = await submitChallenge(currentChallenge.id);
 
-      // 정답인 경우, useChallengeData 훅 updateUserProgress 함수로 상태 업데이트
-      if (result && result.isCorrect) {
-        console.log("✅ 정답! 사용자 진행도 업데이트");
-        updateUserProgress({
-          totalPoints: (userProgress?.totalPoints || 0) + result.score,
-          completedChallenges: [
-            ...(userProgress?.completedChallenges || []),
-            currentChallenge.id,
-          ],
-        });
+      if (result) {
+        // 결과 저장
+        setChallengeResults((prev) => [
+          ...prev,
+          {
+            challengeId: currentChallenge.id,
+            title: currentChallenge.title,
+            isCorrect: result.isCorrect,
+            userAnswers: userAnswers,
+            correctAnswers: result.correctAnswers,
+            explanation: result.explanation,
+          },
+        ]);
+
+        // 정답이고 오늘 처음 푸는 문제인 경우에만 점수 추가
+        if (result.isCorrect && !todayCompleted.includes(currentChallenge.id)) {
+          console.log("✅ 정답! 사용자 진행도 업데이트");
+          updateUserProgress({
+            totalPoints: (userProgress?.totalPoints || 0) + result.score,
+            completedChallenges: [
+              ...(userProgress?.completedChallenges || []),
+              currentChallenge.id,
+            ],
+          });
+
+          // 오늘 완료한 문제로 저장
+          saveTodayCompletedChallenge(currentChallenge.id);
+          setTodayCompleted((prev) => [...prev, currentChallenge.id]);
+        } else if (result.isCorrect) {
+          console.log("✅ 정답이지만 오늘 이미 푼 문제입니다. 점수 추가 안 함.");
+        }
       }
     } catch (error) {
-      console.error("❌ 답안 제출 실패 (Page):", error);
+      console.error("❌ 답안 제출 실패:", error);
       alert("답안 제출 중 오류가 발생했습니다. 다시 시도해주세요.");
     }
   };
 
   /**
-   * 힌트 보기 핸들러
-   */
-  const handleShowHint = () => {
-    if (!currentChallenge?.hints || !currentChallenge.hints.length) return;
-
-    const nextHintIndex = visibleHints.length;
-
-    // 아직 보여주지 않은 힌트가 있다면
-    if (nextHintIndex < currentChallenge.hints.length) {
-      const nextHint = currentChallenge.hints[nextHintIndex];
-      setVisibleHints([...visibleHints, nextHint]);
-    }
-  };
-
-  /**
-   * 다음 챌린지로 이동
+   * 다음 문제로 이동
    */
   const handleNext = () => {
-    goToNext(); // useChallengeData
-    resetChallenge(); // useChallengeSubmit
+    goToNext();
+    resetChallenge();
   };
 
   /**
-   * 이전 챌린지로 이동
+   * 문제 다시 풀기
    */
-  const handlePrevious = () => {
-    goToPrevious(); // useChallengeData
-    resetChallenge(); // useChallengeSubmit
+  const handleRestart = () => {
+    setChallengeResults([]);
+    setChallengeIndex(0);
+    resetChallenge();
+    setHasStarted(true);
+    setEarnedBadge(null);
   };
+
+  /**
+   * 모든 문제 완료 여부
+   */
+  const isAllCompleted =
+    hasStarted && challengeIndex === challenges.length - 1 && showResult;
+
+  /**
+   * 정답 개수 계산
+   */
+  const correctCount = challengeResults.filter((r) => r.isCorrect).length;
+  const totalScore = correctCount * 10; // 각 문제당 10점
+
+  /**
+   * 모든 문제를 완료했을 때 뱃지 부여
+   */
+  useEffect(() => {
+    if (isAllCompleted && !earnedBadge) {
+      // 뱃지 결정 로직
+      const percentage = (correctCount / challenges.length) * 100;
+      let badge: Badge;
+
+      if (percentage >= 70) {
+        badge = {
+          id: "challenge_master",
+          name: "감정 마스터",
+          description: "감정이 아닌 논리로 판단하는 능력자!",
+          icon: "🎯",
+          earnedAt: new Date().toISOString(),
+          category: "training",
+        };
+      } else {
+        badge = {
+          id: "challenge_novice",
+          name: "감정 폭주자",
+          description: "한 번 더 냉정하게 바라보면 괜찮겠어요!",
+          icon: "💪",
+          earnedAt: new Date().toISOString(),
+          category: "training",
+        };
+      }
+
+      setEarnedBadge(badge);
+
+      // userProgress에 뱃지 추가
+      if (userProgress && !userProgress.badges.some((b) => b.id === badge.id)) {
+        updateUserProgress({
+          badges: [...userProgress.badges, badge],
+        });
+      }
+    }
+  }, [isAllCompleted, correctCount, challenges.length, earnedBadge, userProgress, updateUserProgress]);
 
   // --- 렌더링 ---
 
   // 로딩 중 화면
   if (isLoading) {
     return (
-      <PageContainer>
-        <Header>
-          <HeaderTitle>🎯 Criti 챌린지</HeaderTitle>
-          <HeaderSubtitle>AI와 함께하는 비판적 사고 훈련</HeaderSubtitle>
-        </Header>
-        <ChallengeContainer>
-          <ChallengeCard>
-            <div style={{ textAlign: "center", padding: "40px" }}>
-              <div style={{ fontSize: "24px", marginBottom: "16px" }}>⏳</div>
-              <div>오늘의 챌린지를 불러오는 중...</div>
-              <div
-                style={{ fontSize: "14px", color: "#666", marginTop: "8px" }}
-              >
+      <S.Container>
+        <S.ContentWrapper isStarted={false}>
+          <S.ContentCard>
+            <div style={{ textAlign: "center", padding: "60px 20px" }}>
+              <div style={{ fontSize: "48px", marginBottom: "16px" }}>⏳</div>
+              <div style={{ fontSize: "18px", marginBottom: "8px" }}>
+                오늘의 챌린지를 불러오는 중...
+              </div>
+              <div style={{ fontSize: "14px", color: "#666" }}>
                 잠시만 기다려주세요
               </div>
             </div>
-          </ChallengeCard>
-        </ChallengeContainer>
-      </PageContainer>
+          </S.ContentCard>
+        </S.ContentWrapper>
+      </S.Container>
     );
   }
 
   // 에러 화면
   if (error) {
     return (
-      <PageContainer>
-        <Header>
-          <HeaderTitle>🎯 Criti 챌린지</HeaderTitle>
-          <HeaderSubtitle>AI와 함께하는 비판적 사고 훈련</HeaderSubtitle>
-        </Header>
-        <ChallengeContainer>
-          <ChallengeCard>
-            <div style={{ textAlign: "center", padding: "40px" }}>
-              <div style={{ fontSize: "24px", marginBottom: "16px" }}>❌</div>
-              <div style={{ marginBottom: "16px" }}>{error}</div>
-              <ActionButton onClick={loadInitialData}>다시 시도</ActionButton>
+      <S.Container>
+        <S.ContentWrapper isStarted={false}>
+          <S.ContentCard>
+            <div style={{ textAlign: "center", padding: "60px 20px" }}>
+              <div style={{ fontSize: "48px", marginBottom: "16px" }}>❌</div>
+              <div style={{ fontSize: "18px", marginBottom: "24px" }}>
+                {error}
+              </div>
+              <S.StartButton onClick={loadInitialData}>다시 시도</S.StartButton>
             </div>
-          </ChallengeCard>
-        </ChallengeContainer>
-      </PageContainer>
+          </S.ContentCard>
+        </S.ContentWrapper>
+      </S.Container>
     );
   }
 
   // 챌린지가 없는 경우
-  if (!currentChallenge) {
+  if (!currentChallenge && challenges.length === 0) {
     return (
-      <PageContainer>
-        <Header>
-          <HeaderTitle>🎯 Criti 챌린지</HeaderTitle>
-          <HeaderSubtitle>AI와 함께하는 비판적 사고 훈련</HeaderSubtitle>
-        </Header>
-        <ChallengeContainer>
-          <ChallengeCard>
-            <div style={{ textAlign: "center", padding: "40px" }}>
-              <div style={{ fontSize: "24px", marginBottom: "16px" }}>📭</div>
-              <div>현재 이용 가능한 챌린지가 없습니다.</div>
+      <S.Container>
+        <S.ContentWrapper isStarted={false}>
+          <S.ContentCard>
+            <div style={{ textAlign: "center", padding: "60px 20px" }}>
+              <div style={{ fontSize: "48px", marginBottom: "16px" }}>📭</div>
+              <div style={{ fontSize: "18px" }}>
+                현재 이용 가능한 챌린지가 없습니다.
+              </div>
             </div>
-          </ChallengeCard>
-        </ChallengeContainer>
-      </PageContainer>
+          </S.ContentCard>
+        </S.ContentWrapper>
+      </S.Container>
+    );
+  }
+
+  // 모든 문제 완료 화면
+  if (isAllCompleted) {
+    return (
+      <S.Container>
+        <S.ContentWrapper isStarted={true}>
+          <S.CompletionContainer>
+            <S.ScoreSection>
+              <S.ScoreTitle>{totalScore}점</S.ScoreTitle>
+              <S.ScoreSubtitle>
+                {challenges.length}문제 중 {correctCount}문제를 맞추셨습니다!
+              </S.ScoreSubtitle>
+
+              {earnedBadge && (
+                <S.BadgeDisplay>
+                  <S.BadgeIcon>{earnedBadge.icon}</S.BadgeIcon>
+                  <S.BadgeInfo>
+                    <S.BadgeName>{earnedBadge.name}</S.BadgeName>
+                    <S.BadgeDescription>
+                      {earnedBadge.description}
+                    </S.BadgeDescription>
+                  </S.BadgeInfo>
+                </S.BadgeDisplay>
+              )}
+
+              <S.RestartButton onClick={handleRestart}>
+                새로운 문제 풀기
+              </S.RestartButton>
+            </S.ScoreSection>
+
+            <S.ResultsListTitle>문제 결과</S.ResultsListTitle>
+            <S.ResultsList>
+              {challengeResults.map((result, index) => (
+                <S.ResultItem key={result.challengeId}>
+                  <S.ResultItemHeader>
+                    <S.ResultItemNumber>{index + 1}번</S.ResultItemNumber>
+                    <S.ResultItemStatus correct={result.isCorrect}>
+                      {result.isCorrect ? "정답이에요!" : "땡! 틀렸어요."}
+                    </S.ResultItemStatus>
+                  </S.ResultItemHeader>
+                  <S.ResultItemTitle>{result.title}</S.ResultItemTitle>
+                  <S.AnswerLabel>
+                    {result.isCorrect ? "정답" : "내가 고른 답"}
+                  </S.AnswerLabel>
+                  <S.AnswerBox correct={result.isCorrect}>
+                    {challenges[index]?.options
+                      .filter((opt) => result.userAnswers.includes(opt.id))
+                      .map((opt) => opt.text)
+                      .join(", ")}
+                  </S.AnswerBox>
+                  {!result.isCorrect && (
+                    <>
+                      <S.AnswerLabel>정답</S.AnswerLabel>
+                      <S.AnswerBox correct={true}>
+                        {challenges[index]?.options
+                          .filter((opt) =>
+                            result.correctAnswers.includes(opt.id)
+                          )
+                          .map((opt) => opt.text)
+                          .join(", ")}
+                      </S.AnswerBox>
+                    </>
+                  )}
+                </S.ResultItem>
+              ))}
+            </S.ResultsList>
+          </S.CompletionContainer>
+        </S.ContentWrapper>
+      </S.Container>
+    );
+  }
+
+  // 시작 전 화면
+  if (!hasStarted) {
+    return (
+      <S.Container>
+        <S.ContentWrapper isStarted={false}>
+          <S.WelcomeContainer>
+            <S.WelcomeIcon>🔍</S.WelcomeIcon>
+            <S.WelcomeTitle>비판적 사고 훈련을 시작해볼까요?</S.WelcomeTitle>
+            <S.WelcomeSubtitle>
+              AI가 생성한 챌린지를 통해
+              <br />
+              가짜뉴스를 판별하는 능력을 기르세요!
+            </S.WelcomeSubtitle>
+            <S.StartButton onClick={handleStart}>훈련하기 시작하기</S.StartButton>
+          </S.WelcomeContainer>
+        </S.ContentWrapper>
+      </S.Container>
     );
   }
 
   // 메인 챌린지 화면
   return (
-    <PageContainer>
-      <Header>
-        <HeaderTitle>🎯 Criti 챌린지</HeaderTitle>
-        <HeaderSubtitle>AI와 함께하는 비판적 사고 훈련</HeaderSubtitle>
-      </Header>
+    <S.Container>
+      <S.ContentWrapper isStarted={true}>
+        {/* 진행바 */}
+        <S.ProgressBarContainer>
+          <S.ProgressBar>
+            <S.ProgressFill
+              progress={((challengeIndex + 1) / challenges.length) * 100}
+            />
+          </S.ProgressBar>
+        </S.ProgressBarContainer>
 
-      {/* 네비게이션 버튼 */}
-      <NavButtonContainer>
-        <NavButton onClick={() => navigate("/youtube")}>
-          <span>🎬</span>
-          유튜브 영상 분석
-        </NavButton>
-      </NavButtonContainer>
+        {/* 챌린지 카드 */}
+        <S.ContentCard>
+          <S.QuestionNumber>{challengeIndex + 1}번</S.QuestionNumber>
+          <S.QuestionTitle>{currentChallenge?.title}</S.QuestionTitle>
 
-      {/* 사용자 진행도 */}
-      {userProgress && (
-        <StatsBar>
-          <StatItem>
-            <StatLabel>총 점수</StatLabel>
-            <StatValue>{userProgress.totalPoints}점</StatValue>
-          </StatItem>
-          <StatItem>
-            <StatLabel>레벨</StatLabel>
-            <StatValue>Lv.{userProgress.level}</StatValue>
-          </StatItem>
-          <StatItem>
-            <StatLabel>완료한 챌린지</StatLabel>
-            <StatValue>{userProgress.completedChallenges.length}개</StatValue>
-          </StatItem>
-          <StatItem>
-            <StatLabel>획득한 배지</StatLabel>
-            <StatValue>{userProgress.badges.length}개</StatValue>
-          </StatItem>
-        </StatsBar>
-      )}
-
-      {/* 배지 목록 */}
-      {userProgress && userProgress.badges.length > 0 && (
-        <BadgeContainer>
-          <h3>🏆 획득한 배지</h3>
-          {userProgress.badges.map((badge) => (
-            <Badge key={badge.id}>
-              <span className="icon">{badge.icon}</span>
-              <div>
-                <div className="name">{badge.name}</div>
-                <div className="description">{badge.description}</div>
-              </div>
-            </Badge>
-          ))}
-        </BadgeContainer>
-      )}
-
-      {/* 챌린지 카드 */}
-      <ChallengeContainer>
-        <ChallengeCard>
-          <ChallengeTitle>
-            챌린지 {challengeIndex + 1}/{challenges.length}:{" "}
-            {currentChallenge.title}
-          </ChallengeTitle>
-          {currentChallenge.categoryDescription && (
-            <ChallengeCategoryDescription>
-              <strong>❓ 용어 설명:</strong>
-              {currentChallenge.categoryDescription}
-            </ChallengeCategoryDescription>
-          )}
-          {!showResult && (
+          {!showResult ? (
             <>
-              <OptionsContainer>
-                {currentChallenge.options.map((option, index) => (
-                  <OptionButton
+              {/* 선택지 */}
+              <S.OptionsContainer>
+                {currentChallenge?.options.map((option, index) => (
+                  <S.OptionButton
                     key={option.id}
                     selected={userAnswers.includes(option.id)}
                     onClick={() => toggleAnswer(option.id)}
-                    title={option.text}
                   >
-                    {/* 번호 + 텍스트 */}
-                    <span className="option-number">{index + 1}</span>
-                    <div className="option-text">{option.text}</div>
-                  </OptionButton>
+                    <S.OptionIcon selected={userAnswers.includes(option.id)}>
+                      {userAnswers.includes(option.id) ? "✓" : index + 1}
+                    </S.OptionIcon>
+                    <S.OptionText>{option.text}</S.OptionText>
+                  </S.OptionButton>
                 ))}
-              </OptionsContainer>
-              {/* --- 힌트 표시 영역 --- */}
-              {visibleHints.length > 0 && (
-                <HintContainer>
-                  {visibleHints.map((hint, index) => (
-                    <HintText key={index}>
-                      <strong>💡 힌트 {index + 1}:</strong> {hint}
-                    </HintText>
-                  ))}
-                </HintContainer>
+              </S.OptionsContainer>
+
+              {/* 힌트 섹션 (문제 풀 때 표시) */}
+              {showHints && currentChallenge?.hints && currentChallenge.hints.length > 0 && (
+                <S.HintSection>
+                  <S.HintContent>
+                    {currentChallenge.hints.map((hint, index) => (
+                      <div key={index} style={{ marginBottom: "12px" }}>
+                        <strong>💡 힌트 {index + 1}:</strong> {hint}
+                      </div>
+                    ))}
+                  </S.HintContent>
+                </S.HintSection>
               )}
 
-              {/* --- 버튼 컨테이너 --- */}
-              <ActionButtonsContainer>
-                {/* 힌트 버튼 */}
-                {currentChallenge.hints &&
-                  currentChallenge.hints.length > 0 && (
-                    <HintButton
-                      onClick={handleShowHint}
-                      // 모든 힌트를 다 봤으면 비활성화
-                      disabled={
-                        visibleHints.length === currentChallenge.hints.length
-                      }
-                    >
-                      💡 힌트 보기 (
-                      {`${visibleHints.length}/${currentChallenge.hints.length}`}
-                      )
-                    </HintButton>
-                  )}
-
-                {/* 제출 버튼 */}
-                <ActionButton
+              {/* 힌트 버튼과 제출 버튼 */}
+              <S.ButtonContainer>
+                {currentChallenge?.hints && currentChallenge.hints.length > 0 && (
+                  <S.HintButton
+                    onClick={() => setShowHints(!showHints)}
+                    disabled={false}
+                  >
+                    {showHints ? "💡 힌트 숨기기" : "💡 힌트 보기"}
+                  </S.HintButton>
+                )}
+                <S.SubmitButton
                   onClick={handleSubmit}
                   disabled={userAnswers.length === 0 || submitLoading}
                 >
-                  {submitLoading ? "제출 중..." : "답안 제출"}
-                </ActionButton>
-              </ActionButtonsContainer>
+                  {submitLoading ? "제출 중..." : "정답 확인하기"}
+                </S.SubmitButton>
+              </S.ButtonContainer>
             </>
-          )}
+          ) : (
+            <S.ResultSection>
+              {/* 결과 배지 */}
+              <S.ResultBadge correct={isCorrect}>
+                {isCorrect ? "✓" : "✗"}
+              </S.ResultBadge>
+              <S.ResultTitle correct={isCorrect}>
+                {isCorrect ? "정답이에요!" : "땡! 틀렸어요."}
+              </S.ResultTitle>
 
-          {showResult && (
-            <ResultContainer>
-              <ResultText isCorrect={isCorrect}>
-                {isCorrect ? "🎉 정답입니다!" : "❌ 틀렸습니다."}
-              </ResultText>
+              {/* 내가 고른 답 / 정답 */}
+              <S.AnswerExplanation>
+                <S.AnswerLabel>
+                  {isCorrect ? "정답" : "내가 고른 답"}
+                </S.AnswerLabel>
+                <S.AnswerBox correct={isCorrect}>
+                  {currentChallenge?.options
+                    .filter((opt) => userAnswers.includes(opt.id))
+                    .map((opt) => opt.text)
+                    .join(", ")}
+                </S.AnswerBox>
 
-              <ExplanationText
-                // React가 마크다운(굵은 글씨 등)을 렌더링하도록 설정
-                dangerouslySetInnerHTML={{ __html: explanation || "" }}
-              />
-            </ResultContainer>
-          )}
-        </ChallengeCard>
-      </ChallengeContainer>
+                {!isCorrect && (
+                  <>
+                    <S.AnswerLabel>정답</S.AnswerLabel>
+                    <S.AnswerBox correct={true}>
+                      {currentChallenge?.options
+                        .filter((opt) => resultAnswers.includes(opt.id))
+                        .map((opt) => opt.text)
+                        .join(", ")}
+                    </S.AnswerBox>
+                  </>
+                )}
+              </S.AnswerExplanation>
 
-      {/* 네비게이션 버튼 */}
-      <NavigationButtons>
-        <div style={{ display: "flex", gap: "12px" }}>
-          {challengeIndex > 0 && (
-            <ActionButton onClick={handlePrevious}>← 이전 챌린지</ActionButton>
+              {/* 해설 */}
+              {explanation && (
+                <S.ExplanationSection>
+                  <S.ExplanationTitle>📝 해설</S.ExplanationTitle>
+                  <S.ExplanationText>{explanation}</S.ExplanationText>
+                </S.ExplanationSection>
+              )}
+
+              {/* 다음 문제 버튼 */}
+              <S.NextButton onClick={handleNext}>다음 문제로 →</S.NextButton>
+            </S.ResultSection>
           )}
-          {challengeIndex < challenges.length - 1 && showResult && (
-            <ActionButton onClick={handleNext}>다음 챌린지 →</ActionButton>
-          )}
-          {challengeIndex === challenges.length - 1 && showResult && (
-            <ActionButton onClick={loadInitialData}>새로고침</ActionButton>
-          )}
-        </div>
-      </NavigationButtons>
-    </PageContainer>
+        </S.ContentCard>
+      </S.ContentWrapper>
+    </S.Container>
   );
 };
 
