@@ -5,12 +5,14 @@ import type {
   UserProgress,
   Badge,
   ChallengeResponse,
-  ChallengeOption, // ChallengeOption 타입을 임포트해야 할 수 있습니다. (types.ts에 있다면)
+  ChallengeOption,
 } from "@criti-ai/shared";
+import { BadgeService } from "./BadgeService.js";
 
 class DatabaseService {
   private static instance: DatabaseService;
   private prisma: PrismaClient;
+  private badgeService: BadgeService;
 
   private constructor() {
     this.prisma = new PrismaClient({
@@ -19,6 +21,7 @@ class DatabaseService {
           ? ["query", "error", "warn"]
           : ["error"],
     });
+    this.badgeService = new BadgeService(this.prisma);
   }
 
   public static getInstance(): DatabaseService {
@@ -159,9 +162,7 @@ class DatabaseService {
         },
       });
 
-      if (!user) {
-        return null;
-      }
+      if (!user) return null;
 
       const completedChallenges = user.challengeResults.map(
         (r) => r.challengeId
@@ -176,7 +177,8 @@ class DatabaseService {
           | "analysis"
           | "training"
           | "milestone"
-          | "special",
+          | "special"
+          | "streak",
       }));
 
       return {
@@ -194,7 +196,6 @@ class DatabaseService {
   }
 
   // === 챌린지 관련 ===
-
   async getAllChallenges(difficulty?: string): Promise<Challenge[]> {
     try {
       const challenges = await this.prisma.challenge.findMany({
@@ -232,9 +233,7 @@ class DatabaseService {
         where: { id, isActive: true },
       });
 
-      if (!challenge) {
-        return null;
-      }
+      if (!challenge) return null;
 
       return {
         id: challenge.id,
@@ -333,56 +332,54 @@ class DatabaseService {
     }
   }
 
-// 여러 개의 챌린지를 DB에 한 번의 트랜잭션으로 생성
-async createMultipleChallenges(
-  challengesData: Array<{
-    type: string;
-    title: string;
-    options: string;
-    category: string;
-    categoryDescription: string;
-    difficulty: string;
-    points: number;
-    correctAnswers: string;
-    explanation: string;
-    hints?: string | null;
-    isGenerated: boolean;
-    isActive: boolean;
-    dailyKey?: string;
-  }>
-): Promise<Challenge[]> {
-  console.log(
-    `🚀 DB 트랜잭션 시작: ${challengesData.length}개 챌린지 생성`
-  );
-  try {
-    // Prisma $transaction 사용하여 모든 create 작업을 하나의 트랜잭션으로 실행
-    const createdChallenges = await this.prisma.$transaction(
-      challengesData.map((data) => this.prisma.challenge.create({ data }))
-    );
+  // 여러 개의 챌린지를 DB에 한 번의 트랜잭션으로 생성
+  async createMultipleChallenges(
+    challengesData: Array<{
+      type: string;
+      title: string;
+      options: string;
+      category: string;
+      categoryDescription: string;
+      difficulty: string;
+      points: number;
+      correctAnswers: string;
+      explanation: string;
+      hints?: string | null;
+      isGenerated: boolean;
+      isActive: boolean;
+      dailyKey?: string;
+    }>
+  ): Promise<Challenge[]> {
+    console.log(`🚀 DB 트랜잭션 시작: ${challengesData.length}개 챌린지 생성`);
+    try {
+      // Prisma $transaction 사용하여 모든 create 작업을 하나의 트랜잭션으로 실행
+      const createdChallenges = await this.prisma.$transaction(
+        challengesData.map((data) => this.prisma.challenge.create({ data }))
+      );
 
-    console.log(
-      `✅ DB 트랜잭션 완료: ${createdChallenges.length}개 챌린지 생성됨`
-    );
+      console.log(
+        `✅ DB 트랜잭션 완료: ${createdChallenges.length}개 챌린지 생성됨`
+      );
 
-    // 생성된 챌린지 데이터 API 응답 타입(Challenge[])으로 변환하여 반환
-    return createdChallenges.map((c) => ({
-      id: c.id,
-      type: c.type as Challenge["type"],
-      title: c.title,
-      options: JSON.parse(c.options || "[]") as ChallengeOption[],
-      category: c.category || undefined,
-      categoryDescription: c.categoryDescription || undefined,
-      correctAnswers: JSON.parse(c.correctAnswers),
-      explanation: c.explanation,
-      difficulty: c.difficulty as Challenge["difficulty"],
-      points: c.points,
-      hints: c.hints ? JSON.parse(c.hints) : undefined,
-    }));
-  } catch (error) {
-    console.error("❌ 챌린지 일괄 생성 트랜잭션 실패:", error);
-    throw error;
+      // 생성된 챌린지 데이터 API 응답 타입(Challenge[])으로 변환하여 반환
+      return createdChallenges.map((c) => ({
+        id: c.id,
+        type: c.type as Challenge["type"],
+        title: c.title,
+        options: JSON.parse(c.options || "[]") as ChallengeOption[],
+        category: c.category || undefined,
+        categoryDescription: c.categoryDescription || undefined,
+        correctAnswers: JSON.parse(c.correctAnswers),
+        explanation: c.explanation,
+        difficulty: c.difficulty as Challenge["difficulty"],
+        points: c.points,
+        hints: c.hints ? JSON.parse(c.hints) : undefined,
+      }));
+    } catch (error) {
+      console.error("❌ 챌린지 일괄 생성 트랜잭션 실패:", error);
+      throw error;
+    }
   }
-}
 
   async createChallenge(data: {
     type: string;
@@ -437,8 +434,11 @@ async createMultipleChallenges(
     }
   }
 
-  // === 배지 관련 ===
+  // === 배지 관련 (BadgeService 사용) ===
 
+  /**
+   * 모든 뱃지 조건 체크 및 부여
+   */
   async checkAndAwardBadges(userId: string): Promise<Badge[]> {
     try {
       const user = await this.prisma.user.findUnique({
@@ -449,9 +449,7 @@ async createMultipleChallenges(
         },
       });
 
-      if (!user) {
-        return [];
-      }
+      if (!user) return [];
 
       const earnedBadgeIds = user.badges.map((ub) => ub.badgeId);
       const availableBadges = await this.prisma.badge.findMany({
@@ -466,17 +464,27 @@ async createMultipleChallenges(
       for (const badge of availableBadges) {
         let shouldAward = false;
 
-        // 포인트 기반 배지
+        // 1. 포인트 기반 배지
         if (badge.pointsRequired && user.totalPoints >= badge.pointsRequired) {
           shouldAward = true;
         }
 
-        // 챌린지 완료 기반 배지
+        // 2. 챌린지 완료 기반 배지
         if (
           badge.challengesRequired &&
           user.challengeResults.length >= badge.challengesRequired
         ) {
           shouldAward = true;
+        }
+
+        // 3. 조건 기반 배지
+        if (badge.conditionType && badge.conditionValue) {
+          shouldAward = await this.badgeService.checkBadgeCondition(
+            userId,
+            badge.conditionType,
+            badge.conditionValue,
+            user
+          );
         }
 
         if (shouldAward) {
@@ -505,8 +513,26 @@ async createMultipleChallenges(
     }
   }
 
-  // === 통계 관련 ===
+  /**
+   * 일일 챌린지 완료 시 뱃지 부여
+   */
+  async awardDailyChallengeBadge(
+    userId: string,
+    accuracy: number,
+    isPerfect: boolean,
+    avgTime: number,
+    totalHints: number
+  ): Promise<Badge[]> {
+    return this.badgeService.awardDailyChallengeBadge(
+      userId,
+      accuracy,
+      isPerfect,
+      avgTime,
+      totalHints
+    );
+  }
 
+  // === 통계 관련 ===
   async updateAnalysisStats(date: Date): Promise<void> {
     try {
       const startOfDay = new Date(date);
