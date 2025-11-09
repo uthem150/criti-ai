@@ -115,14 +115,15 @@ const Layout: React.FC = () => {
         </S.Nav>
       </S.Sidebar>
 
+      {/* 모바일용 헤더 및 토글 버튼 */}
+      <S.MobileHeader>
+        <S.MobileToggleBtn onClick={toggleSidebar}>
+          <Menu />
+        </S.MobileToggleBtn>
+      </S.MobileHeader>
+
       {/* 메인 콘텐츠 */}
       <S.MainContent isSidebarOpen={isSidebarOpen} isDesktop={isDesktop}>
-        {/* 모바일용 헤더 및 토글 버튼 */}
-        <S.MobileHeader>
-          <S.MobileToggleBtn onClick={toggleSidebar}>
-            <Menu />
-          </S.MobileToggleBtn>
-        </S.MobileHeader>
         <Outlet />
       </S.MainContent>
     </S.LayoutContainer>

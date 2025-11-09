@@ -70,9 +70,16 @@ export const MobileHeader = styled.header`
   height: 4.5rem; // 로고 높이와 맞춤
   padding: 0 1rem;
   align-items: center;
+  background: ${colors.light.grayscale[0]};
+  border-bottom: 1px solid ${colors.light.grayscale[20]};
 
   @media (max-width: 1024px) {
     display: flex;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 998;
   }
 `;
 
