@@ -14,7 +14,7 @@ const BADGE_DATA = [
   },
   {
     name: "감정 마스터",
-    description: "감정이 아닌 논리로 판단하는 능력자!",
+    description: "일일 정답률 90% 이상 달성!",
     icon: "🎯",
     category: "training",
     conditionType: "daily_accuracy",
@@ -22,7 +22,7 @@ const BADGE_DATA = [
   },
   {
     name: "논리의 달인",
-    description: "논리적 사고에 능숙해졌어요!",
+    description: "일일 정답률 70% 이상 달성!",
     icon: "🎓",
     category: "training",
     conditionType: "daily_accuracy",
@@ -30,7 +30,7 @@ const BADGE_DATA = [
   },
   {
     name: "도전자",
-    description: "오늘도 꾸준히 도전하는 중!",
+    description: "일일 정답률 50% 이상 달성!",
     icon: "💪",
     category: "training",
     conditionType: "daily_accuracy",
@@ -54,14 +54,29 @@ const BADGE_DATA = [
   },
   {
     name: "독학의 달인",
-    description: "힌트 없이 모든 문제를 맞췄어요!",
+    description: "힌트 없이 오늘의 챌린지를 모두 완료했어요!",
     icon: "🧠",
     category: "training",
     conditionType: "no_hints",
     conditionValue: "0",
   },
+  {
+    name: "신속한 판단",
+    description: "90초 안에 정답을 맞췄어요!",
+    icon: "💨",
+    category: "training",
+    conditionType: "fast_answer",
+    conditionValue: "90",
+  },
+  {
+    name: "광속",
+    description: "30초 안에 정답을 맞췄어요! 혹시 찍으신 건 아니죠?",
+    icon: "☄️",
+    category: "training",
+    conditionType: "fast_answer",
+    conditionValue: "30",
+  },
 
-  // === Streak 카테고리 (연속 기록) ===
   {
     name: "3일 연속 도전",
     description: "3일 연속으로 챌린지를 완료했어요!",
@@ -79,6 +94,14 @@ const BADGE_DATA = [
     conditionValue: "7",
   },
   {
+    name: "2주 연속 달성",
+    description: "14일 연속으로 챌린지를 완료했어요!",
+    icon: "📅",
+    category: "streak",
+    conditionType: "consecutive_days",
+    conditionValue: "14",
+  },
+  {
     name: "한 달 챔피언",
     description: "30일 연속으로 챌린지를 완료했어요!",
     icon: "🔥🔥🔥",
@@ -94,8 +117,22 @@ const BADGE_DATA = [
     conditionType: "consecutive_days",
     conditionValue: "100",
   },
-
+  {
+    name: "살아있는 역사",
+    description: "200일 연속 도전! 경이롭습니다!",
+    icon: "🏛️",
+    category: "streak",
+    conditionType: "consecutive_days",
+    conditionValue: "200",
+  },
   // === Milestone 카테고리 (누적 성취) ===
+  {
+    name: "새싹 탐정",
+    description: "50점을 달성했어요!",
+    icon: "🌱",
+    category: "milestone",
+    pointsRequired: 50,
+  },
   {
     name: "신입 탐정",
     description: "100점을 달성했어요!",
@@ -118,11 +155,25 @@ const BADGE_DATA = [
     pointsRequired: 1000,
   },
   {
+    name: "프로 탐정",
+    description: "2,500점을 달성했어요!",
+    icon: "🕵️",
+    category: "milestone",
+    pointsRequired: 2500,
+  },
+  {
     name: "전설의 탐정",
     description: "5,000점을 달성했어요!",
     icon: "👑",
     category: "milestone",
     pointsRequired: 5000,
+  },
+  {
+    name: "CritiAI 마스터",
+    description: "10,000점을 달성했어요! 명예의 전당 입성!",
+    icon: "🌌",
+    category: "milestone",
+    pointsRequired: 10000,
   },
   {
     name: "챌린지 컬렉터",
@@ -138,7 +189,27 @@ const BADGE_DATA = [
     category: "milestone",
     challengesRequired: 50,
   },
-
+  {
+    name: "수집가",
+    description: "100개의 챌린지를 완료했어요!",
+    icon: "📙",
+    category: "milestone",
+    challengesRequired: 100,
+  },
+  {
+    name: "사서",
+    description: "250개의 챌린지를 완료했어요!",
+    icon: "📔",
+    category: "milestone",
+    challengesRequired: 250,
+  },
+  {
+    name: "박물관장",
+    description: "500개의 챌린지를 완료했어요!",
+    icon: "🏛️", // 스트릭의 '살아있는 역사'와 아이콘 통일
+    category: "milestone",
+    challengesRequired: 500,
+  },
   // === Special 카테고리 (특별 이벤트) ===
   {
     name: "첫 방문",
@@ -170,7 +241,7 @@ async function seedBadges() {
       });
 
       if (existing) {
-        console.log(`⏭️  이미 존재: ${badge.name}`);
+        console.log(`⏭️ 이미 존재: ${badge.name}`);
         continue;
       }
 
