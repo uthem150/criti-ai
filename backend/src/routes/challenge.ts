@@ -173,11 +173,8 @@ router.post(
         ) &&
         userAnswers.every((answer: string) => correctAnswers.includes(answer));
 
-      const score = isCorrect
-        ? challenge.points
-        : Math.floor(challenge.points * 0.3);
-      const bonusPoints =
-        timeSpent < 60 ? Math.floor(challenge.points * 0.1) : 0; // 빠른 답변 보너스
+      const score = isCorrect ? 20 : 0;
+      const bonusPoints = 0;
 
       // 결과 저장
       await databaseService.saveChallengeResult(
@@ -193,11 +190,6 @@ router.post(
       let newBadges = await databaseService.checkAndAwardBadges(userId);
 
       // === 오늘의 모든 챌린지 완료 확인 ===
-      const today = new Date();
-      const kstOffset = 9 * 60;
-      const kstTime = new Date(today.getTime() + kstOffset * 60 * 1000);
-      const todayKST = kstTime.toISOString().split("T")[0];
-
       const todaysChallenges =
         await dailyChallengeService.getTodaysChallenges();
       const todaysChallengeIds = todaysChallenges.map((c) => c.id);

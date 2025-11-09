@@ -221,7 +221,7 @@ const ChallengePage: React.FC<ChallengePageProps> = ({
    * 정답 개수 계산
    */
   const correctCount = challengeResults.filter((r) => r.isCorrect).length;
-  const totalScore = correctCount * 10; // 각 문제당 10점
+  const totalScore = correctCount * 20; // 각 문제당 10점
 
   /**
    * 모든 문제 완료했을 때 서버에서 진행도 다시 불러와서 새 뱃지 확인
