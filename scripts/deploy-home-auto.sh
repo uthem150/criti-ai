@@ -274,8 +274,7 @@ build_and_start() {
     # === 뱃지 데이터 시드 ===
     show_progress 4 6
     echo -e "\n${BLUE}뱃지 데이터 시드 중...${NC}"
-    docker-compose -f ./config/docker/docker-compose.home.yml run --rm backend npm run db:seed-badges
-    # === 수정 완료 ===
+    docker-compose -f ./config/docker/docker-compose.home.yml run --rm backend node dist/scripts/seedBadges.js
 
     # 서비스 시작
     show_progress 5 6
