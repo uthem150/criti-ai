@@ -15,54 +15,57 @@ const router = Router();
 const geminiService = new GeminiService();
 
 // 강제로 오늘의 챌린지 재생성 (개발/테스트용)
-router.post("/daily/regenerate", async (req: Request, res: Response): Promise<void> => {
-  try {
-    console.log("🔄 오늘의 챌린지 강제 재생성 요청");
-    
-    const today = new Date().toISOString().split('T')[0];
-    const kstOffset = 9 * 60;
-    const kstTime = new Date(new Date().getTime() + (kstOffset * 60 * 1000));
-    const todayKST = kstTime.toISOString().split('T')[0];
-    
-    console.log(`📅 재생성 대상 날짜: ${todayKST}`);
-    
-    // 기존 오늘의 챌린지 삭제
-    const deleteResult = await databaseService.client.challenge.deleteMany({
-      where: { dailyKey: todayKST }
-    });
-    
-    console.log(`🗑️ 삭제된 기존 챌린지: ${deleteResult.count}개`);
-    
-    // 새로운 챌린지 생성
-    const newChallenges = await dailyChallengeService.generateDailyChallenges(todayKST);
-    
-    res.json({
-      success: true,
-      data: {
-        date: todayKST,
-        deletedCount: deleteResult.count,
-        newChallenges: newChallenges,
-        message: `${newChallenges.length}개의 새로운 챌린지가 생성되었습니다.`
-      },
-      timestamp: new Date().toISOString(),
-    });
-  } catch (error) {
-    console.error("❌ 챌린지 강제 재생성 실패:", error);
-    res.status(500).json({
-      success: false,
-      error: "챌린지 재생성 중 오류가 발생했습니다.",
-      timestamp: new Date().toISOString(),
-    });
+router.post(
+  "/daily/regenerate",
+  async (req: Request, res: Response): Promise<void> => {
+    try {
+      console.log("🔄 오늘의 챌린지 강제 재생성 요청");
+
+      const kstOffset = 9 * 60;
+      const kstTime = new Date(new Date().getTime() + kstOffset * 60 * 1000);
+      const todayKST = kstTime.toISOString().split("T")[0];
+
+      console.log(`📅 재생성 대상 날짜: ${todayKST}`);
+
+      // 기존 오늘의 챌린지 삭제
+      const deleteResult = await databaseService.client.challenge.deleteMany({
+        where: { dailyKey: todayKST },
+      });
+
+      console.log(`🗑️ 삭제된 기존 챌린지: ${deleteResult.count}개`);
+
+      // 새로운 챌린지 생성
+      const newChallenges =
+        await dailyChallengeService.generateDailyChallenges(todayKST);
+
+      res.json({
+        success: true,
+        data: {
+          date: todayKST,
+          deletedCount: deleteResult.count,
+          newChallenges: newChallenges,
+          message: `${newChallenges.length}개의 새로운 챌린지가 생성되었습니다.`,
+        },
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error) {
+      console.error("❌ 챌린지 강제 재생성 실패:", error);
+      res.status(500).json({
+        success: false,
+        error: "챌린지 재생성 중 오류가 발생했습니다.",
+        timestamp: new Date().toISOString(),
+      });
+    }
   }
-});
+);
 
 // 오늘의 챌린지 조회 (일일 챌린지)
 router.get("/daily", async (req: Request, res: Response): Promise<void> => {
   try {
     console.log("🎯 오늘의 챌린지 요청 수신");
-    
+
     const todaysChallenges = await dailyChallengeService.getTodaysChallenges();
-    
+
     res.json({
       success: true,
       data: todaysChallenges,
@@ -79,173 +82,262 @@ router.get("/daily", async (req: Request, res: Response): Promise<void> => {
 });
 
 // 모든 챌린지 조회
-router.get("/challenges", async (req: Request, res: Response): Promise<void> => {
-  try {
-    const { difficulty } = req.query;
-    
-    const challenges = await databaseService.getAllChallenges(
-      difficulty ? String(difficulty) : undefined
-    );
+router.get(
+  "/challenges",
+  async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { difficulty } = req.query;
 
-    res.json({
-      success: true,
-      data: challenges,
-      timestamp: new Date().toISOString(),
-    } as ApiResponse<Challenge[]>);
-  } catch (error) {
-    console.error("Challenges fetch error:", error);
-    res.status(500).json({
-      success: false,
-      error: "챌린지를 불러오는 중 오류가 발생했습니다.",
-      timestamp: new Date().toISOString(),
-    });
+      const challenges = await databaseService.getAllChallenges(
+        difficulty ? String(difficulty) : undefined
+      );
+
+      res.json({
+        success: true,
+        data: challenges,
+        timestamp: new Date().toISOString(),
+      } as ApiResponse<Challenge[]>);
+    } catch (error) {
+      console.error("Challenges fetch error:", error);
+      res.status(500).json({
+        success: false,
+        error: "챌린지를 불러오는 중 오류가 발생했습니다.",
+        timestamp: new Date().toISOString(),
+      });
+    }
   }
-});
+);
 
 // 특정 챌린지 조회
-router.get("/challenges/:id", async (req: Request, res: Response): Promise<void> => {
-  try {
-    const { id } = req.params;
-    const challenge = await databaseService.getChallenge(id);
+router.get(
+  "/challenges/:id",
+  async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { id } = req.params;
+      const challenge = await databaseService.getChallenge(id);
 
-    if (!challenge) {
-      res.status(404).json({
+      if (!challenge) {
+        res.status(404).json({
+          success: false,
+          error: "챌린지를 찾을 수 없습니다.",
+          timestamp: new Date().toISOString(),
+        });
+        return;
+      }
+
+      res.json({
+        success: true,
+        data: challenge,
+        timestamp: new Date().toISOString(),
+      } as ApiResponse<Challenge>);
+    } catch (error) {
+      console.error("Challenge fetch error:", error);
+      res.status(500).json({
         success: false,
-        error: "챌린지를 찾을 수 없습니다.",
+        error: "챌린지를 불러오는 중 오류가 발생했습니다.",
         timestamp: new Date().toISOString(),
       });
-      return;
     }
-
-    res.json({
-      success: true,
-      data: challenge,
-      timestamp: new Date().toISOString(),
-    } as ApiResponse<Challenge>);
-  } catch (error) {
-    console.error("Challenge fetch error:", error);
-    res.status(500).json({
-      success: false,
-      error: "챌린지를 불러오는 중 오류가 발생했습니다.",
-      timestamp: new Date().toISOString(),
-    });
   }
-});
+);
 
 // 챌린지 답안 제출 및 채점
-router.post("/challenges/:id/submit", async (req: Request, res: Response): Promise<void> => {
-  try {
-    const { id } = req.params;
-    const { userAnswers, timeSpent, hintsUsed = 0 }: ChallengeResponse = req.body;
-    const userId = req.body.userId || 'guest'; // 임시 사용자 ID
+router.post(
+  "/challenges/:id/submit",
+  async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { id } = req.params;
+      const {
+        userAnswers,
+        timeSpent,
+        hintsUsed = 0,
+      }: ChallengeResponse = req.body;
+      const userId = req.body.userId || "guest";
 
-    const challenge = await databaseService.getChallenge(id);
-    
-    if (!challenge) {
-      res.status(404).json({
-        success: false,
-        error: "챌린지를 찾을 수 없습니다.",
+      const challenge = await databaseService.getChallenge(id);
+
+      if (!challenge) {
+        res.status(404).json({
+          success: false,
+          error: "챌린지를 찾을 수 없습니다.",
+          timestamp: new Date().toISOString(),
+        });
+        return;
+      }
+
+      // 답안 채점
+      const correctAnswers = challenge.correctAnswers;
+      const isCorrect =
+        correctAnswers.every((answer: string) =>
+          userAnswers.includes(answer)
+        ) &&
+        userAnswers.every((answer: string) => correctAnswers.includes(answer));
+
+      const score = isCorrect
+        ? challenge.points
+        : Math.floor(challenge.points * 0.3);
+      const bonusPoints =
+        timeSpent < 60 ? Math.floor(challenge.points * 0.1) : 0; // 빠른 답변 보너스
+
+      // 결과 저장
+      await databaseService.saveChallengeResult(
+        userId,
+        id,
+        { challengeId: id, userAnswers, timeSpent, hintsUsed },
+        isCorrect,
+        score,
+        bonusPoints
+      );
+
+      // 기본 배지 확인 및 지급
+      let newBadges = await databaseService.checkAndAwardBadges(userId);
+
+      // === 오늘의 모든 챌린지 완료 확인 ===
+      const today = new Date();
+      const kstOffset = 9 * 60;
+      const kstTime = new Date(today.getTime() + kstOffset * 60 * 1000);
+      const todayKST = kstTime.toISOString().split("T")[0];
+
+      const todaysChallenges =
+        await dailyChallengeService.getTodaysChallenges();
+      const todaysChallengeIds = todaysChallenges.map((c) => c.id);
+
+      const todaysResults =
+        await databaseService.client.challengeResult.findMany({
+          where: {
+            userId,
+            challengeId: { in: todaysChallengeIds },
+          },
+        });
+
+      const completedChallengeIds = todaysResults.map((r) => r.challengeId);
+      const allCompleted = todaysChallengeIds.every((id) =>
+        completedChallengeIds.includes(id)
+      );
+
+      if (allCompleted && todaysResults.length === todaysChallenges.length) {
+        console.log(`🎉 사용자 ${userId}가 오늘의 모든 챌린지를 완료했습니다!`);
+
+        // 정답률 계산
+        const correctCount = todaysResults.filter((r) => r.isCorrect).length;
+        const totalCount = todaysResults.length;
+        const accuracy = (correctCount / totalCount) * 100;
+
+        // 평균 시간 계산
+        const totalTime = todaysResults.reduce(
+          (sum, r) => sum + r.timeSpent,
+          0
+        );
+        const avgTime = totalTime / totalCount;
+
+        // 총 힌트 사용 횟수
+        const totalHints = todaysResults.reduce(
+          (sum, r) => sum + r.hintsUsed,
+          0
+        );
+
+        // 완벽 점수 여부
+        const isPerfect = accuracy === 100;
+
+        console.log(
+          `📊 정답률: ${accuracy.toFixed(1)}% (${correctCount}/${totalCount})`
+        );
+        console.log(`⏱️ 평균 시간: ${avgTime.toFixed(1)}초`);
+        console.log(`💡 힌트 사용: ${totalHints}회`);
+
+        // 일일 챌린지 뱃지 부여
+        const dailyBadges = await databaseService.awardDailyChallengeBadge(
+          userId,
+          accuracy,
+          isPerfect,
+          avgTime,
+          totalHints
+        );
+
+        newBadges.push(...dailyBadges);
+
+        console.log(`✅ 총 ${newBadges.length}개의 뱃지 부여 완료!`);
+      }
+
+      res.json({
+        success: true,
+        data: {
+          isCorrect,
+          correctAnswers,
+          userAnswers,
+          score: score + bonusPoints,
+          explanation: challenge.explanation,
+          bonusPoints,
+          timeSpent,
+          newBadges,
+        },
         timestamp: new Date().toISOString(),
       });
-      return;
+    } catch (error) {
+      console.error("Challenge submission error:", error);
+      res.status(500).json({
+        success: false,
+        error: "답안 제출 중 오류가 발생했습니다.",
+        timestamp: new Date().toISOString(),
+      });
     }
-
-    // 답안 채점
-    const correctAnswers = challenge.correctAnswers;
-    const isCorrect = correctAnswers.every((answer: string) => userAnswers.includes(answer)) &&
-                      userAnswers.every((answer: string) => correctAnswers.includes(answer));
-
-    const score = isCorrect ? challenge.points : Math.floor(challenge.points * 0.3); // 남련점 30%
-    const bonusPoints = timeSpent < 60 ? Math.floor(challenge.points * 0.1) : 0; // 빠른 답변 보너스
-
-    // 결과 저장
-    await databaseService.saveChallengeResult(
-      userId,
-      id,
-      { challengeId: id, userAnswers, timeSpent, hintsUsed },
-      isCorrect,
-      score,
-      bonusPoints
-    );
-
-    // 배지 확인 및 지급
-    const newBadges = await databaseService.checkAndAwardBadges(userId);
-
-    res.json({
-      success: true,
-      data: {
-        isCorrect,
-        correctAnswers,
-        userAnswers,
-        score: score + bonusPoints,
-        explanation: challenge.explanation,
-        bonusPoints,
-        timeSpent,
-        newBadges
-      },
-      timestamp: new Date().toISOString(),
-    });
-  } catch (error) {
-    console.error("Challenge submission error:", error);
-    res.status(500).json({
-      success: false,
-      error: "답안 제출 중 오류가 발생했습니다.",
-      timestamp: new Date().toISOString(),
-    });
   }
-});
+);
 
 // 사용자 진행도 조회
-router.get("/progress/:userId", async (req: Request, res: Response): Promise<void> => {
-  try {
-    const { userId } = req.params;
-    
-    let progress = await databaseService.getUserProgress(userId);
-    
-    // 사용자가 없으면 기본 사용자 생성
-    if (!progress) {
-      await databaseService.createUser({
-        id: userId,
-        displayName: `사용자_${userId.slice(-4)}`
+router.get(
+  "/progress/:userId",
+  async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { userId } = req.params;
+
+      let progress = await databaseService.getUserProgress(userId);
+
+      // 사용자가 없으면 기본 사용자 생성
+      if (!progress) {
+        await databaseService.createUser({
+          id: userId,
+          displayName: `사용자_${userId.slice(-4)}`,
+        });
+
+        progress = await databaseService.getUserProgress(userId);
+      }
+
+      // 여전히 null이면 기본 값 반환
+      if (!progress) {
+        progress = {
+          userId,
+          totalPoints: 0,
+          level: 1,
+          badges: [],
+          completedChallenges: [],
+          analyticsUsed: 0,
+        };
+      }
+
+      res.json({
+        success: true,
+        data: progress,
+        timestamp: new Date().toISOString(),
+      } as ApiResponse<UserProgress>);
+    } catch (error) {
+      console.error("Progress fetch error:", error);
+      res.status(500).json({
+        success: false,
+        error: "진행도를 불러오는 중 오류가 발생했습니다.",
+        timestamp: new Date().toISOString(),
       });
-      
-      progress = await databaseService.getUserProgress(userId);
     }
-    
-    // 여전히 null이면 기본 값 반환
-    if (!progress) {
-      progress = {
-        userId,
-        totalPoints: 0,
-        level: 1,
-        badges: [],
-        completedChallenges: [],
-        analyticsUsed: 0
-      };
-    }
-
-    res.json({
-      success: true,
-      data: progress,
-      timestamp: new Date().toISOString(),
-    } as ApiResponse<UserProgress>);
-  } catch (error) {
-    console.error("Progress fetch error:", error);
-    res.status(500).json({
-      success: false,
-      error: "진행도를 불러오는 중 오류가 발생했습니다.",
-      timestamp: new Date().toISOString(),
-    });
   }
-});
+);
 
-// AI가 새로운 챌린지 생성 (고급 기능)
+// AI가 새로운 챌린지 생성
 router.post("/generate", async (req: Request, res: Response): Promise<void> => {
   try {
     const { type, difficulty, topic } = req.body;
 
     // Redis 캐시 확인
-    const cacheKey = `${type}:${difficulty}:${topic || 'default'}`;
+    const cacheKey = `${type}:${difficulty}:${topic || "default"}`;
     const cachedChallenge = await redisCacheService.getChallengeCache(cacheKey);
 
     if (cachedChallenge) {
@@ -253,16 +345,23 @@ router.post("/generate", async (req: Request, res: Response): Promise<void> => {
         success: true,
         data: cachedChallenge,
         timestamp: new Date().toISOString(),
-        cached: true
+        cached: true,
       });
       return;
     }
 
     // AI로 새 챌린지 생성
-    const generatedChallenge = await geminiService.generateChallenge(type, difficulty);
+    const generatedChallenge = await geminiService.generateChallenge(
+      type,
+      difficulty
+    );
 
     // Redis에 결과 캐싱 (1시간)
-    await redisCacheService.setChallengeCache(cacheKey, generatedChallenge, 60 * 60);
+    await redisCacheService.setChallengeCache(
+      cacheKey,
+      generatedChallenge,
+      60 * 60
+    );
 
     res.json({
       success: true,
@@ -284,50 +383,57 @@ router.get("/stats", async (req: Request, res: Response): Promise<void> => {
   try {
     // 데이터베이스에서 실제 통계 조회
     const totalChallenges = await databaseService.client.challenge.count({
-      where: { isActive: true }
-    });
-    
-    const totalUsers = await databaseService.client.user.count();
-    
-    const recentResults = await databaseService.client.challengeResult.findMany({
-      take: 100,
-      orderBy: { submittedAt: 'desc' },
-      include: { challenge: true }
-    });
-    
-    const averageScore = recentResults.length > 0 
-      ? recentResults.reduce((sum, r) => sum + r.score, 0) / recentResults.length
-      : 0;
-    
-    const completionRate = recentResults.length > 0
-      ? (recentResults.filter(r => r.isCorrect).length / recentResults.length) * 100
-      : 0;
-    
-    // 난이도별 인기도 계산
-    const difficultyStats = await databaseService.client.challenge.groupBy({
-      by: ['difficulty'],
       where: { isActive: true },
-      _count: { id: true }
     });
-    
-    const popularDifficulty = difficultyStats.reduce((prev, current) => 
-      (prev._count.id > current._count.id) ? prev : current
-    )?.difficulty || 'beginner';
-    
+
+    const totalUsers = await databaseService.client.user.count();
+
+    const recentResults = await databaseService.client.challengeResult.findMany(
+      {
+        take: 100,
+        orderBy: { submittedAt: "desc" },
+        include: { challenge: true },
+      }
+    );
+
+    const averageScore =
+      recentResults.length > 0
+        ? recentResults.reduce((sum, r) => sum + r.score, 0) /
+          recentResults.length
+        : 0;
+
+    const completionRate =
+      recentResults.length > 0
+        ? (recentResults.filter((r) => r.isCorrect).length /
+            recentResults.length) *
+          100
+        : 0;
+
+    const difficultyStats = await databaseService.client.challenge.groupBy({
+      by: ["difficulty"],
+      where: { isActive: true },
+      _count: { id: true },
+    });
+
+    const popularDifficulty =
+      difficultyStats.reduce((prev, current) =>
+        prev._count.id > current._count.id ? prev : current
+      )?.difficulty || "beginner";
+
     // 인기 챌린지 TOP 3
     const topChallenges = await databaseService.client.challenge.findMany({
       take: 3,
       where: { isActive: true },
       include: {
         _count: {
-          select: { results: true }
-        }
+          select: { results: true },
+        },
       },
       orderBy: {
         results: {
-          _count: 'desc'
-        }
-      }
+          _count: "desc",
+        },
+      },
     });
 
     const stats = {
@@ -336,11 +442,11 @@ router.get("/stats", async (req: Request, res: Response): Promise<void> => {
       averageScore: Math.round(averageScore * 10) / 10,
       completionRate: Math.round(completionRate * 10) / 10,
       popularDifficulty,
-      topChallenges: topChallenges.map(c => ({
+      topChallenges: topChallenges.map((c) => ({
         id: c.id,
         title: c.title,
-        completions: c._count.results
-      }))
+        completions: c._count.results,
+      })),
     };
 
     res.json({
@@ -350,17 +456,17 @@ router.get("/stats", async (req: Request, res: Response): Promise<void> => {
     });
   } catch (error) {
     console.error("Stats fetch error:", error);
-    
+
     // 오류 시 기본값 반환
     const fallbackStats = {
       totalChallenges: 0,
       totalUsers: 0,
       averageScore: 0,
       completionRate: 0,
-      popularDifficulty: 'beginner',
-      topChallenges: []
+      popularDifficulty: "beginner",
+      topChallenges: [],
     };
-    
+
     res.json({
       success: true,
       data: fallbackStats,
