@@ -257,26 +257,32 @@ build_and_start() {
     print_step 7 10 "서비스 빌드 및 시작"
     
     # 기존 컨테이너 정리
-    show_progress 1 5
-    docker-compose -f ./config/docker/docker-compose.home.yml down || true
+    show_progress 1 6
+    docker-compose -f ./config/docker/docker-compose.home.yml down >/dev/null 2>&1 || true
     
     # 이미지 빌드
-    show_progress 2 5
+    show_progress 2 6
     echo -e "\n${BLUE}Docker 이미지 빌드 중... (5-10분 소요)${NC}"
-    docker-compose -f ./config/docker/docker-compose.home.yml build
+    docker-compose -f ./config/docker/docker-compose.home.yml build >/dev/null 2>&1
     
     # 데이터베이스 스키마 적용
-    show_progress 3 5
+    show_progress 3 6
     echo -e "\n${BLUE}데이터베이스 스키마 적용 중...${NC}"
     # 'backend' 서비스의 이미지를 사용해 'npx prisma db push'를 1회 실행
     docker-compose -f ./config/docker/docker-compose.home.yml run --rm backend npx prisma db push
 
+    # === 뱃지 데이터 시드 ===
+    show_progress 4 6
+    echo -e "\n${BLUE}뱃지 데이터 시드 중...${NC}"
+    docker-compose -f ./config/docker/docker-compose.home.yml run --rm backend npm run db:seed-badges
+    # === 수정 완료 ===
+
     # 서비스 시작
-    show_progress 4 5
-    docker-compose -f ./config/docker/docker-compose.home.yml up -d
+    show_progress 5 6
+    docker-compose -f ./config/docker/docker-compose.home.yml up -d >/dev/null 2>&1
     
     # 서비스 시작 대기
-    show_progress 5 5
+    show_progress 6 6
     echo -e "\n${BLUE}서비스 시작 대기 중...${NC}"
     sleep 60
     
