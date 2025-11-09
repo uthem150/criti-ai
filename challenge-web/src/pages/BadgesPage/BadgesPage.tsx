@@ -15,7 +15,6 @@ const BADGE_CATEGORIES: BadgeCategory[] = [
   { id: "all", name: "전체", icon: "🏆" },
   { id: "training", name: "학습", icon: "📚" },
   { id: "streak", name: "연속 기록", icon: "🔥" },
-  { id: "analysis", name: "분석", icon: "🔍" },
   { id: "milestone", name: "성취", icon: "🎖️" },
   { id: "special", name: "특별", icon: "🎁" },
 ];
@@ -101,36 +100,6 @@ const ALL_POSSIBLE_BADGES: Omit<Badge, "earnedAt">[] = [
     description: "100일 연속 도전! 당신은 전설입니다!",
     icon: "👑",
     category: "streak",
-  },
-
-  // Analysis
-  {
-    id: "analysis-1",
-    name: "분석의 시작",
-    description: "첫 영상 분석을 완료했어요!",
-    icon: "🔍",
-    category: "analysis",
-  },
-  {
-    id: "analysis-2",
-    name: "탐험가",
-    description: "10개의 영상을 분석했어요!",
-    icon: "📈",
-    category: "analysis",
-  },
-  {
-    id: "analysis-3",
-    name: "분석 마니아",
-    description: "50개의 영상을 분석했어요!",
-    icon: "🎬",
-    category: "analysis",
-  },
-  {
-    id: "analysis-4",
-    name: "분석의 달인",
-    description: "100개의 영상을 분석했어요!",
-    icon: "🌟",
-    category: "analysis",
   },
 
   // Milestone

@@ -95,40 +95,6 @@ const BADGE_DATA = [
     conditionValue: "100",
   },
 
-  // === Analysis 카테고리 (유튜브 분석) ===
-  {
-    name: "분석의 시작",
-    description: "첫 영상 분석을 완료했어요!",
-    icon: "🔍",
-    category: "analysis",
-    conditionType: "analysis_count",
-    conditionValue: "1",
-  },
-  {
-    name: "탐험가",
-    description: "10개의 영상을 분석했어요!",
-    icon: "📈",
-    category: "analysis",
-    conditionType: "analysis_count",
-    conditionValue: "10",
-  },
-  {
-    name: "분석 마니아",
-    description: "50개의 영상을 분석했어요!",
-    icon: "🎬",
-    category: "analysis",
-    conditionType: "analysis_count",
-    conditionValue: "50",
-  },
-  {
-    name: "분석의 달인",
-    description: "100개의 영상을 분석했어요!",
-    icon: "🌟",
-    category: "analysis",
-    conditionType: "analysis_count",
-    conditionValue: "100",
-  },
-
   // === Milestone 카테고리 (누적 성취) ===
   {
     name: "신입 탐정",
