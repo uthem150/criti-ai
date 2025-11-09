@@ -11,6 +11,7 @@ import { ROUTES } from "../constants/routes";
 
 import ChallengePage from "../pages/ChallengePage/ChallengePage";
 import YoutubeAnalysisPage from "../pages/YoutubeAnalysisPage/YoutubeAnalysisPage";
+import BadgesPage from "../pages/BadgesPage/BadgesPage";
 // import GuidePage from "../pages/GuidePage/GuidePage";
 
 /**
@@ -31,6 +32,10 @@ export const router = createBrowserRouter([
       {
         path: ROUTES.YOUTUBE_ANALYSIS, // path: '/youtube'
         element: <YoutubeAnalysisPage />,
+      },
+      {
+        path: ROUTES.BADGES,
+        element: <BadgesPage />,
       },
       // {
       //   path: ROUTES.GUIDE, // path: '/guide'

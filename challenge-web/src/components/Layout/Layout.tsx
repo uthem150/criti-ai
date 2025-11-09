@@ -6,7 +6,7 @@ import * as S from "./Layout.style";
 // 아이콘
 import Chart from "@/assets/icons/chart-bar.svg?react";
 import Seeding from "@/assets/icons/seeding.svg?react";
-import Menu from "@/assets/icons/menu.svg?react"; // <-- 메뉴 아이콘 추가
+import Menu from "@/assets/icons/menu.svg?react";
 import Close from "@/assets/icons/chevron-up.svg?react";
 
 // 화면 크기 감지 훅
@@ -56,7 +56,11 @@ const Layout: React.FC = () => {
       label: "비판적 사고 훈련",
       path: ROUTES.HOME,
     },
-
+    {
+      icon: () => <div style={{ fontSize: "1.5rem" }}>🏆</div>,
+      label: "내 뱃지",
+      path: ROUTES.BADGES,
+    },
     // {
     //   icon: 'ℹ️',
     //   label: '이용 가이드',

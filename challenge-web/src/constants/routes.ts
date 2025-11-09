@@ -5,5 +5,6 @@ export const ROUTES = {
   HOME: "/",
   CHALLENGE: "/challenge",
   YOUTUBE_ANALYSIS: "/youtube",
+  BADGES: "/badges",
   GUIDE: "/guide",
 } as const;
