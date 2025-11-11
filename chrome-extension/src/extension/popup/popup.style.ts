@@ -1,12 +1,23 @@
 import styled from "@emotion/styled";
-import {
-  colors,
-  spacing,
-  borderRadius,
-  typography,
-  shadows,
-  animations,
-} from "@/styles/style";
+import { colors, typography } from "@/styles/design";
+
+const spacing = ["0rem", "0.25rem", "0.5rem", "0.75rem", "1rem", "1.5rem"];
+
+const borderRadius = {
+  md: "8px",
+  lg: "12px",
+};
+
+const shadows = {
+  sm: "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
+  md: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+};
+
+const animations = {
+  transition: {
+    normal: "0.2s ease-out",
+  },
+};
 
 export const PopupContainer = styled.div`
   padding: ${spacing[5]};
@@ -14,7 +25,7 @@ export const PopupContainer = styled.div`
   min-height: 500px;
   display: flex;
   flex-direction: column;
-  background: ${colors.background.primary};
+  background: ${colors.light.grayscale[0]};
 `;
 
 export const Header = styled.div`
@@ -22,7 +33,7 @@ export const Header = styled.div`
 
   h2 {
     margin: 0 0 ${spacing[2]} 0;
-    color: ${colors.primary.dark};
+    color: ${colors.light.brand.primary100};
     ${typography.styles.title1};
 
     display: flex;
@@ -33,8 +44,7 @@ export const Header = styled.div`
 
   p {
     margin: 0;
-    color: ${colors.text.secondary};
-
+    color: ${colors.light.grayscale[60]};
     ${typography.styles.caption3};
   }
 `;
@@ -45,7 +55,7 @@ export const GuideSection = styled.div`
 `;
 
 export const GuideCard = styled.div`
-  background: ${colors.background.secondary};
+  background: ${colors.light.grayscale[5]};
   padding: ${spacing[4]};
   border-radius: ${borderRadius.lg};
   margin-bottom: ${spacing[4]};
@@ -53,8 +63,7 @@ export const GuideCard = styled.div`
 
   h3 {
     margin: 0 0 ${spacing[2]} 0;
-    color: ${colors.text.primary};
-
+    color: ${colors.light.grayscale[90]};
     ${typography.styles.title4};
 
     display: flex;
@@ -64,10 +73,9 @@ export const GuideCard = styled.div`
 
   ol {
     text-align: left;
-    color: ${colors.text.primary};
+    color: ${colors.light.grayscale[90]};
     padding-left: ${spacing[5]};
     margin: 0;
-
     ${typography.styles.caption3};
 
     li {
@@ -77,25 +85,23 @@ export const GuideCard = styled.div`
 `;
 
 export const StatusText = styled.div`
-  color: ${colors.text.disabled};
+  color: ${colors.light.grayscale[40]};
   margin-bottom: ${spacing[5]};
-
   ${typography.styles.body4};
 `;
 
 export const ActionButton = styled.button`
-  background: ${colors.primary.main};
-  color: ${colors.text.inverse};
+  background: ${colors.light.brand.primary100};
+  color: ${colors.light.static.white};
   border: none;
   padding: ${spacing[2]} ${spacing[4]};
   border-radius: ${borderRadius.md};
   cursor: pointer;
   transition: all ${animations.transition.normal};
-
   ${typography.styles.title5};
 
   &:hover {
-    background: ${colors.primary.hover};
+    background: ${colors.light.brand.primary80};
     transform: translateY(-1px);
     box-shadow: ${shadows.md};
   }
@@ -116,8 +122,8 @@ export const FeatureItem = styled.div`
   align-items: center;
   gap: ${spacing[3]};
   padding: ${spacing[3]};
-  background: ${colors.background.primary};
-  border: 1px solid ${colors.border.primary};
+  background: ${colors.light.grayscale[0]};
+  border: 1px solid ${colors.light.grayscale[20]};
   border-radius: ${borderRadius.md};
   text-align: left;
 
@@ -129,16 +135,14 @@ export const FeatureItem = styled.div`
     flex: 1;
 
     .title {
-      color: ${colors.text.primary};
+      color: ${colors.light.grayscale[90]};
       margin-bottom: 2px;
-
       ${typography.styles.title5};
     }
 
     .description {
-      color: ${colors.text.secondary};
+      color: ${colors.light.grayscale[60]};
       margin: 0;
-
       ${typography.styles.body4};
     }
   }
