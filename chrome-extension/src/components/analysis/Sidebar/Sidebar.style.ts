@@ -404,7 +404,8 @@ export const ExpandableSectionContainer = styled.div`
 
 export const SectionHeader = styled.button`
   width: 100%;
-  padding: 16px 20px;
+  padding: 12px 16px;
+  height: 3.5rem;
   background: ${colors.light.grayscale[5]};
   border: none;
   cursor: pointer;
@@ -431,8 +432,17 @@ export const SectionIcon = styled.span`
 `;
 
 export const SectionTitle = styled.span`
-  ${typography.styles.title5};
-  color: ${colors.light.grayscale[90]};
+  ${typography.styles.title3};
+  color: ${colors.light.grayscale[100]};
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  /* 점수/개수 텍스트 스타일 */
+  span {
+    ${typography.styles.title3};
+    font-weight: ${typography.fontWeight.bold};
+  }
 `;
 
 export const SectionBadge = styled.span`
@@ -445,16 +455,19 @@ export const SectionBadge = styled.span`
 `;
 
 export const ExpandArrow = styled.span<{ expanded?: boolean }>`
-  font-size: ${typography.styles.body4.fontSize};
-  color: ${colors.light.grayscale[60]};
-  transition: transform 250ms ease-in-out;
-  transform: rotate(-90deg);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  color: ${colors.light.grayscale[70]};
+  transition: transform 0.2s ease;
+  transform: ${(props) => (props.expanded ? "rotate(180deg)" : "rotate(0deg)")};
 
-  ${(props) =>
-    props.expanded &&
-    css`
-      transform: rotate(0deg);
-    `}
+  svg {
+    width: 100%;
+    height: 100%;
+  }
 `;
 
 export const SectionContent = styled.div`
@@ -543,6 +556,57 @@ export const DetailedScoresTitle = styled.h4`
   margin: 0 0 16px 0;
 `;
 
+// 세로 막대 그래프 컨테이너
+export const ChartContainer = styled.div`
+  display: flex;
+  justify-content: space-around;
+  gap: 12px;
+  height: 180px;
+  padding: 0 8px;
+  align-self: stretch;
+`;
+
+export const ChartColumn = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex: 1;
+`;
+
+export const ChartBarVertical = styled.div<{ height: number; color: string }>`
+  width: 100%;
+  height: ${(props) => props.height}%;
+  background: ${(props) => props.color};
+  border-radius: 6px 6px 0 0;
+  position: relative;
+  transition: height 0.5s ease;
+  min-height: 20px;
+`;
+
+export const ChartValue = styled.div<{ score: number }>`
+  position: absolute;
+  top: -24px;
+  left: 50%;
+  transform: translateX(-50%);
+  ${typography.styles.title5};
+  
+  color: ${(props) => {
+    if (props.score >= 70) return colors.light.state.success;
+    if (props.score >= 50) return colors.light.etc.orange;
+    return colors.light.state.error;
+  }};
+  white-space: nowrap;
+`;
+
+export const ChartLabel = styled.div`
+  ${typography.styles.caption3};
+  color: ${colors.light.grayscale[70]};
+  text-align: center;
+`;
+
+// 가로 막대 그래프 (기존 유지)
 export const ScoreBars = styled.div`
   display: flex;
   flex-direction: column;

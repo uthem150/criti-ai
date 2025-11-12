@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import type { TrustAnalysis } from "@shared/types";
-// import { Global } from "@emotion/react";
+import { getScoreColor } from "@/utils/formatUtils";
 import * as S from "./Sidebar.style";
 
 interface SidebarProps {
@@ -118,6 +118,22 @@ const ClickableText: React.FC<ClickableTextProps> = ({
   );
 };
 
+// ChevronDown 아이콘 컴포넌트
+const ChevronDownIcon = () => (
+  <svg
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <polyline points="6 9 12 15 18 9" />
+  </svg>
+);
+
 // ExpandableSection (S. 컴포넌트 사용)
 const ExpandableSection: React.FC<ExpandableSectionProps> = ({
   title,
@@ -133,14 +149,14 @@ const ExpandableSection: React.FC<ExpandableSectionProps> = ({
     <S.SectionHeader onClick={onToggle}>
       <S.HeaderLeft>
         <S.SectionIcon>{icon}</S.SectionIcon>
-        <S.SectionTitle>{title}</S.SectionTitle>
-        {badge && (
-          <S.SectionBadge style={{ backgroundColor: badgeColor }}>
-            {badge}
-          </S.SectionBadge>
-        )}
+        <S.SectionTitle>
+          {title}
+          {badge && <span style={{ color: badgeColor }}>{badge}</span>}
+        </S.SectionTitle>
       </S.HeaderLeft>
-      <S.ExpandArrow expanded={isExpanded}>▼</S.ExpandArrow>
+      <S.ExpandArrow expanded={isExpanded}>
+        <ChevronDownIcon />
+      </S.ExpandArrow>
     </S.SectionHeader>
     {isExpanded && <S.SectionContent>{children}</S.SectionContent>}
   </S.ExpandableSectionContainer>
@@ -310,93 +326,67 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
 
               {analysis.detailedScores && (
                 <S.DetailedScores>
-                  <S.DetailedScoresTitle>📈 상세 점수</S.DetailedScoresTitle>
-                  <S.ScoreBars>
-                    <S.ScoreBar>
-                      <S.BarInfo>
-                        <S.BarLabel>🏛️ 출처</S.BarLabel>
-                        <S.BarValue>
+                  <S.ChartContainer>
+                    <S.ChartColumn>
+                      <S.ChartBarVertical
+                        height={analysis.detailedScores.sourceScore}
+                        color={getScoreColor(analysis.detailedScores.sourceScore)}
+                      >
+                        <S.ChartValue score={analysis.detailedScores.sourceScore}>
                           {analysis.detailedScores.sourceScore}
-                        </S.BarValue>
-                      </S.BarInfo>
-                      <S.BarTrack>
-                        <S.BarFill
-                          type="source"
-                          style={{
-                            width: `${analysis.detailedScores.sourceScore}%`,
-                          }}
-                        />
-                      </S.BarTrack>
-                    </S.ScoreBar>
+                        </S.ChartValue>
+                      </S.ChartBarVertical>
+                      <S.ChartLabel>출처</S.ChartLabel>
+                    </S.ChartColumn>
 
-                    <S.ScoreBar>
-                      <S.BarInfo>
-                        <S.BarLabel>⚖️ 객관성</S.BarLabel>
-                        <S.BarValue>
+                    <S.ChartColumn>
+                      <S.ChartBarVertical
+                        height={analysis.detailedScores.objectivityScore}
+                        color={getScoreColor(analysis.detailedScores.objectivityScore)}
+                      >
+                        <S.ChartValue score={analysis.detailedScores.objectivityScore}>
                           {analysis.detailedScores.objectivityScore}
-                        </S.BarValue>
-                      </S.BarInfo>
-                      <S.BarTrack>
-                        <S.BarFill
-                          type="objectivity"
-                          style={{
-                            width: `${analysis.detailedScores.objectivityScore}%`,
-                          }}
-                        />
-                      </S.BarTrack>
-                    </S.ScoreBar>
+                        </S.ChartValue>
+                      </S.ChartBarVertical>
+                      <S.ChartLabel>객관성</S.ChartLabel>
+                    </S.ChartColumn>
 
-                    <S.ScoreBar>
-                      <S.BarInfo>
-                        <S.BarLabel>🧠 논리성</S.BarLabel>
-                        <S.BarValue>
+                    <S.ChartColumn>
+                      <S.ChartBarVertical
+                        height={analysis.detailedScores.logicScore}
+                        color={getScoreColor(analysis.detailedScores.logicScore)}
+                      >
+                        <S.ChartValue score={analysis.detailedScores.logicScore}>
                           {analysis.detailedScores.logicScore}
-                        </S.BarValue>
-                      </S.BarInfo>
-                      <S.BarTrack>
-                        <S.BarFill
-                          type="logic"
-                          style={{
-                            width: `${analysis.detailedScores.logicScore}%`,
-                          }}
-                        />
-                      </S.BarTrack>
-                    </S.ScoreBar>
+                        </S.ChartValue>
+                      </S.ChartBarVertical>
+                      <S.ChartLabel>논리성</S.ChartLabel>
+                    </S.ChartColumn>
 
-                    <S.ScoreBar>
-                      <S.BarInfo>
-                        <S.BarLabel>🚫 광고성</S.BarLabel>
-                        <S.BarValue>
+                    <S.ChartColumn>
+                      <S.ChartBarVertical
+                        height={analysis.detailedScores.advertisementScore}
+                        color={getScoreColor(analysis.detailedScores.advertisementScore)}
+                      >
+                        <S.ChartValue score={analysis.detailedScores.advertisementScore}>
                           {analysis.detailedScores.advertisementScore}
-                        </S.BarValue>
-                      </S.BarInfo>
-                      <S.BarTrack>
-                        <S.BarFill
-                          type="advertisement"
-                          style={{
-                            width: `${analysis.detailedScores.advertisementScore}%`,
-                          }}
-                        />
-                      </S.BarTrack>
-                    </S.ScoreBar>
+                        </S.ChartValue>
+                      </S.ChartBarVertical>
+                      <S.ChartLabel>광고성</S.ChartLabel>
+                    </S.ChartColumn>
 
-                    <S.ScoreBar>
-                      <S.BarInfo>
-                        <S.BarLabel>📚 근거</S.BarLabel>
-                        <S.BarValue>
+                    <S.ChartColumn>
+                      <S.ChartBarVertical
+                        height={analysis.detailedScores.evidenceScore}
+                        color={getScoreColor(analysis.detailedScores.evidenceScore)}
+                      >
+                        <S.ChartValue score={analysis.detailedScores.evidenceScore}>
                           {analysis.detailedScores.evidenceScore}
-                        </S.BarValue>
-                      </S.BarInfo>
-                      <S.BarTrack>
-                        <S.BarFill
-                          type="evidence"
-                          style={{
-                            width: `${analysis.detailedScores.evidenceScore}%`,
-                          }}
-                        />
-                      </S.BarTrack>
-                    </S.ScoreBar>
-                  </S.ScoreBars>
+                        </S.ChartValue>
+                      </S.ChartBarVertical>
+                      <S.ChartLabel>근거</S.ChartLabel>
+                    </S.ChartColumn>
+                  </S.ChartContainer>
                 </S.DetailedScores>
               )}
             </S.OverviewContent>
