@@ -59,33 +59,89 @@ export class DailyChallengeService {
     const today = dateKey || this.getTodayDateString();
     console.log(`🤖 ${today} 일일 챌린지 생성 시작 (일괄 생성)`);
 
+    // 매일 다른 주제 조합 생성
+    const allTopics = [
+      // 초급 주제들
+      {
+        difficulty: "beginner",
+        topics: [
+          "논리적 오류",
+          "편향 표현",
+          "감정적 편향",
+          "과장된 표현",
+          "긴급성 유도",
+          "권위에 호소",
+          "클릭베이트",
+        ],
+      },
+      // 중급 주제들
+      {
+        difficulty: "intermediate",
+        topics: [
+          "광고성 콘텐츠",
+          "정보 출처",
+          "인과관계 오류",
+          "흑백논리",
+          "허수아비 공격",
+          "순환논리",
+          "과장된 수치",
+        ],
+      },
+      // 고급 주제들
+      {
+        difficulty: "advanced",
+        topics: [
+          "복합적 문제",
+          "미묘한 편향",
+          "교묘한 광고",
+          "정교한 논리적 오류",
+          "선동적 언어",
+          "인신공격",
+          "성급한 일반화",
+        ],
+      },
+    ];
+
+    // 날짜 기반 시드로 매일 다른 조합 선택
+    const dateHash = today
+      .split("-")
+      .reduce((acc, val) => acc + parseInt(val), 0);
+
     const challengeTemplates = [
       {
         type: "article-analysis",
         difficulty: "beginner",
-        topic: "논리적 오류",
-      },
-      { type: "article-analysis", difficulty: "beginner", topic: "편향 표현" },
-      {
-        type: "article-analysis",
-        difficulty: "intermediate",
-        topic: "광고성 콘텐츠",
+        topic: allTopics[0].topics[dateHash % allTopics[0].topics.length],
       },
       {
         type: "article-analysis",
+        difficulty: "beginner",
+        topic: allTopics[0].topics[(dateHash + 1) % allTopics[0].topics.length],
+      },
+      {
+        type: "article-analysis",
         difficulty: "intermediate",
-        topic: "정보 출처",
+        topic: allTopics[1].topics[(dateHash + 2) % allTopics[1].topics.length],
+      },
+      {
+        type: "article-analysis",
+        difficulty: "intermediate",
+        topic: allTopics[1].topics[(dateHash + 3) % allTopics[1].topics.length],
       },
       {
         type: "article-analysis",
         difficulty: "advanced",
-        topic: "복합적 문제",
+        topic: allTopics[2].topics[(dateHash + 4) % allTopics[2].topics.length],
       },
     ];
 
     try {
       console.log(
         `🔄 Gemini API 호출 중: ${challengeTemplates.length}개 챌린지 동시 생성 요청`
+      );
+      console.log(
+        `📋 오늘의 주제들:`,
+        challengeTemplates.map((t) => t.topic).join(", ")
       );
 
       // 1. Gemini API로 5개 챌린지 한 번에 생성
@@ -314,14 +370,20 @@ export class DailyChallengeService {
   startDailyScheduler() {
     console.log("⏰ 일일 챌린지 스케줄러 시작");
 
-    // 매일 자정 (KST) 실행
     const scheduleNextGeneration = () => {
       const now = new Date();
-      const tomorrow = new Date(now);
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      tomorrow.setHours(0, 0, 0, 0); // 자정으로 설정
 
-      const msUntilMidnight = tomorrow.getTime() - now.getTime();
+      // KST 기준으로 다음 자정 계산
+      const kstOffset = 9 * 60;
+      const kstNow = new Date(now.getTime() + kstOffset * 60 * 1000);
+
+      const tomorrow = new Date(kstNow);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      tomorrow.setHours(0, 0, 0, 0);
+
+      // UTC로 다시 변환
+      const tomorrowUTC = new Date(tomorrow.getTime() - kstOffset * 60 * 1000);
+      const msUntilMidnight = tomorrowUTC.getTime() - now.getTime();
 
       setTimeout(async () => {
         console.log("🌅 자정 도달 - 새로운 일일 챌린지 생성 시작");
@@ -337,7 +399,7 @@ export class DailyChallengeService {
       }, msUntilMidnight);
 
       console.log(
-        `⏰ 다음 챌린지 생성 예정: ${tomorrow.toLocaleString("ko-KR")}`
+        `⏰ 다음 챌린지 생성 예정: ${tomorrowUTC.toLocaleString("ko-KR")}`
       );
     };
 
