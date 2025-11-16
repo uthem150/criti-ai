@@ -1,0 +1,1149 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Criti.AI 전체 아키텍처 - 최종 버전</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap");
+      body {
+        font-family: "Noto Sans KR", sans-serif;
+        background-color: #f8fafc;
+      }
+      .diagram-card {
+        background-color: white;
+        border-radius: 0.75rem;
+        box-shadow:
+          0 4px 6px -1px rgb(0 0 0 / 0.1),
+          0 2px 4px -2px rgb(0 0 0 / 0.1);
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        overflow: hidden;
+      }
+      h1,
+      h2,
+      h3 {
+        font-weight: 700;
+      }
+      pre.mermaid {
+        background-color: #f1f5f9;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        text-align: center;
+      }
+      code {
+        background-color: #e2e8f0;
+        padding: 0.2rem 0.4rem;
+        border-radius: 0.25rem;
+        font-size: 0.9em;
+      }
+      .key-feature {
+        background-color: #f1f5f9;
+        border-left: 4px solid #3b82f6;
+        padding: 1rem;
+        margin: 1rem 0;
+        border-radius: 0.25rem;
+      }
+    </style>
+  </head>
+  <body class="p-4 sm:p-8">
+    <div class="max-w-7xl mx-auto">
+      <header class="text-center mb-12">
+        <h1 class="text-4xl md:text-5xl font-bold text-gray-800">
+          🏗️ Criti.AI 아키텍처 (최종 버전)
+        </h1>
+        <p class="text-lg text-gray-600 mt-2">
+          시스템 구조, 데이터 흐름, 유튜브 분석, 게이미피케이션 아키텍처
+        </p>
+        <p class="text-sm text-gray-500 mt-1">
+          v2.0 - 유튜브 분석 & 뱃지 시스템 포함
+        </p>
+      </header>
+
+      <!-- Document Part 1: Backend & Caching Focus -->
+      <div class="mb-16">
+        <h2
+          class="text-3xl font-bold text-gray-800 border-b-2 border-blue-500 pb-2 mb-8"
+        >
+          백엔드 시스템 아키텍처
+        </h2>
+
+        <div class="diagram-card">
+          <h3 class="text-2xl mb-4">🏛️ 1. 전체 시스템 아키텍처</h3>
+          <pre class="mermaid">
+graph TB
+    subgraph "<b>Client Layer</b>"
+        WEB["웹 애플리케이션<br/>React/Vite<br/>챌린지 & 유튜브 분석"]
+        EXT["Chrome<br/>확장 프로그램<br/>실시간 기사 분석"]
+        MOB["모바일 앱<br/>(향후)"]
+    end
+
+    subgraph "<b>Network Layer</b>"
+        LB["리버스 프록시<br/>Nginx"]
+        CORS["CORS 정책<br/>Express Middleware"]
+    end
+
+    subgraph "<b>Application Layer</b>"
+        API["Express.js API 서버<br/>TypeScript"]
+        subgraph "<b>라우터</b>"
+            AR["Analysis Router<br/>/api/analysis"]
+            CR["Challenge Router<br/>/api/challenge"]
+            YR["Youtube Router<br/>/api/youtube"]
+            HR["Health Router<br/>/health"]
+        end
+        subgraph "<b>서비스</b>"
+            GS["Gemini Service<br/>AI 분석 엔진"]
+            YS["Youtube Service<br/>자막 추출 & 메타데이터"]
+            DCS["Daily Challenge Service<br/>자동 챌린지 생성"]
+            DS["Database Service<br/>데이터 관리"]
+            CS["Cache Service<br/>3단계 캐싱"]
+        end
+    end
+
+    subgraph "<b>Data Layer</b>"
+        subgraph "<b>Cache Layer</b>"
+            L1["L1: Redis Cache<br/>64MB LRU"]
+            L2["L2: Database Cache<br/>영구 저장"]
+            L3["L3: Memory Cache<br/>LRU 100개"]
+        end
+        subgraph "<b>영구 저장소</b>"
+            DB[("SQLite/PostgreSQL<br/>Prisma ORM")]
+            FILES["파일 시스템<br/>로그 & 임시 파일"]
+        end
+    end
+
+    subgraph "<b>외부 API</b>"
+        GEMINI["Google Gemini AI<br/>콘텐츠 분석"]
+        YTAPI["YouTube Data API v3<br/>메타데이터 수집"]
+        YTDLP["yt-dlp<br/>자막 추출"]
+    end
+
+    subgraph "<b>인프라 레이어</b>"
+        DOCKER["Docker 컨테이너<br/>Alpine Linux<br/>200MB Backend"]
+        MONITOR["모니터링 시스템<br/>메모리 & CPU<br/>자동 재시작"]
+        BACKUP["백업 시스템<br/>자동 백업"]
+        DEPLOY["배포 자동화<br/>deploy-micro-auto.sh<br/>최적화 스크립트"]
+    end
+
+    WEB --> LB
+    EXT --> LB
+    MOB --> LB
+    LB --> CORS
+    CORS --> API
+    API --> AR
+    API --> CR
+    API --> YR
+    API --> HR
+    AR --> GS
+    AR --> CS
+    YR --> YS
+    YR --> CS
+    CR --> DCS
+    CR --> DS
+    CS --> L1
+    CS --> L2
+    CS --> L3
+    DS --> DB
+    GS --> GEMINI
+    DCS --> GEMINI
+    YS --> YTAPI
+    YS --> YTDLP
+    YS --> GS
+    L2 --> DB
+    DOCKER --> API
+    MONITOR --> DOCKER
+    BACKUP --> DB
+    BACKUP --> FILES
+    DEPLOY --> DOCKER
+
+    classDef client fill:#e3f2fd
+    classDef network fill:#f3e5f5
+    classDef app fill:#e8f5e9
+    classDef data fill:#fff3e0
+    classDef external fill:#ffebee
+    classDef infra fill:#f1f8e9
+    
+    class WEB,EXT,MOB client
+    class LB,CORS network
+    class API,AR,CR,YR,HR,GS,YS,DCS,DS,CS app
+    class L1,L2,L3,DB,FILES data
+    class GEMINI,YTAPI,YTDLP external
+    class DOCKER,MONITOR,BACKUP,DEPLOY,HEALTHCHECK,LOGGING infra
+
+    linkStyle default stroke-width:1px
+                </pre>
+        </div>
+
+        <div class="diagram-card">
+          <h3 class="text-2xl mb-4">🎬 2. 유튜브 분석 파이프라인</h3>
+          <pre class="mermaid">
+graph TB
+    subgraph "📥 사용자 입력"
+        INPUT["유튜브 URL 입력<br/>challenge-web"]
+    end
+
+    subgraph "🔍 비디오 ID 추출"
+        VALIDATE["URL 검증 & 파싱<br/>정규표현식"]
+        EXTRACT["비디오 ID 추출<br/>예: dQw4w9WgXcQ"]
+    end
+
+    subgraph "📝 자막 추출 (yt-dlp)"
+        YTDLP_CHECK["yt-dlp 실행 가능 확인"]
+        YTDLP_CMD["yt-dlp 명령어 실행<br/>--skip-download<br/>--write-auto-subs<br/>--sub-lang ko<br/>--sub-format json3"]
+        SUBTITLE_PARSE["자막 파일 파싱<br/>JSON3 → Segments"]
+        SUBTITLE_CLEAN["텍스트 정리<br/>타임스탬프 매핑"]
+    end
+
+    subgraph "📊 메타데이터 수집 (YouTube API)"
+        API_CALL["YouTube Data API v3<br/>videos.list"]
+        META_PARSE["메타데이터 파싱<br/>제목, 설명, 채널명<br/>조회수, 좋아요, 게시일"]
+        CHANNEL_INFO["채널 정보 수집<br/>구독자 수, 채널 생성일"]
+    end
+
+    subgraph "🤖 AI 분석"
+        COMBINE["자막 + 메타데이터 결합<br/>컨텍스트 구성"]
+        GEMINI_CALL["Gemini AI 호출<br/>다차원 신뢰도 분석<br/>- 출처 신뢰도<br/>- 편향성<br/>- 논리 오류<br/>- 광고성"]
+        JSON_REPAIR["jsonrepair<br/>JSON 응답 안정화"]
+        RESULT_VALIDATE["결과 검증<br/>스키마 확인"]
+    end
+
+    subgraph "💾 캐싱 & 응답"
+        CACHE_SAVE["3-Tier 캐싱<br/>Redis + DB + Memory"]
+        RESPONSE["분석 결과 반환<br/>YoutubeAnalysisPage"]
+    end
+
+    INPUT --> VALIDATE
+    VALIDATE --> EXTRACT
+    EXTRACT --> YTDLP_CHECK
+    YTDLP_CHECK --> YTDLP_CMD
+    YTDLP_CMD --> SUBTITLE_PARSE
+    SUBTITLE_PARSE --> SUBTITLE_CLEAN
+    EXTRACT --> API_CALL
+    API_CALL --> META_PARSE
+    META_PARSE --> CHANNEL_INFO
+    SUBTITLE_CLEAN --> COMBINE
+    CHANNEL_INFO --> COMBINE
+    COMBINE --> GEMINI_CALL
+    GEMINI_CALL --> JSON_REPAIR
+    JSON_REPAIR --> RESULT_VALIDATE
+    RESULT_VALIDATE --> CACHE_SAVE
+    CACHE_SAVE --> RESPONSE
+
+    classDef input fill:#e3f2fd
+    classDef validate fill:#f3e5f5
+    classDef ytdlp fill:#e8f5e9
+    classDef ytapi fill:#fff3e0
+    classDef ai fill:#ffebee
+    classDef cache fill:#f1f8e9
+
+    class INPUT input
+    class VALIDATE,EXTRACT validate
+    class YTDLP_CHECK,YTDLP_CMD,SUBTITLE_PARSE,SUBTITLE_CLEAN ytdlp
+    class API_CALL,META_PARSE,CHANNEL_INFO ytapi
+    class COMBINE,GEMINI_CALL,JSON_REPAIR,RESULT_VALIDATE ai
+    class CACHE_SAVE,RESPONSE cache
+
+    linkStyle default stroke-width:1px
+                </pre>
+        </div>
+
+        <div class="diagram-card">
+          <h3 class="text-2xl mb-4">🔄 3. 유튜브 분석 Sequence Diagram</h3>
+          <pre class="mermaid">
+sequenceDiagram
+    participant U as 사용자
+    participant W as 웹 페이지
+    participant API as Express API
+    participant YS as YoutubeService
+    participant YTDLP as yt-dlp
+    participant YTAPI as YouTube API
+    participant GS as GeminiService
+    participant CACHE as Cache
+
+    Note over U,CACHE: 🎬 유튜브 영상 분석 플로우
+
+    U->>+W: 유튜브 URL 입력
+    W->>+API: POST /api/youtube/analyze<br/>{videoUrl}
+    
+    Note over API: 📝 URL 검증
+    API->>API: validateVideoId()
+    
+    Note over API,CACHE: ⚡ 캐시 확인
+    API->>+CACHE: 분석 결과 조회
+    CACHE-->>-API: null (캐시 미스)
+    
+    API->>+YS: extractTranscript(videoId)
+    
+    Note over YS,YTDLP: 📝 자막 추출 (1-2초)
+    YS->>+YTDLP: execFile(yt-dlp, args)
+    YTDLP-->>-YS: subtitle.json3 파일
+    YS->>YS: 자막 파싱 & 정리
+    
+    Note over YS,YTAPI: 📊 메타데이터 수집 (0.5초)
+    YS->>+YTAPI: videos.list(videoId)
+    YTAPI-->>-YS: {title, description, stats}
+    YS->>+YTAPI: channels.list(channelId)
+    YTAPI-->>-YS: {subscribers, created}
+    
+    YS-->>-API: {transcript, metadata}
+    
+    Note over API,GS: 🤖 AI 분석 (2-3초)
+    API->>+GS: analyzeYoutubeVideo(data)
+    GS->>GS: 프롬프트 구성
+    GS->>+GS: Gemini AI 호출
+    GS-->>-GS: AI 응답
+    GS->>GS: jsonrepair(response)
+    GS->>GS: 결과 검증
+    GS-->>-API: analysisResult
+    
+    Note over API,CACHE: 💾 캐싱
+    API->>CACHE: 결과 저장 (24h TTL)
+    
+    API-->>-W: ✅ 분석 결과
+    W-->>-U: 신뢰도 리포트 표시
+
+    Note over U,CACHE: 📈 총 소요 시간: 약 1분
+                </pre>
+        </div>
+
+        <div class="diagram-card">
+          <h3 class="text-2xl mb-4">⚡ 4. 3단계 캐싱 시스템 아키텍처</h3>
+          <pre class="mermaid">
+graph TD
+    subgraph "📥 요청 진입점"
+        REQ[클라이언트 요청<br/>분석 API 호출]
+    end
+
+    subgraph "🏃‍♂️ L1: Redis 캐시 (초고속)"
+        R1{Redis<br/>캐시 확인}
+        R2[Redis 히트<br/>⚡ 5ms 응답<br/>95% 히트율]
+        R3[Redis에 저장<br/>TTL: 24시간<br/>64MB LRU]
+    end
+
+    subgraph "💾 L2: Database 캐시 (중속)"
+        D1{Database<br/>캐시 확인}
+        D2[DB 히트<br/>💾 50ms 응답<br/>4% 히트율]
+        D3[DB에 영구 저장<br/>히트 카운트 증가<br/>Prisma ORM]
+    end
+
+    subgraph "🧠 L3: Memory 캐시 (최고속)"
+        M1{Memory<br/>캐시 확인}
+        M2[Memory 히트<br/>🧠 1ms 응답]
+        M3[Memory에 저장<br/>LRU 정책, 100개 제한]
+    end
+
+    subgraph "🤖 L4: AI 분석 (저속)"
+        A1[Gemini AI 호출<br/>🤖 2500ms 응답<br/>1% 미스율]
+        A2[결과 검증<br/>JSON 파싱<br/>jsonrepair]
+    end
+
+    REQ --> R1
+    R1 -->|캐시 히트| R2
+    R1 -->|캐시 미스| D1
+    D1 -->|캐시 히트| D2
+    D1 -->|캐시 미스| M1
+    M1 -->|캐시 히트| M2
+    M1 -->|캐시 미스| A1
+    A1 --> A2
+    A2 --> A3[전체 캐시 레이어 저장]
+    A3 --> R3
+    A3 --> D3
+    A3 --> M3
+    D2 --> R3
+
+    classDef request fill:#e3f2fd
+    classDef redis fill:#ffcdd2
+    classDef database fill:#bbdefb
+    classDef memory fill:#c8e6c9
+    classDef ai fill:#ffecb3
+
+    class REQ request
+    class R1,R2,R3 redis
+    class D1,D2,D3 database
+    class M1,M2,M3 memory
+    class A1,A2,A3 ai
+
+    linkStyle default stroke-width:1px
+                </pre>
+        </div>
+
+        <div class="diagram-card">
+          <h3 class="text-2xl mb-4">🎮 5. 일일 챌린지 자동 생성 시스템</h3>
+          <pre class="mermaid">
+graph TB
+    subgraph "⏰ 스케줄링 시스템"
+        CRON[매일 자정 실행<br/>Node.js setTimeout]
+        CHECK{오늘 챌린지<br/>존재 확인}
+    end
+
+    subgraph "🤖 AI 챌린지 생성"
+        TEMPLATE[챌린지 템플릿<br/>난이도별 5개]
+        subgraph "난이도별 생성"
+            BEG[초급 챌린지<br/>논리적 오류]
+            INT1[중급 챌린지<br/>광고성 콘텐츠]
+            INT2[중급 챌린지<br/>정보 출처]
+            ADV[고급 챌린지<br/>복합적 문제]
+        end
+        AI_GEN[Gemini AI<br/>프롬프트 기반 생성]
+        VALIDATE[결과 검증<br/>품질 확인]
+    end
+
+    subgraph "🛡️ 백업 시스템"
+        FALLBACK{AI 생성<br/>실패?}
+        MANUAL[수동 작성<br/>백업 챌린지]
+        BASIC[기본 챌린지<br/>하드코딩]
+    end
+
+    subgraph "💾 저장 시스템"
+        DB_SAVE[(데이터베이스 저장<br/>dailyKey로 구분)]
+        CACHE_SAVE[Redis 캐싱<br/>25시간 TTL]
+    end
+    
+    CRON --> CHECK
+    CHECK -->|존재함| RETURN[기존 챌린지 반환]
+    CHECK -->|없음| TEMPLATE
+    TEMPLATE --> BEG
+    TEMPLATE --> INT1
+    TEMPLATE --> INT2
+    TEMPLATE --> ADV
+    BEG --> AI_GEN
+    INT1 --> AI_GEN
+    INT2 --> AI_GEN
+    ADV --> AI_GEN
+    AI_GEN --> VALIDATE
+    VALIDATE -->|성공| DB_SAVE
+    VALIDATE -->|실패| FALLBACK
+    FALLBACK -->|재시도| MANUAL
+    FALLBACK -->|최종 실패| BASIC
+    MANUAL --> DB_SAVE
+    BASIC --> DB_SAVE
+    DB_SAVE --> CACHE_SAVE
+    CACHE_SAVE --> COMPLETE[✅ 생성 완료]
+
+    classDef schedule fill:#e3f2fd
+    classDef ai fill:#f3e5f5
+    classDef backup fill:#fff3e0
+    classDef storage fill:#e8f5e9
+
+    class CRON,CHECK schedule
+    class TEMPLATE,BEG,INT1,INT2,ADV,AI_GEN,VALIDATE ai
+    class FALLBACK,MANUAL,BASIC backup
+    class DB_SAVE,CACHE_SAVE storage
+
+    linkStyle default stroke-width:1px
+                </pre>
+        </div>
+
+        <div class="diagram-card">
+          <h3 class="text-2xl mb-4">🏆 6. 게이미피케이션 & 뱃지 시스템</h3>
+          <pre class="mermaid">
+graph TB
+    subgraph "🎯 사용자 진입"
+        START["사용자 접속<br/>challenge-web"]
+        LOAD["localStorage 로드<br/>userId, stats"]
+    end
+
+    subgraph "📊 사용자 상태 관리"
+        USER_DATA["사용자 데이터<br/>- 총 점수<br/>- 완료한 챌린지 수<br/>- 획득 배지 목록<br/>- 레벨"]
+        LEVEL_CALC["레벨 계산<br/>점수 기반 자동 산정"]
+    end
+
+    subgraph "🎮 챌린지 플레이"
+        CHALLENGE["챌린지 시작"]
+        ANSWER["정답 제출"]
+        SCORE["점수 계산<br/>기본점수 + 시간보너스<br/>+ 힌트미사용보너스"]
+    end
+
+    subgraph "🏆 뱃지 획득 시스템"
+        BADGE_CHECK{뱃지 조건<br/>확인}
+        BADGE_NEW["새 뱃지 획득!<br/>- 첫 챌린지 완료<br/>- 10회 연속 정답<br/>- 100점 달성<br/>- 레벨 10 달성"]
+        BADGE_ANIM["뱃지 애니메이션<br/>축하 효과"]
+    end
+
+    subgraph "💾 데이터 저장"
+        SAVE_LOCAL["localStorage 저장<br/>즉시 반영"]
+        SAVE_STATS["통계 업데이트<br/>- 총 점수<br/>- 완료 횟수<br/>- 정답률"]
+    end
+
+    subgraph "🎨 UI 업데이트"
+        UPDATE_UI["UI 갱신<br/>- 점수 표시<br/>- 레벨 바<br/>- 배지 목록"]
+    end
+
+    START --> LOAD
+    LOAD --> USER_DATA
+    USER_DATA --> LEVEL_CALC
+    LEVEL_CALC --> CHALLENGE
+    CHALLENGE --> ANSWER
+    ANSWER --> SCORE
+    SCORE --> BADGE_CHECK
+    BADGE_CHECK -->|조건 충족| BADGE_NEW
+    BADGE_CHECK -->|조건 미충족| SAVE_LOCAL
+    BADGE_NEW --> BADGE_ANIM
+    BADGE_ANIM --> SAVE_LOCAL
+    SAVE_LOCAL --> SAVE_STATS
+    SAVE_STATS --> UPDATE_UI
+    UPDATE_UI --> CHALLENGE
+
+    classDef entry fill:#e3f2fd
+    classDef state fill:#f3e5f5
+    classDef play fill:#e8f5e9
+    classDef badge fill:#fff3e0
+    classDef storage fill:#ffebee
+    classDef ui fill:#f1f8e9
+
+    class START,LOAD entry
+    class USER_DATA,LEVEL_CALC state
+    class CHALLENGE,ANSWER,SCORE play
+    class BADGE_CHECK,BADGE_NEW,BADGE_ANIM badge
+    class SAVE_LOCAL,SAVE_STATS storage
+    class UPDATE_UI ui
+
+    linkStyle default stroke-width:1px
+                </pre>
+        </div>
+
+        <div class="diagram-card">
+          <h3 class="text-2xl mb-4">🎯 핵심 아키텍처 특징</h3>
+          <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div class="key-feature">
+              <strong>1. 확장성 (Scalability):</strong> 마이크로서비스 준비,
+              수평 확장 가능한 캐싱, 컨테이너 기반 배포, Monorepo 구조.
+            </div>
+            <div class="key-feature">
+              <strong>2. 성능 (Performance):</strong> 3단계 캐싱으로 95% 요청
+              고속 처리, 유튜브 분석 80% 단축 (5분→1분), 메모리 최적화.
+            </div>
+            <div class="key-feature">
+              <strong>3. 안정성 (Reliability):</strong> 다층 백업 시스템, 자동
+              모니터링 및 재시작, jsonrepair로 AI 응답 안정화.
+            </div>
+            <div class="key-feature">
+              <strong>4. 유지보수성 (Maintainability):</strong> 명확한 계층
+              분리, TypeScript 타입 안전성, Shared 패키지로 타입 통합.
+            </div>
+            <div class="key-feature">
+              <strong>5. 비용 효율성 (Cost Efficiency):</strong> 캐싱으로 AI API
+              호출 98% 절약, Oracle Cloud Free Tier, Alpine Linux 경량화.
+            </div>
+            <div class="key-feature">
+              <strong>6. 사용자 경험 (UX):</strong> 게이미피케이션 시스템, 뱃지
+              & 레벨, 실시간 피드백, 직관적 UI/UX.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Document Part 2: Monorepo & Frontend Focus -->
+      <div>
+        <h2
+          class="text-3xl font-bold text-gray-800 border-b-2 border-green-500 pb-2 mb-8"
+        >
+          프로젝트 구조 및 배포 아키텍처
+        </h2>
+
+        <div class="diagram-card">
+          <h3 class="text-2xl mb-4">
+            🌐 1. 전체 시스템 아키텍처 (High-Level Overview)
+          </h3>
+          <pre class="mermaid">
+graph TB
+    subgraph "<b>🎯 클라이언트 레이어</b>"
+        CHROME["🧩 Chrome Extension<br/>실시간 기사 분석<br/>React + Vite"]
+        WEB["🌐 웹 플랫폼<br/>챌린지 & 유튜브 분석<br/>React SPA"]
+        FUTURE["📱 모바일 앱<br/>(향후 확장)"]
+    end
+
+    subgraph "<b>🔗 공통 레이어</b>"
+        SHARED["🔧 Shared Package<br/>공통 타입 & 유틸리티<br/>TypeScript 인터페이스<br/>30+ 타입 정의"]
+    end
+
+    subgraph "<b>🎮 애플리케이션 레이어</b>"
+        API["🚀 Express.js API<br/>backend/<br/>TypeScript 서버"]
+        
+        subgraph "<b>📍 라우터 (12개 엔드포인트)</b>"
+            ROUTES["🛣️ API 라우팅<br/>- /api/analysis<br/>- /api/challenge<br/>- /api/youtube<br/>- /health"]
+        end
+        
+        subgraph "<b>⚙️ 핵심 서비스</b>"
+            GEMINI["🤖 Gemini Service<br/>AI 분석 엔진"]
+            YOUTUBE["🎬 Youtube Service<br/>자막 & 메타데이터"]
+            CACHE["⚡ Cache Service<br/>3-Tier 캐싱"]
+            DB_SVC["💾 Database Service<br/>데이터 영속성"]
+            CHALLENGE["🎯 Challenge Service<br/>게이미피케이션"]
+        end
+    end
+
+    subgraph "<b>📊 데이터 레이어</b>"
+        subgraph "<b>🗄️ 영구 저장소</b>"
+            PRISMA[("🔷 Prisma ORM<br/>schema.prisma<br/>타입 안전 DB<br/>SQLite/PostgreSQL")]
+            REDIS[("⚡ Redis Cache<br/>고속 캐싱<br/>64MB LRU")]
+        end
+    end
+
+    subgraph "<b>🌍 외부 API</b>"
+        GEMINI_API["🔮 Google Gemini AI<br/>콘텐츠 분석 & 생성"]
+        YTAPI["📺 YouTube Data API v3<br/>메타데이터 수집"]
+        YTDLP_EXT["📝 yt-dlp<br/>자막 추출 도구"]
+    end
+
+    subgraph "<b>🏗️ 인프라 레이어</b>"
+        DOCKER["🐳 Docker<br/>컨테이너화<br/>Alpine Linux<br/>Multi-stage Build"]
+        NGINX["🔀 Nginx<br/>리버스 프록시<br/>로드 밸런싱"]
+        SCRIPTS["🚀 DevOps Scripts<br/>자동화 배포<br/>모니터링 & 최적화"]
+    end
+
+    subgraph "<b>☁️ 배포 환경</b>"
+        VERCEL["▲ Vercel<br/>웹 플랫폼 호스팅<br/>무료 티어"]
+        ORACLE["☁️ Oracle Cloud<br/>Micro Instance<br/>1GB RAM<br/>API & DB 호스팅"]
+    end
+
+    CHROME --> SHARED
+    WEB --> SHARED
+    FUTURE -.-> SHARED
+    SHARED --> API
+    API --> ROUTES
+    ROUTES --> GEMINI
+    ROUTES --> YOUTUBE
+    ROUTES --> CACHE
+    ROUTES --> DB_SVC
+    ROUTES --> CHALLENGE
+    DB_SVC --> PRISMA
+    CACHE --> REDIS
+    GEMINI --> GEMINI_API
+    YOUTUBE --> YTAPI
+    YOUTUBE --> YTDLP_EXT
+    YOUTUBE --> GEMINI
+    CHALLENGE --> GEMINI_API
+    DOCKER --> API
+    NGINX --> API
+    SCRIPTS --> DOCKER
+    SCRIPTS --> NGINX
+    WEB --> VERCEL
+    CHROME --> VERCEL
+    API --> ORACLE
+    PRISMA --> ORACLE
+    REDIS --> ORACLE
+
+    classDef client fill:#e3f2fd
+    classDef shared fill:#f3e5f5
+    classDef app fill:#e8f5e9
+    classDef data fill:#fff3e0
+    classDef external fill:#ffebee
+    classDef infra fill:#f1f8e9
+    classDef deploy fill:#fce4ec
+
+    class CHROME,WEB,FUTURE client
+    class SHARED shared
+    class API,ROUTES,GEMINI,YOUTUBE,CACHE,DB_SVC,CHALLENGE app
+    class PRISMA,REDIS data
+    class GEMINI_API,YTAPI,YTDLP_EXT external
+    class DOCKER,NGINX,SCRIPTS infra
+    class VERCEL,ORACLE deploy
+
+    linkStyle default stroke-width:1px
+                </pre>
+        </div>
+
+        <div class="diagram-card">
+          <h3 class="text-2xl mb-4">🏢 2. Monorepo 구조도</h3>
+          <pre class="mermaid">
+graph TD
+    subgraph "Criti AI Monorepo"
+        Root["루트 package.json<br/>- workspaces 설정<br/>- 통합 스크립트<br/>- npm workspaces"]
+        
+        subgraph "Frontend Apps"
+            Extension["chrome-extension/<br/>Chrome Extension<br/>React + Vite + @crxjs<br/>Shadow DOM"]
+            Web["challenge-web/<br/>React SPA<br/>Vite + Emotion<br/>챌린지 & 유튜브 분석"]
+        end
+        
+        subgraph "Backend"
+            Backend["backend/<br/>Express.js API<br/>TypeScript<br/>Prisma ORM"]
+        end
+        
+        subgraph "Shared Resources"
+            Shared["shared/<br/>공통 타입/유틸<br/>30+ 인터페이스<br/>@criti-ai/shared"]
+            Config["config/<br/>Docker & Nginx<br/>배포 설정"]
+            Scripts["scripts/<br/>배포 자동화<br/>모니터링"]
+        end
+    end
+    
+    Extension --> Shared
+    Web --> Shared
+    Backend --> Shared
+    Root --> Extension
+    Root --> Web
+    Root --> Backend
+    Root --> Shared
+
+    classDef root fill:#f8bbd0
+    classDef frontend fill:#bbdefb
+    classDef backend fill:#ffccbc
+    classDef shared fill:#c8e6c9
+
+    class Root root
+    class Extension,Web frontend
+    class Backend backend
+    class Shared,Config,Scripts shared
+
+    linkStyle default stroke-width:1px
+                </pre>
+        </div>
+
+        <div class="diagram-card">
+          <h3 class="text-2xl mb-4">🚀 3. 배포 및 인프라 구조</h3>
+          <pre class="mermaid">
+graph TB
+    subgraph "개발 환경"
+        Dev["로컬 개발<br/>npm run dev:full<br/>Backend + Frontend 동시 실행"]
+        Testing["테스트 환경<br/>TypeScript 타입 체크"]
+    end
+
+    subgraph "GitHub Repository"
+        Main["main 브랜치<br/>프로덕션 배포"]
+        Develop["develop 브랜치<br/>개발 통합"]
+        Feature["feature/* 브랜치<br/>기능 개발"]
+    end
+
+    subgraph "CI/CD Pipeline"
+        Actions["GitHub Actions<br/>- 타입 체크<br/>- 린트<br/>- 빌드 테스트"]
+        VercelCI["Vercel CI/CD<br/>- 자동 배포<br/>- 프리뷰 배포"]
+    end
+
+    subgraph "Production Deployment"
+        VercelProd["Vercel Production<br/>challenge-web 배포<br/>Global CDN"]
+        Oracle["Oracle Cloud<br/>Backend API<br/>1GB RAM 최적화<br/>Docker Compose"]
+        CDN["Static Assets<br/>정적 자산 CDN"]
+    end
+
+    subgraph "모니터링 & 백업"
+        Monitor["모니터링 시스템<br/>메모리 사용률<br/>자동 재시작"]
+        Backup["백업 시스템<br/>DB 백업<br/>로그 관리"]
+    end
+
+    Dev --> Feature
+    Feature --> Develop
+    Develop --> Main
+    Main --> Actions
+    Actions --> VercelCI
+    VercelCI --> VercelProd
+    Main --> Oracle
+    VercelProd --> CDN
+    Oracle --> Monitor
+    Oracle --> Backup
+
+    classDef dev fill:#e3f2fd
+    classDef git fill:#f3e5f5
+    classDef cicd fill:#e8f5e9
+    classDef prod fill:#fff3e0
+    classDef ops fill:#ffebee
+
+    class Dev,Testing dev
+    class Main,Develop,Feature git
+    class Actions,VercelCI cicd
+    class VercelProd,Oracle,CDN prod
+    class Monitor,Backup ops
+
+    linkStyle default stroke-width:1px
+                </pre>
+        </div>
+
+        <div class="diagram-card">
+          <h3 class="text-2xl mb-4">📱 4. Chrome Extension 아키텍처</h3>
+          <pre class="mermaid">
+graph TB
+    subgraph "웹 페이지"
+        WEBPAGE["뉴스 기사<br/>사용자가 방문한 페이지"]
+    end
+
+    subgraph "Chrome Extension"
+        subgraph "Content Script"
+            CS["Content Script<br/>페이지에 주입<br/>Shadow DOM 격리"]
+            SIDEBAR["분석 사이드바<br/>TrustMeter<br/>BiasHighlights<br/>LogicalFallacies"]
+            HIGHLIGHT["텍스트 하이라이팅<br/>문제 문장 표시"]
+        end
+        
+        subgraph "Background Script"
+            BG["Background Script<br/>Service Worker<br/>API Proxy 역할"]
+        end
+        
+        subgraph "Popup"
+            POPUP["확장 프로그램 팝업<br/>설정 & 상태"]
+        end
+    end
+
+    subgraph "Backend API"
+        API_SERVER["Express API<br/>/api/analysis/analyze"]
+    end
+
+    WEBPAGE --> CS
+    CS --> SIDEBAR
+    CS --> HIGHLIGHT
+    CS -->|chrome.runtime<br/>sendMessage| BG
+    POPUP -->|chrome.runtime<br/>sendMessage| BG
+    BG -->|fetch API<br/>CORS 우회| API_SERVER
+    API_SERVER -->|분석 결과| BG
+    BG -->|sendResponse| CS
+    BG -->|sendResponse| POPUP
+
+    classDef webpage fill:#e3f2fd
+    classDef content fill:#f3e5f5
+    classDef background fill:#e8f5e9
+    classDef popup fill:#fff3e0
+    classDef api fill:#ffebee
+
+    class WEBPAGE webpage
+    class CS,SIDEBAR,HIGHLIGHT content
+    class BG background
+    class POPUP popup
+    class API_SERVER api
+
+    linkStyle default stroke-width:1px
+                </pre>
+        </div>
+
+        <div class="diagram-card">
+          <h3 class="text-2xl mb-4">🎮 5. 게이미피케이션 상태 머신</h3>
+          <pre class="mermaid">
+stateDiagram-v2
+    [*] --> UserIdentification
+
+    UserIdentification --> LoadProgress: 기존 사용자
+    UserIdentification --> CreateUser: 신규 사용자
+
+    CreateUser --> InitialChallenge
+    LoadProgress --> ChallengeSelection
+    InitialChallenge --> ChallengeInProgress
+    ChallengeSelection --> ChallengeInProgress
+
+    state ChallengeInProgress {
+        [*] --> ReadingChallenge
+        ReadingChallenge --> SelectingAnswers
+        SelectingAnswers --> SubmittingAnswer
+    }
+
+    ChallengeInProgress --> ResultEvaluation
+
+    state ResultEvaluation {
+        [*] --> ScoreCalculation
+        ScoreCalculation --> BadgeCheck
+        BadgeCheck --> StatUpdate
+        StatUpdate --> [*]
+    }
+
+    ResultEvaluation --> BadgeAnimation: 새 배지 획득
+    ResultEvaluation --> NextChallenge: 일반 완료
+
+    BadgeAnimation --> NextChallenge
+    NextChallenge --> ChallengeSelection
+
+    note right of UserIdentification
+        localStorage 기반
+        브라우저별 고유 ID
+        오프라인 동작
+    end note
+    
+    note right of ScoreCalculation
+        기본 점수 (100점)
+        + 시간 보너스
+        + 힌트 미사용 보너스
+        = 최종 점수
+    end note
+
+    note right of BadgeCheck
+        배지 조건:
+        - 첫 챌린지 완료
+        - 10회 연속 정답
+        - 100점 달성
+        - 레벨 10 도달
+    end note
+                </pre
+          >
+        </div>
+
+        <div class="diagram-card">
+          <h3 class="text-2xl mb-4">🎨 6. 컴포넌트 아키텍처</h3>
+          <pre class="mermaid">
+graph TD
+    subgraph "App Layer"
+        App["App.tsx<br/>라우팅 & 전역 상태"]
+    end
+    
+    subgraph "Page Layer"
+        ChallengePage["ChallengePage.tsx<br/>챌린지 게임"]
+        YoutubePage["YoutubeAnalysisPage.tsx<br/>유튜브 분석"]
+    end
+    
+    subgraph "Container Components"
+        Header["Header<br/>네비게이션"]
+        StatsBar["StatsBar<br/>점수/레벨/배지"]
+        ChallengeCard["ChallengeCard<br/>문제 표시"]
+        Result["Result<br/>결과 & 해설"]
+        YoutubeForm["YoutubeForm<br/>URL 입력"]
+        AnalysisResult["AnalysisResult<br/>분석 리포트"]
+    end
+    
+    subgraph "UI Components"
+        Button["Button"]
+        OptionButton["OptionButton"]
+        Badge["Badge<br/>뱃지 표시"]
+        Progress["Progress Bar<br/>레벨 진행도"]
+        TrustMeter["TrustMeter<br/>신뢰도 게이지"]
+    end
+    
+    subgraph "Service & State"
+        ApiService["ApiService<br/>API 통신"]
+        UserService["UserService<br/>사용자 관리"]
+        LocalStorage["LocalStorage<br/>데이터 영속화"]
+    end
+    
+    App --> ChallengePage
+    App --> YoutubePage
+    ChallengePage --> Header
+    ChallengePage --> StatsBar
+    ChallengePage --> ChallengeCard
+    ChallengePage --> Result
+    YoutubePage --> YoutubeForm
+    YoutubePage --> AnalysisResult
+    ChallengeCard --> Button
+    ChallengeCard --> OptionButton
+    StatsBar --> Progress
+    StatsBar --> Badge
+    Result --> Badge
+    AnalysisResult --> TrustMeter
+    ChallengePage --> ApiService
+    ChallengePage --> UserService
+    YoutubePage --> ApiService
+    UserService --> LocalStorage
+
+    classDef app fill:#f8bbd0
+    classDef page fill:#bbdefb
+    classDef container fill:#ffccbc
+    classDef ui fill:#c8e6c9
+    classDef service fill:#d1c4e9
+
+    class App app
+    class ChallengePage,YoutubePage page
+    class Header,StatsBar,ChallengeCard,Result,YoutubeForm,AnalysisResult container
+    class Button,OptionButton,Badge,Progress,TrustMeter ui
+    class ApiService,UserService,LocalStorage service
+
+    linkStyle default stroke-width:1px
+                </pre>
+        </div>
+
+        <div class="diagram-card">
+          <h3 class="text-2xl mb-4">📊 7. 데이터베이스 스키마 (Prisma)</h3>
+          <pre class="mermaid">
+erDiagram
+    AnalysisCache ||--o{ Analysis : "stores"
+    DailyChallenge ||--o{ Challenge : "generates"
+    UserProgress ||--o{ User : "tracks"
+
+    AnalysisCache {
+        string id PK
+        string url UK
+        string urlHash UK
+        string title
+        string publisher
+        json result
+        datetime createdAt
+        datetime updatedAt
+        int hitCount
+    }
+
+    DailyChallenge {
+        string id PK
+        string dailyKey UK
+        json challenges
+        datetime createdAt
+    }
+
+    UserProgress {
+        string id PK
+        string userId UK
+        int totalScore
+        int completedChallenges
+        json badges
+        int level
+        datetime lastActive
+    }
+
+    Analysis {
+        int trustScore
+        string trustLevel
+        json sourceCredibility
+        json biasAnalysis
+        json logicalFallacies
+        json adDetection
+    }
+
+    Challenge {
+        string id
+        string type
+        string difficulty
+        string title
+        string content
+        json options
+        int correctAnswer
+        string explanation
+    }
+
+    User {
+        string userId
+        string username
+        datetime createdAt
+    }
+                </pre
+          >
+        </div>
+
+        <div class="diagram-card">
+          <h3 class="text-2xl mb-4">🔧 8. 핵심 기술 통합 흐름</h3>
+          <pre class="mermaid">
+graph TB
+    subgraph "사용자 인터페이스"
+        UI1["Chrome Extension<br/>실시간 분석"]
+        UI2["웹 플랫폼<br/>챌린지 & 유튜브"]
+    end
+
+    subgraph "API Gateway"
+        NGINX_LAYER["Nginx<br/>리버스 프록시<br/>Rate Limiting"]
+    end
+
+    subgraph "비즈니스 로직"
+        ROUTER["Express Router<br/>요청 분배"]
+        SERVICE["Service Layer<br/>핵심 로직"]
+    end
+
+    subgraph "AI & 외부 연동"
+        GEMINI_LAYER["Gemini Service<br/>AI 분석"]
+        YOUTUBE_LAYER["Youtube Service<br/>자막 & 메타"]
+        CACHE_LAYER["Cache Service<br/>3-Tier"]
+    end
+
+    subgraph "데이터 영속화"
+        DB_LAYER["Prisma ORM<br/>SQLite/PostgreSQL"]
+        REDIS_LAYER["Redis<br/>캐시 스토어"]
+    end
+
+    subgraph "외부 API"
+        EXTERNAL["Gemini AI<br/>YouTube API<br/>yt-dlp"]
+    end
+
+    UI1 --> NGINX_LAYER
+    UI2 --> NGINX_LAYER
+    NGINX_LAYER --> ROUTER
+    ROUTER --> SERVICE
+    SERVICE --> GEMINI_LAYER
+    SERVICE --> YOUTUBE_LAYER
+    SERVICE --> CACHE_LAYER
+    GEMINI_LAYER --> EXTERNAL
+    YOUTUBE_LAYER --> EXTERNAL
+    CACHE_LAYER --> REDIS_LAYER
+    CACHE_LAYER --> DB_LAYER
+    SERVICE --> DB_LAYER
+
+    classDef ui fill:#e3f2fd
+    classDef gateway fill:#f3e5f5
+    classDef logic fill:#e8f5e9
+    classDef ai fill:#fff3e0
+    classDef data fill:#ffebee
+    classDef external fill:#f1f8e9
+
+    class UI1,UI2 ui
+    class NGINX_LAYER gateway
+    class ROUTER,SERVICE logic
+    class GEMINI_LAYER,YOUTUBE_LAYER,CACHE_LAYER ai
+    class DB_LAYER,REDIS_LAYER data
+    class EXTERNAL external
+
+    linkStyle default stroke-width:1px
+                </pre>
+        </div>
+
+        <div class="diagram-card">
+          <h3 class="text-2xl mb-4">💡 시스템 핵심 강점</h3>
+          <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div class="key-feature">
+              <strong>1. 성능 최적화:</strong>
+              <ul class="mt-2 space-y-1 text-sm">
+                <li>• 3-Tier 캐싱으로 95% 히트율</li>
+                <li>• 유튜브 분석 80% 단축 (5분→1분)</li>
+                <li>• Alpine Linux 경량화 (이미지 70% 압축)</li>
+                <li>• Node.js 힙 메모리 128MB 제한</li>
+              </ul>
+            </div>
+            <div class="key-feature">
+              <strong>2. 비용 효율성:</strong>
+              <ul class="mt-2 space-y-1 text-sm">
+                <li>• Oracle Cloud Free Tier ($0/월)</li>
+                <li>• Vercel Free Tier ($0/월)</li>
+                <li>• AI API 호출 98% 절감 (캐싱)</li>
+                <li>• 총 운영 비용: ~$1/월</li>
+              </ul>
+            </div>
+            <div class="key-feature">
+              <strong>3. 개발 생산성:</strong>
+              <ul class="mt-2 space-y-1 text-sm">
+                <li>• Monorepo로 타입 통합</li>
+                <li>• Shared Package 30+ 타입</li>
+                <li>• TypeScript 100% 커버리지</li>
+                <li>• 런타임 에러 제로 (컴파일 검출)</li>
+              </ul>
+            </div>
+            <div class="key-feature">
+              <strong>4. 안정성:</strong>
+              <ul class="mt-2 space-y-1 text-sm">
+                <li>• jsonrepair로 AI 응답 안정화</li>
+                <li>• Fallback 챌린지 시스템</li>
+                <li>• Healthcheck & 자동 재시작</li>
+                <li>• 메모리 모니터링 (85% 이하 유지)</li>
+              </ul>
+            </div>
+            <div class="key-feature">
+              <strong>5. 사용자 경험:</strong>
+              <ul class="mt-2 space-y-1 text-sm">
+                <li>• 실시간 기사 분석 (Shadow DOM)</li>
+                <li>• 게이미피케이션 (뱃지/레벨)</li>
+                <li>• 유튜브 자막 기반 분석</li>
+                <li>• 직관적 신뢰도 시각화</li>
+              </ul>
+            </div>
+            <div class="key-feature">
+              <strong>6. 확장성:</strong>
+              <ul class="mt-2 space-y-1 text-sm">
+                <li>• Docker 컨테이너화</li>
+                <li>• 수평 확장 가능한 아키텍처</li>
+                <li>• SQLite → PostgreSQL 마이그레이션 준비</li>
+                <li>• 마이크로서비스 전환 용이</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+       
+    <footer class="text-center py-8 text-gray-500 text-sm">
+      <p>Criti.AI Architecture Documentation v2.0</p>
+      <p class="mt-2">
+        유튜브 분석 & 게이미피케이션 시스템 포함 | 최종 업데이트: 2024.11
+      </p>
+    </footer>
+
+    <script>
+      mermaid.initialize({
+        startOnLoad: true,
+        theme: "neutral",
+        themeVariables: {
+          fontSize: "14px",
+        },
+        flowchart: {
+          curve: "basis",
+          useMaxWidth: true,
+          htmlLabels: true,
+        },
+      });
+    </script>
+  </body>
+</html>
