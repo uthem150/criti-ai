@@ -11,6 +11,7 @@ import challengeRoutes from "./routes/challenge.js";
 import youtubeRoutes from "./routes/youtube.js";
 import { GeminiService } from "./services/GeminiService.js";
 import { redisCacheService } from "./services/RedisCacheService.js";
+import { cacheService } from "./services/CacheService.js";
 import { databaseService } from "./services/DatabaseService.js";
 import { dailyChallengeService } from "./services/DailyChallengeService.js";
 
@@ -259,7 +260,9 @@ process.on("SIGINT", async () => {
   console.log("\n🛑 서버 종료 신호 수신...");
 
   try {
-    // 데이터베이스와 Redis 연결 동시 종료
+    // Memory Cache 정리
+    cacheService.destroy();
+
     await Promise.all([
       databaseService.disconnect(),
       redisCacheService.disconnect(),

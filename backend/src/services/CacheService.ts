@@ -3,6 +3,47 @@ export class CacheService {
   // key: string (데이터를 식별하는 고유 키)
   // value: { data: any; expiry: number } (실제 데이터와 만료 시간 담는 객체)
   private cache: Map<string, { data: any; expiry: number }> = new Map();
+  private cleanupInterval: NodeJS.Timeout | null = null;
+
+  constructor() {
+    // 5분마다 만료된 캐시 정리
+    this.cleanupInterval = setInterval(
+      () => {
+        this.cleanupExpired();
+      },
+      5 * 60 * 1000
+    );
+  }
+
+  /**
+   * 만료된 캐시 항목 정리
+   */
+  private cleanupExpired(): void {
+    const now = Date.now();
+    let deletedCount = 0;
+
+    for (const [key, item] of this.cache.entries()) {
+      if (now > item.expiry) {
+        this.cache.delete(key);
+        deletedCount++;
+      }
+    }
+
+    if (deletedCount > 0) {
+      console.log(`🧹 메모리 캐시 정리: ${deletedCount}개 삭제`);
+    }
+  }
+
+  /**
+   * 서비스 종료 시 인터벌 정리
+   */
+  destroy(): void {
+    if (this.cleanupInterval) {
+      clearInterval(this.cleanupInterval);
+      this.cleanupInterval = null;
+      console.log("✅ 메모리 캐시 정리 스케줄러 종료");
+    }
+  }
 
   /**
    * 키(key)에 해당하는 데이터를 캐시에서 조회
@@ -56,3 +97,6 @@ export class CacheService {
     this.cache.clear();
   }
 }
+
+// 싱글톤 인스턴스 export
+export const cacheService = new CacheService();
