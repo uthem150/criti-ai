@@ -3,7 +3,7 @@ import { colors, typography } from "../../styles/design-system";
 
 // 전체 컨테이너
 export const Container = styled.div`
-  max-height: 100vh;
+  min-height: 100vh;
   background: ${colors.light.grayscale[5]};
   display: flex;
 `;
@@ -16,7 +16,9 @@ export const ContentWrapper = styled.div<{ isAnalysis: boolean }>`
   gap: 1.75rem;
   flex: 1 0 0;
   align-self: stretch;
-  justify-content: center;
+
+  // 분석 결과가 있을 때는 상단 정렬, 없을 때만 중앙 정렬
+  justify-content: ${(props) => (props.isAnalysis ? "flex-start" : "center")};
 
   padding: ${(props) =>
     props.isAnalysis ? "2.5rem 1.25rem" : "12.5rem 1.25rem"};
