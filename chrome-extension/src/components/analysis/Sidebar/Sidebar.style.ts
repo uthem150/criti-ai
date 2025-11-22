@@ -445,15 +445,6 @@ export const SectionTitle = styled.span`
   }
 `;
 
-export const SectionBadge = styled.span`
-  background: ${colors.light.brand.primary100};
-  color: ${colors.light.grayscale[0]};
-  padding: 4px 8px;
-  border-radius: 12px;
-  ${typography.styles.caption4};
-  font-weight: ${typography.fontWeight.semibold};
-`;
-
 export const ExpandArrow = styled.span<{ expanded?: boolean }>`
   display: flex;
   justify-content: center;
@@ -499,53 +490,38 @@ export const OverviewContent = styled.div`
 
 export const OverallScoreDisplay = styled.div`
   display: flex;
-  gap: 20px;
-  align-items: center;
+  flex-direction: column;
+  gap: 16px;
   padding: 20px;
   background: ${colors.light.grayscale[0]};
   border-radius: 12px;
-  border: 1px solid ${colors.light.brand.primary100};
+  border: 1px solid ${colors.light.brand.primary20};
 `;
 
 export const ScoreCircle = styled.div`
-  flex-shrink: 0;
   text-align: center;
 `;
 
 export const ScoreNumber = styled.div`
   ${typography.styles.headline1};
-  background: linear-gradient(
-    135deg,
-    ${colors.light.brand.primary100},
-    ${colors.light.brand.primary100}
-  );
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: ${colors.light.etc.mint};
   line-height: 1;
+  font-weight: ${typography.fontWeight.bold};
 `;
 
 export const ScoreLabel = styled.div`
   ${typography.styles.caption4};
-  color: ${colors.light.brand.primary100};
-  font-weight: ${typography.fontWeight.semibold};
+  color: ${colors.light.grayscale[70]};
   margin-top: 4px;
 `;
 
-export const ScoreDescription = styled.div`
-  flex: 1;
-`;
-
-export const ScoreDescriptionTitle = styled.h4`
-  ${typography.styles.title4};
-  color: ${colors.light.grayscale[90]};
-  margin: 0 0 8px 0;
-`;
+export const ScoreDescription = styled.div``;
 
 export const ScoreDescriptionText = styled.p`
   ${typography.styles.body3};
   color: ${colors.light.grayscale[70]};
   margin: 0;
+  line-height: 1.6;
 `;
 
 export const DetailedScores = styled.div``;
@@ -591,7 +567,7 @@ export const ChartValue = styled.div<{ score: number }>`
   left: 50%;
   transform: translateX(-50%);
   ${typography.styles.title5};
-  
+
   color: ${(props) => {
     if (props.score >= 70) return colors.light.state.success;
     if (props.score >= 50) return colors.light.etc.orange;
@@ -604,77 +580,6 @@ export const ChartLabel = styled.div`
   ${typography.styles.caption3};
   color: ${colors.light.grayscale[70]};
   text-align: center;
-`;
-
-// 가로 막대 그래프 (기존 유지)
-export const ScoreBars = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-`;
-
-export const ScoreBar = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-`;
-
-export const BarInfo = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-`;
-
-export const BarLabel = styled.span`
-  ${typography.styles.body3};
-  color: ${colors.light.grayscale[70]};
-`;
-
-export const BarValue = styled.span`
-  ${typography.styles.body3};
-  color: ${colors.light.grayscale[90]};
-  font-weight: ${typography.fontWeight.semibold};
-`;
-
-export const BarTrack = styled.div`
-  height: 8px;
-  background: ${colors.light.grayscale[10]};
-  border-radius: 4px;
-  overflow: hidden;
-`;
-
-export const BarFill = styled.div<{
-  type: "source" | "objectivity" | "logic" | "advertisement" | "evidence";
-}>`
-  height: 100%;
-  border-radius: 4px;
-  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-
-  ${(props) =>
-    props.type === "source" &&
-    css`
-      background: ${colors.light.etc.blue};
-    `}
-  ${(props) =>
-    props.type === "objectivity" &&
-    css`
-      background: ${colors.light.brand.primary100};
-    `}
-  ${(props) =>
-    props.type === "logic" &&
-    css`
-      background: ${colors.light.etc.orange};
-    `}
-  ${(props) =>
-    props.type === "advertisement" &&
-    css`
-      background: ${colors.light.etc.mint};
-    `}
-  ${(props) =>
-    props.type === "evidence" &&
-    css`
-      background: ${colors.light.etc.red};
-    `}
 `;
 
 // 출처 신뢰도
@@ -1531,6 +1436,31 @@ export const TipText = styled.p`
   margin: 0;
   ${typography.styles.body4};
   color: ${colors.light.grayscale[70]};
+`;
+
+// 비판적 사고 훈련 버튼
+export const CriticalThinkingButton = styled.button`
+  width: 100%;
+  padding: 14px 20px;
+  background: ${colors.light.brand.primary100};
+  color: ${colors.light.grayscale[0]};
+  border: none;
+  border-radius: 12px;
+  ${typography.styles.title5};
+  font-weight: ${typography.fontWeight.semibold};
+  cursor: pointer;
+  transition: all 250ms ease-in-out;
+  margin-top: 16px;
+
+  &:hover {
+    background: ${colors.light.brand.primary100};
+    opacity: 0.9;
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
 `;
 
 // ClickableText 스타일

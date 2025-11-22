@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import type { TrustAnalysis } from "@shared/types";
 import { getScoreColor } from "@/utils/formatUtils";
+import { colors } from "@/styles/design";
 import * as S from "./Sidebar.style";
 
 interface SidebarProps {
@@ -298,30 +299,17 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
             icon="📊"
             isExpanded={expandedSections.overview}
             onToggle={() => toggleSection("overview")}
-            badge={`${analysis.overallScore}/100`}
-            badgeColor={
-              analysis.overallScore >= 70
-                ? "#10b981"
-                : analysis.overallScore >= 50
-                  ? "#f59e0b"
-                  : "#ef4444"
-            }
             sectionType="overview"
           >
             <S.OverviewContent>
               <S.OverallScoreDisplay>
                 <S.ScoreCircle>
                   <S.ScoreNumber>{analysis.overallScore}</S.ScoreNumber>
-                  <S.ScoreLabel>신뢰도 점수</S.ScoreLabel>
+                  <S.ScoreLabel>점</S.ScoreLabel>
                 </S.ScoreCircle>
-                <S.ScoreDescription>
-                  <S.ScoreDescriptionTitle>
-                    🎯 분석 요약
-                  </S.ScoreDescriptionTitle>
-                  <S.ScoreDescriptionText>
-                    {analysis.analysisSummary}
-                  </S.ScoreDescriptionText>
-                </S.ScoreDescription>
+                <S.ScoreDescriptionText>
+                  {analysis.analysisSummary}
+                </S.ScoreDescriptionText>
               </S.OverallScoreDisplay>
 
               {analysis.detailedScores && (
@@ -398,16 +386,8 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
             icon="🏛️"
             isExpanded={expandedSections.source}
             onToggle={() => toggleSection("source")}
-            badge={`${analysis.sourceCredibility.score}/100`}
-            badgeColor={
-              analysis.sourceCredibility.level === "trusted"
-                ? "#10b981"
-                : analysis.sourceCredibility.level === "neutral"
-                  ? "#6b7280"
-                  : analysis.sourceCredibility.level === "caution"
-                    ? "#f59e0b"
-                    : "#ef4444"
-            }
+            badge={`${analysis.sourceCredibility.score}점`}
+            badgeColor={colors.light.brand.primary100}
             sectionType="source"
           >
             <S.SourceContent>
@@ -479,12 +459,8 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
             icon="🎭"
             isExpanded={expandedSections.bias}
             onToggle={() => toggleSection("bias")}
-            badge={`${analysis.biasAnalysis.emotionalBias.score}/100`}
-            badgeColor={
-              analysis.biasAnalysis.emotionalBias.score >= 70
-                ? "#10b981"
-                : "#f59e0b"
-            }
+            badge={`${analysis.biasAnalysis.emotionalBias.score}점`}
+            badgeColor={colors.light.etc.orange}
             sectionType="bias"
           >
             <S.BiasContent>
@@ -671,14 +647,8 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
                 icon="🧠"
                 isExpanded={expandedSections.logic}
                 onToggle={() => toggleSection("logic")}
-                badge={`${analysis.logicalFallacies.length}개 발견`}
-                badgeColor={
-                  analysis.logicalFallacies.length > 3
-                    ? "#ef4444"
-                    : analysis.logicalFallacies.length > 1
-                      ? "#f59e0b"
-                      : "#10b981"
-                }
+                badge={`${analysis.logicalFallacies.length}개`}
+                badgeColor={colors.light.state.error}
                 sectionType="logic"
               >
                 <S.LogicContent>
@@ -768,8 +738,8 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
               }
               badgeColor={
                 analysis.advertisementAnalysis.isAdvertorial
-                  ? "#f59e0b"
-                  : "#10b981"
+                  ? colors.light.state.error
+                  : colors.light.brand.primary100
               }
               sectionType="advertisement"
             >
@@ -889,10 +859,10 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
               }
               badgeColor={
                 analysis.crossReference.consensus === "agree"
-                  ? "#10b981"
+                  ? colors.light.state.success
                   : analysis.crossReference.consensus === "disagree"
-                    ? "#ef4444"
-                    : "#f59e0b"
+                    ? colors.light.state.error
+                    : colors.light.etc.yellow
               }
               sectionType="crossref"
             >
@@ -1016,6 +986,9 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
                 </S.TipText>
               </S.TipItem>
             </S.TipsGrid>
+            <S.CriticalThinkingButton>
+              비판적 사고 훈련하기
+            </S.CriticalThinkingButton>
           </S.AnalysisTips>
         </S.ResultsSection>
       )}
