@@ -1,5 +1,34 @@
 import React, { useState, useEffect } from "react";
 import { createRoot } from "react-dom/client";
+import * as S from "./popup.style";
+import Magnifier from "@/assets/icons/magnifier.svg?react";
+import Logo from "@/assets/icons/CritiAI_Logo.svg?react";
+import CartBar from "@/assets/icons/chart-bar.svg?react";
+import Seeding from "@/assets/icons/seeding.svg?react";
+
+import styled from "@emotion/styled";
+
+const StyledMagnifier = styled(Magnifier)`
+  display: flex;
+  width: 4.5rem;
+  height: 4.5rem;
+  padding: 0.32975rem;
+  justify-content: center;
+  align-items: center;
+  aspect-ratio: 1/1;
+
+  animation: bounce 2s infinite;
+
+  @keyframes bounce {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+`;
 
 export const PopupApp: React.FC = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -159,76 +188,62 @@ export const PopupApp: React.FC = () => {
     switch (connectionStatus) {
       case "checking":
         return (
-          <div className="status-checking">
-            <div className="spinner"></div>
-            <p>페이지 연결 상태 확인 중...</p>
-            <small>Content Script 로딩을 기다리고 있습니다.</small>
-          </div>
+          <S.StatusContainer status="checking">
+            <S.Spinner />
+            <S.StatusDescription>
+              페이지 연결 상태 확인 중...
+              <br />
+              <small>Content Script 로딩을 기다리고 있습니다.</small>
+            </S.StatusDescription>
+          </S.StatusContainer>
         );
 
       case "ready":
         return (
-          <div className="status-ready">
-            <div className="icon">🎯</div>
-            <h3>신뢰도 분석 준비 완료</h3>
-            <p>
-              현재 페이지의 내용을 분석하여 신뢰도, 편향성, 논리적 오류를 검토할
-              수 있습니다.
-            </p>
-            <button
-              onClick={handleAnalyzeClick}
-              disabled={isAnalyzing}
-              className="analyze-button"
-            >
-              {isAnalyzing ? (
-                <>
-                  <div className="spinner small"></div>
-                  분석 중...
-                </>
-              ) : (
-                "🔍 페이지 분석 시작"
+          <S.StatusContainer status="ready">
+            <S.GreetingContainer>
+              <StyledMagnifier />
+              <S.StatusTitle>신뢰도 분석 준비 완료</S.StatusTitle>
+              {currentTab?.title && (
+                <S.CurrentPage>
+                  <small>
+                    📄 {currentTab.title.substring(0, 50)}
+                    {currentTab.title.length > 50 ? "..." : ""}
+                  </small>
+                </S.CurrentPage>
               )}
-            </button>
-            {currentTab?.title && (
-              <div className="current-page">
-                <small>
-                  📄 {currentTab.title.substring(0, 50)}
-                  {currentTab.title.length > 50 ? "..." : ""}
-                </small>
-              </div>
-            )}
-          </div>
+            </S.GreetingContainer>
+          </S.StatusContainer>
         );
 
       case "not_ready":
         return (
-          <div className="status-not-ready">
-            <div className="icon">⚠️</div>
-            <h3>분석 준비 중</h3>
-            <p>
-              페이지가 아직 완전히 로드되지 않았거나, 분석할 수 있는 콘텐츠가
-              부족합니다.
-            </p>
-            <button
-              onClick={() => window.location.reload()}
-              className="retry-button"
-            >
-              🔄 다시 시도
-            </button>
+          <S.StatusContainer status="not_ready">
+            <S.Icon status="not_ready">⚠️</S.Icon>
+            <S.StatusTitle>분석 준비 중</S.StatusTitle>
+            <S.StatusDescription>
+              페이지가 아직 완전히 로드되지 않았거나,
+              <br /> 분석할 수 있는 콘텐츠가 부족합니다.
+            </S.StatusDescription>
+            <S.RetryButton onClick={() => window.location.reload()}>
+              <S.ButtonTitle type="analyze">다시 시도</S.ButtonTitle>
+            </S.RetryButton>
             <small>
               💡 뉴스, 블로그, 게시글 등 텍스트 콘텐츠가 있는 페이지에서
               사용하세요.
             </small>
-          </div>
+          </S.StatusContainer>
         );
 
       case "error":
         return (
-          <div className="status-error">
-            <div className="icon">❌</div>
-            <h3>연결 실패</h3>
-            <p>현재 페이지는 분석할 수 없습니다.</p>
-            <div className="error-details">
+          <S.StatusContainer status="error">
+            <S.Icon status="error">❌</S.Icon>
+            <S.StatusTitle>연결 실패</S.StatusTitle>
+            <S.StatusDescription>
+              현재 페이지는 분석할 수 없습니다.
+            </S.StatusDescription>
+            <S.ErrorDetails>
               <small>
                 다음과 같은 페이지는 분석이 제한됩니다:
                 <br />
@@ -239,16 +254,17 @@ export const PopupApp: React.FC = () => {
                 • 파일 시스템 페이지
                 <br />• 텍스트 내용이 부족한 페이지
               </small>
-            </div>
-            <button
+            </S.ErrorDetails>
+            <S.DemoButton
               onClick={() =>
                 chrome.tabs.create({ url: "https://news.naver.com" })
               }
-              className="demo-button"
             >
-              📰 네이버 뉴스로 테스트
-            </button>
-          </div>
+              <S.ButtonTitle type="analyze">
+                📰 네이버 뉴스로 테스트
+              </S.ButtonTitle>
+            </S.DemoButton>
+          </S.StatusContainer>
         );
 
       default:
@@ -257,42 +273,63 @@ export const PopupApp: React.FC = () => {
   };
 
   return (
-    <div className="popup-container">
-      <header className="popup-header">
-        <h2>🎯 Criti AI</h2>
-        <p>디지털 콘텐츠 신뢰도 분석</p>
-      </header>
+    <S.PopupContainer>
+      <S.Header>
+        <S.LogoWrapper>
+          <Logo />
+          <h2>Criti AI</h2>
+        </S.LogoWrapper>
+      </S.Header>
 
-      <main className="popup-main">
+      <S.Main>
         {renderConnectionStatus()}
 
-        {/* Challenge 버튼 섹션 - 연결 상태와 무관하게 항상 표시 */}
-        <div className="challenge-section">
-          <button onClick={handleChallengeClick} className="challenge-button">
-            🎮 비판적 사고 훈련하기
-          </button>
-          <p className="challenge-description">
-            AI가 생성한 챌린지를 통해 가짜 뉴스를 판별하는 능력을 기르세요!
-          </p>
-        </div>
-      </main>
+        <S.OptionWrapper>
+          {connectionStatus === "ready" ? (
+            <S.AnalyzeButton onClick={handleAnalyzeClick} type="analyze">
+              {isAnalyzing ? (
+                <>
+                  <S.Spinner small />
+                  분석 중...
+                </>
+              ) : (
+                <S.ButtonContent>
+                  <S.ButtonTitleWrapper>
+                    <CartBar />
+                    <S.ButtonTitle type="analyze">분석 시작하기</S.ButtonTitle>
+                  </S.ButtonTitleWrapper>
+                  <S.ButtonDescription type="analyze">
+                    AI가 해당 콘텐츠의 신뢰도, 편향성, 광고 등을
+                    <br /> 종합적으로 분석합니다.
+                  </S.ButtonDescription>
+                </S.ButtonContent>
+              )}
+            </S.AnalyzeButton>
+          ) : (
+            ""
+          )}
+          <S.ChallengeButton onClick={handleChallengeClick}>
+            <S.ButtonContent>
+              <S.ButtonTitleWrapper>
+                <Seeding />
+                <S.ButtonTitle type="challenge">
+                  비판적 사고 훈련하기
+                </S.ButtonTitle>
+              </S.ButtonTitleWrapper>
 
-      {/* <footer className="popup-footer">
-        <div className="version-info">
-          <small>v1.0.0 • 개발 모드</small>
-        </div>
-        <div className="links">
-          <a href="#" onClick={(e) => { 
-            e.preventDefault(); 
-            chrome.tabs.create({ url: 'https://github.com/your-repo/criti-ai' }); 
-          }}>
-            📚 도움말
-          </a>
-        </div>
-      </footer> */}
-    </div>
+              <S.ButtonDescription type="challenge">
+                AI가 생성한 챌린지를 통해 <br />
+                가짜뉴스를 판별하는 능력을 기르세요!
+              </S.ButtonDescription>
+            </S.ButtonContent>
+          </S.ChallengeButton>
+        </S.OptionWrapper>
+      </S.Main>
+    </S.PopupContainer>
   );
 };
+
+// 기존 인라인 스타일 제거
 
 // 스타일링
 const styles = `
@@ -302,276 +339,16 @@ const styles = `
     box-sizing: border-box;
   }
 
+  
   body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Malgun Gothic', sans-serif;
+    font-family: 'Pretendard', 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Malgun Gothic', sans-serif;
     width: 380px;
     min-height: 550px;
     background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
     color: #1e293b;
     line-height: 1.5;
   }
-
-  .popup-container {
-    display: flex;
-    flex-direction: column;
-    min-height: 550px;
-  }
-
-  .popup-header {
-    background: linear-gradient(135deg, #0ea5e9, #0284c7);
-    color: white;
-    padding: 15px;
-    text-align: center;
-    
-    h2 {
-      font-size: 24px;
-      font-weight: 700;
-      margin-bottom: 4px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-    }
-    
-    p {
-      font-size: 14px;
-      opacity: 0.9;
-    }
-  }
-
-  .popup-main {
-    flex: 1;
-    padding: 24px;
-  }
-
-  .status-checking,
-  .status-ready,
-  .status-not-ready,
-  .status-error {
-    text-align: center;
-    margin-bottom: 24px;
-    
-    .icon {
-      font-size: 48px;
-      margin-bottom: 16px;
-    }
-    
-    h3 {
-      font-size: 18px;
-      font-weight: 600;
-      margin-bottom: 12px;
-      color: #1e293b;
-    }
-    
-    p {
-      font-size: 14px;
-      color: #64748b;
-      line-height: 1.6;
-      margin-bottom: 20px;
-    }
-  }
-
-  .spinner {
-    width: 40px;
-    height: 40px;
-    border: 3px solid #e2e8f0;
-    border-top: 3px solid #0ea5e9;
-    border-radius: 50%;
-    margin: 0 auto 16px;
-    animation: spin 1s linear infinite;
-    
-    &.small {
-      width: 16px;
-      height: 16px;
-      border-width: 2px;
-      margin: 0 8px 0 0;
-    }
-  }
-
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
-
-  .analyze-button,
-  .retry-button,
-  .demo-button {
-    background: linear-gradient(135deg, #0ea5e9, #0284c7);
-    color: white;
-    border: none;
-    padding: 12px 24px;
-    border-radius: 8px;
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-    box-shadow: 0 2px 4px rgba(14, 165, 233, 0.2);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    margin-bottom: 16px;
-    
-    &:hover:not(:disabled) {
-      transform: translateY(-1px);
-      box-shadow: 0 4px 8px rgba(14, 165, 233, 0.3);
-    }
-    
-    &:disabled {
-      opacity: 0.7;
-      cursor: not-allowed;
-      transform: none;
-    }
-  }
-
-  .retry-button {
-    background: linear-gradient(135deg, #f59e0b, #d97706);
-    box-shadow: 0 2px 4px rgba(245, 158, 11, 0.2);
-    
-    &:hover:not(:disabled) {
-      box-shadow: 0 4px 8px rgba(245, 158, 11, 0.3);
-    }
-  }
-
-  .demo-button {
-    background: linear-gradient(135deg, #10b981, #059669);
-    box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
-    
-    &:hover:not(:disabled) {
-      box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
-    }
-  }
-
-  /* Challenge 섹션 스타일 */
-  .challenge-section {
-    margin-top: 20px;
-    padding-top: 20px;
-    border-top: 1px solid #e2e8f0;
-  }
-
-  .divider {
-    text-align: center;
-    margin-bottom: 20px;
-    position: relative;
-    
-    &::before {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 0;
-      right: 0;
-      height: 1px;
-      background: #e2e8f0;
-      z-index: 1;
-    }
-    
-    span {
-      background: #f8fafc;
-      padding: 0 16px;
-      color: #64748b;
-      font-size: 14px;
-      position: relative;
-      z-index: 2;
-    }
-  }
-
-  .challenge-button {
-    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
-    color: white;
-    border: none;
-    padding: 14px 24px;
-    border-radius: 8px;
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-    box-shadow: 0 2px 4px rgba(139, 92, 246, 0.2);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    margin-bottom: 12px;
-    
-    &:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 4px 8px rgba(139, 92, 246, 0.3);
-      background: linear-gradient(135deg, #7c3aed, #6d28d9);
-    }
-  }
-
-  .challenge-description {
-    font-size: 13px;
-    color: #64748b;
-    text-align: center;
-    line-height: 1.4;
-    margin-bottom: 8px;
-  }
-
-  .current-page {
-    margin-top: 12px;
-    padding: 8px 12px;
-    background: rgba(14, 165, 233, 0.1);
-    border-radius: 6px;
-    
-    small {
-      color: #0c4a6e;
-      font-weight: 500;
-    }
-  }
-
-  .error-details {
-    margin: 16px 0;
-    padding: 12px;
-    background: rgba(239, 68, 68, 0.05);
-    border-radius: 6px;
-    border: 1px solid rgba(239, 68, 68, 0.1);
-    
-    small {
-      font-size: 12px;
-      color: #7f1d1d;
-      line-height: 1.4;
-    }
-  }
-
-  .popup-footer {
-    padding: 16px 24px;
-    background: rgba(148, 163, 184, 0.1);
-    border-top: 1px solid #e2e8f0;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    
-    .version-info small {
-      color: #64748b;
-      font-size: 12px;
-    }
-    
-    .links a {
-      color: #0ea5e9;
-      text-decoration: none;
-      font-size: 12px;
-      font-weight: 500;
-      
-      &:hover {
-        text-decoration: underline;
-      }
-    }
-  }
-
-  /* 상태별 아이콘 색상 */
-  .status-ready .icon {
-    filter: hue-rotate(120deg);
-  }
-  
-  .status-not-ready .icon {
-    filter: hue-rotate(30deg);
-  }
-  
-  .status-error .icon {
-    filter: hue-rotate(0deg);
-  }
 `;
-
 // 스타일 주입
 const styleSheet = document.createElement("style");
 styleSheet.textContent = styles;

@@ -184,7 +184,7 @@ export const typography = {
    */
   fontFamily: {
     primary:
-      "'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'Noto Sans KR', sans-serif",
+      "'Pretendard', 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'Noto Sans KR', sans-serif",
     code: "'JetBrains Mono', 'Fira Code', 'Consolas', monospace",
   },
 
@@ -247,49 +247,49 @@ export const typography = {
     },
     body1: {
       fontSize: "1.125rem", // 18px
-      fontWeight: 300,
+      fontWeight: 400,
       lineHeight: 1.6,
       letterSpacing: "-0.0225rem",
     },
     body2: {
       fontSize: "1rem", // 16px
-      fontWeight: 300,
+      fontWeight: 400,
       lineHeight: 1.6,
       letterSpacing: "-0.02rem",
     },
     body3: {
       fontSize: "0.875rem", // 14px (JSON 원본 rem: "1rem"이었으나 px: "14px" 기준으로 수정)
-      fontWeight: 300,
+      fontWeight: 400,
       lineHeight: 1.6,
       letterSpacing: "-0.02625rem", // JSON 원본 값
     },
     body4: {
       fontSize: "0.75rem", // 12px (JSON 원본 rem: "0.875rem"이었으나 px: "12px" 기준으로 수정)
-      fontWeight: 300,
+      fontWeight: 400,
       lineHeight: 1.6,
       letterSpacing: "-0.0225rem", // JSON 원본 값
     },
     caption1: {
       fontSize: "1.125rem", // 18px
-      fontWeight: 400,
+      fontWeight: 500,
       lineHeight: 1.6,
       letterSpacing: "-0.0225rem",
     },
     caption2: {
       fontSize: "1rem", // 16px
-      fontWeight: 400,
+      fontWeight: 500,
       lineHeight: 1.6,
       letterSpacing: "-0.02rem",
     },
     caption3: {
       fontSize: "0.875rem", // 14px
-      fontWeight: 400,
+      fontWeight: 500,
       lineHeight: 1.6,
       letterSpacing: "-0.0175rem",
     },
     caption4: {
       fontSize: "0.75rem", // 12px
-      fontWeight: 400,
+      fontWeight: 500,
       lineHeight: 1.6,
       letterSpacing: "-0.015rem",
     },
