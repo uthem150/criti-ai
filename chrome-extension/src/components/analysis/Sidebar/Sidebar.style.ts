@@ -1,7 +1,17 @@
 import styled from "@emotion/styled";
 import { css, keyframes } from "@emotion/react";
 import { colors, typography } from "@/styles/design";
-import { getScoreColor } from "@/utils/formatUtils";
+import {
+  getConsensusColor,
+  getIntensityColor,
+  getScoreColor,
+  getTextTypeColor,
+  getTrustColor,
+  getVerdictColor,
+  type ConsensusType,
+  type TextType,
+  type VerdictType,
+} from "@/utils/colorUtils";
 
 // Keyframes
 const spin = keyframes`
@@ -428,36 +438,28 @@ export const ResultsSection = styled.div`
 
 // 접을 수 있는 섹션 (ExpandableSection 컴포넌트 내부에서 사용)
 export const ExpandableSectionContainer = styled.div`
-  margin-bottom: 16px;
-  border-radius: 12px;
-  border: 1px solid ${colors.light.grayscale[20]};
-  background: ${colors.light.grayscale[0]};
+  background: ${colors.light.grayscale[5]};
   overflow: hidden;
-  box-shadow:
-    0 1px 3px 0 rgb(0 0 0 / 0.1),
-    0 1px 2px -1px rgb(0 0 0 / 0.1);
   transition: all 250ms ease-in-out;
 
-  &:hover {
-    box-shadow:
-      0 10px 15px -3px rgb(0 0 0 / 0.1),
-      0 4px 6px -4px rgb(0 0 0 / 0.1);
-  }
+  cursor: pointer;
 `;
 
 export const SectionHeader = styled.button`
   width: 100%;
-  padding: 12px 16px;
-  height: 3.5rem;
   background: ${colors.light.grayscale[5]};
   border: none;
   cursor: pointer;
+  transition: all 250ms ease-in-out;
+
   display: flex;
   justify-content: space-between;
+
+  height: 3.5rem;
+  padding: 0.75rem 2rem;
   align-items: center;
-  font-size: ${typography.styles.title5.fontSize};
-  transition: all 250ms ease-in-out;
-  font-family: inherit;
+  gap: 1rem;
+  align-self: stretch;
 
   &:hover {
     background: ${colors.light.grayscale[10]};
@@ -468,10 +470,6 @@ export const HeaderLeft = styled.div`
   display: flex;
   align-items: center;
   gap: 12px;
-`;
-
-export const SectionIcon = styled.span`
-  font-size: ${typography.styles.title3.fontSize};
 `;
 
 export const SectionTitle = styled.span`
@@ -505,8 +503,13 @@ export const ExpandArrow = styled.span<{ expanded?: boolean }>`
 `;
 
 export const SectionContent = styled.div`
-  padding: 20px;
-  border-top: 1px solid ${colors.light.grayscale[20]};
+  display: flex;
+  padding: 2rem;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 1rem;
+  align-self: stretch;
+  background-color: ${colors.light.grayscale[0]};
   animation: ${slideDown} 250ms ease-in-out;
 `;
 
@@ -559,14 +562,16 @@ export const DetailedScores = styled.div`
   align-self: stretch;
 `;
 
-// 그래프 영역 (높이 15rem 고정, 막대들이 들어가는 곳)
+// 그래프 영역 (높이 12rem 고정, 막대들이 들어가는 곳)
 export const ChartGraphBox = styled.div`
   display: flex;
-  height: 15rem;
+  height: 13rem;
   padding: 0 0.75rem;
   align-items: flex-end;
   gap: 1.25rem;
   align-self: stretch;
+
+  border-bottom: 1px solid ${colors.light.grayscale[20]};
 `;
 
 // 그래프 내부의 개별 막대 컬럼 (Value + Bar)
@@ -628,7 +633,7 @@ export const ChartValue = styled.div<{ score: number }>`
 // 하단 라벨 영역 컨테이너
 export const ChartLabelsBox = styled.div`
   display: flex;
-  padding: 0.62 0; /* 그래프와 간격(padding-top) */
+  padding: 0.62rem 0.75rem; /* 그래프와 간격(padding-top) */
   align-items: center;
   gap: 1.25rem;
   align-self: stretch;
@@ -661,34 +666,12 @@ export const TrustBadge = styled.span<{
   border-radius: 9999px;
   ${typography.styles.title5};
 
-  ${(props) =>
-    props.level === "trusted" &&
-    css`
-      background: ${colors.light.grayscale[5]};
-      color: ${colors.light.etc.mint};
-      border: 1px solid ${colors.light.etc.mint};
-    `}
-  ${(props) =>
-    props.level === "neutral" &&
-    css`
-      background: ${colors.light.grayscale[5]};
-      color: ${colors.light.grayscale[60]};
-      border: 1px solid ${colors.light.grayscale[60]};
-    `}
-  ${(props) =>
-    props.level === "caution" &&
-    css`
-      background: ${colors.light.grayscale[5]};
-      color: ${colors.light.etc.yellow};
-      border: 1px solid ${colors.light.etc.yellow};
-    `}
-  ${(props) =>
-    props.level === "unreliable" &&
-    css`
-      background: ${colors.light.grayscale[5]};
-      color: ${colors.light.state.error};
-      border: 1px solid ${colors.light.state.error};
-    `}
+  /* 모든 케이스 공통 스타일 */
+  background: ${colors.light.grayscale[5]};
+  border: 1px solid;
+
+  color: ${({ level }) => getTrustColor(level)};
+  border-color: ${({ level }) => getTrustColor(level)};
 `;
 
 export const SourceDetails = styled.div``;
@@ -777,38 +760,25 @@ export const BiasSectionTitle = styled.h4`
   margin: 0 0 12px 0;
 `;
 
-export const IntensityDisplay = styled.div`
-  margin-bottom: 16px;
+export const BiasSectionHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
 `;
 
 export const IntensityBadge = styled.span<{
   intensity: "none" | "low" | "medium" | "high";
 }>`
-  padding: 4px 12px;
-  border-radius: 9999px;
+  padding: 0.3rem 0.5rem;
+  border-radius: 0.5rem;
   ${typography.styles.caption4};
   font-weight: ${typography.fontWeight.semibold};
   background: ${colors.light.grayscale[0]};
   border: 1px solid;
 
-  ${(props) =>
-    (props.intensity === "none" || props.intensity === "low") &&
-    css`
-      color: ${colors.light.etc.mint};
-      border-color: ${colors.light.etc.mint};
-    `}
-  ${(props) =>
-    props.intensity === "medium" &&
-    css`
-      color: ${colors.light.etc.yellow};
-      border-color: ${colors.light.etc.yellow};
-    `}
-  ${(props) =>
-    props.intensity === "high" &&
-    css`
-      color: ${colors.light.state.error};
-      border-color: ${colors.light.state.error};
-    `}
+  color: ${({ intensity }) => getIntensityColor(intensity)};
+  border-color: ${({ intensity }) => getIntensityColor(intensity)};
 `;
 
 export const ManipulativeWords = styled.div``;
@@ -1068,24 +1038,8 @@ export const FallacyItem = styled.div<{
       0 2px 4px -2px rgb(0 0 0 / 0.1);
   }
 
-  ${(props) =>
-    props.severity === "high" &&
-    css`
-      border-color: ${colors.light.etc.red};
-      background: ${colors.light.grayscale[5]};
-    `}
-  ${(props) =>
-    props.severity === "medium" &&
-    css`
-      border-color: ${colors.light.etc.orange};
-      background: ${colors.light.grayscale[5]};
-    `}
-  ${(props) =>
-    props.severity === "low" &&
-    css`
-      border-color: ${colors.light.etc.yellow};
-      background: ${colors.light.grayscale[5]};
-    `}
+  border-color: ${({ severity }) => getIntensityColor(severity)};
+  background: ${colors.light.grayscale[5]};
 `;
 
 export const FallacyHeader = styled.div`
@@ -1099,10 +1053,6 @@ export const FallacyType = styled.div`
   display: flex;
   align-items: center;
   gap: 8px;
-`;
-
-export const FallacyIcon = styled.span`
-  font-size: ${typography.styles.title4.fontSize};
 `;
 
 export const FallacyName = styled.span`
@@ -1119,21 +1069,7 @@ export const SeverityBadge = styled.span<{
   font-weight: ${typography.fontWeight.semibold};
   background: ${colors.light.grayscale[10]};
 
-  ${(props) =>
-    props.severity === "high" &&
-    css`
-      color: ${colors.light.etc.red};
-    `}
-  ${(props) =>
-    props.severity === "medium" &&
-    css`
-      color: ${colors.light.etc.orange};
-    `}
-  ${(props) =>
-    props.severity === "low" &&
-    css`
-      color: ${colors.light.etc.yellow};
-    `}
+  color: ${({ severity }) => getIntensityColor(severity)};
 `;
 
 export const FallacyContent = styled.div`
@@ -1372,7 +1308,7 @@ export const SourceOrg = styled.span`
 `;
 
 export const VerdictBadge = styled.span<{
-  verdict: "true" | "false" | "mixed" | "unverified";
+  verdict: VerdictType;
 }>`
   padding: 4px 8px;
   border-radius: 12px;
@@ -1380,26 +1316,7 @@ export const VerdictBadge = styled.span<{
   font-weight: ${typography.fontWeight.semibold};
   background: ${colors.light.grayscale[10]};
 
-  ${(props) =>
-    props.verdict === "true" &&
-    css`
-      color: ${colors.light.etc.mint};
-    `}
-  ${(props) =>
-    props.verdict === "false" &&
-    css`
-      color: ${colors.light.state.error};
-    `}
-  ${(props) =>
-    props.verdict === "mixed" &&
-    css`
-      color: ${colors.light.etc.yellow};
-    `}
-  ${(props) =>
-    props.verdict === "unverified" &&
-    css`
-      color: ${colors.light.grayscale[60]};
-    `}
+  color: ${({ verdict }) => getVerdictColor(verdict)};
 `;
 
 export const SourceSummary = styled.p`
@@ -1420,7 +1337,7 @@ export const SourceLink = styled.a`
 `;
 
 export const ConsensusBadge = styled.div<{
-  consensus: "agree" | "disagree" | "mixed" | "insufficient";
+  consensus: ConsensusType;
 }>`
   padding: 12px 16px;
   border-radius: 12px;
@@ -1429,30 +1346,9 @@ export const ConsensusBadge = styled.div<{
   border: 2px solid;
   background: ${colors.light.grayscale[5]};
 
-  ${(props) =>
-    props.consensus === "agree" &&
-    css`
-      color: ${colors.light.etc.mint};
-      border-color: ${colors.light.etc.mint};
-    `}
-  ${(props) =>
-    props.consensus === "disagree" &&
-    css`
-      color: ${colors.light.state.error};
-      border-color: ${colors.light.state.error};
-    `}
-  ${(props) =>
-    props.consensus === "mixed" &&
-    css`
-      color: ${colors.light.etc.yellow};
-      border-color: ${colors.light.etc.yellow};
-    `}
-  ${(props) =>
-    props.consensus === "insufficient" &&
-    css`
-      color: ${colors.light.grayscale[60]};
-      border-color: ${colors.light.grayscale[60]};
-    `}
+  /* 👇 유틸 함수를 사용하여 글자색과 테두리 색상 동적 적용 */
+  color: ${({ consensus }) => getConsensusColor(consensus)};
+  border-color: ${({ consensus }) => getConsensusColor(consensus)};
 `;
 
 // 분석 팁
@@ -1525,49 +1421,23 @@ export const CriticalThinkingButton = styled.button`
 
 // ClickableText 스타일
 export const ClickableTextStyled = styled.span<{
-  type: "bias" | "fallacy" | "manipulation" | "advertisement" | "claim";
+  type: TextType;
 }>`
   cursor: pointer;
   padding: 2px 4px;
   border-radius: 2px;
   transition: 150ms ease-in-out;
 
+  /* 공통 스타일: 모든 타입이 semibold를 사용하므로 여기서 한 번만 선언 */
+  font-weight: ${typography.fontWeight.semibold};
+
+  /* 유틸 함수를 사용하여 글자색 동적 적용 */
+  color: ${({ type }) => getTextTypeColor(type)};
+
   &:hover {
     background-color: ${colors.light.grayscale[10]};
   }
 
-  ${(props) =>
-    props.type === "bias" &&
-    css`
-      color: ${colors.light.etc.yellow};
-      font-weight: ${typography.fontWeight.semibold};
-    `}
-  ${(props) =>
-    props.type === "fallacy" &&
-    css`
-      color: ${colors.light.etc.orange};
-      font-weight: ${typography.fontWeight.semibold};
-    `}
-  ${(props) =>
-    props.type === "manipulation" &&
-    css`
-      color: ${colors.light.etc.purple};
-      font-weight: ${typography.fontWeight.semibold};
-    `}
-  ${(props) =>
-    props.type === "advertisement" &&
-    css`
-      color: ${colors.light.etc.mint};
-      font-weight: ${typography.fontWeight.semibold};
-    `}
-  ${(props) =>
-    props.type === "claim" &&
-    css`
-      color: ${colors.light.etc.blue};
-      font-weight: ${typography.fontWeight.semibold};
-    `}
-  
-  /* .word-badge 스타일을 .className으로 받을 수 있도록 지원 */
   &.word-badge {
     padding: 4px 8px;
     border-radius: 6px;

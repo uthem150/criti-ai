@@ -60,6 +60,7 @@ export const LogoWrapper = styled.div`
 export const Main = styled.main`
   flex: 1;
   padding: ${spacing[5]};
+  margin-bottom: 1rem;
 `;
 
 // 상태별 컨테이너
@@ -132,7 +133,7 @@ export const Spinner = styled.div<{ small?: boolean }>`
 // 버튼 기본 스타일
 const buttonBase = css`
   display: flex;
-  padding: 1.5rem;
+  padding: 1.2rem;
   flex-direction: column;
   align-items: flex-start;
   gap: 0.5rem;

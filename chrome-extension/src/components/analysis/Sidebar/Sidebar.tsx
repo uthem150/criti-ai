@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import type { TrustAnalysis } from "@shared/types";
-import { getScoreColor } from "@/utils/formatUtils";
 import { colors } from "@/styles/design";
 import * as S from "./Sidebar.style";
 import Magnifier from "@/assets/icons/magnifier.svg?react";
 import Logo from "@/assets/icons/CritiAI_Logo.svg?react";
 
 import styled from "@emotion/styled";
+import { getScoreColor } from "@/utils/colorUtils";
 
 const StyledMagnifier = styled(Magnifier)`
   display: flex;
@@ -40,7 +40,6 @@ interface SidebarProps {
 
 interface ExpandableSectionProps {
   title: string;
-  icon: string;
   isExpanded: boolean;
   onToggle: () => void;
   children: React.ReactNode;
@@ -163,7 +162,6 @@ const ChevronDownIcon = () => (
 // ExpandableSection (S. 컴포넌트 사용)
 const ExpandableSection: React.FC<ExpandableSectionProps> = ({
   title,
-  icon,
   isExpanded,
   onToggle,
   children,
@@ -174,7 +172,6 @@ const ExpandableSection: React.FC<ExpandableSectionProps> = ({
   <S.ExpandableSectionContainer data-section={sectionType}>
     <S.SectionHeader onClick={onToggle}>
       <S.HeaderLeft>
-        <S.SectionIcon>{icon}</S.SectionIcon>
         <S.SectionTitle>
           {title}
           {badge && <span style={{ color: badgeColor }}>{badge}</span>}
@@ -404,7 +401,7 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
                 <S.ChartLabel>출처</S.ChartLabel>
                 <S.ChartLabel>객관성</S.ChartLabel>
                 <S.ChartLabel>논리성</S.ChartLabel>
-                <S.ChartLabel>비광고성</S.ChartLabel>{" "}
+                <S.ChartLabel>비광고성</S.ChartLabel>
                 <S.ChartLabel>근거</S.ChartLabel>
               </S.ChartLabelsBox>
             </S.DetailedScores>
@@ -413,7 +410,6 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
           {/* 출처 신뢰도 섹션 */}
           <ExpandableSection
             title="출처 신뢰도"
-            icon="🏛️"
             isExpanded={expandedSections.source}
             onToggle={() => toggleSection("source")}
             badge={`${analysis.sourceCredibility.score}점`}
@@ -486,7 +482,6 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
           {/* 편향성 분석 섹션 */}
           <ExpandableSection
             title="편향성 분석"
-            icon="🎭"
             isExpanded={expandedSections.bias}
             onToggle={() => toggleSection("bias")}
             badge={`${analysis.biasAnalysis.emotionalBias.score}점`}
@@ -496,13 +491,13 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
             <S.BiasContent>
               {/* 감정적 편향 */}
               <S.BiasSection>
-                <S.BiasSectionTitle>💥 감정적 편향</S.BiasSectionTitle>
-                <S.IntensityDisplay>
+                <S.BiasSectionHeader>
+                  <S.BiasSectionTitle>감정적 편향</S.BiasSectionTitle>
                   <S.IntensityBadge
                     intensity={analysis.biasAnalysis.emotionalBias.intensity}
                   >
                     {analysis.biasAnalysis.emotionalBias.intensity === "high"
-                      ? "🔥 매우 높음"
+                      ? "🔴 매우 높음"
                       : analysis.biasAnalysis.emotionalBias.intensity ===
                           "medium"
                         ? "🟡 보통"
@@ -511,13 +506,13 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
                           ? "🟢 낮음"
                           : "✅ 거의 없음"}
                   </S.IntensityBadge>
-                </S.IntensityDisplay>
+                </S.BiasSectionHeader>
 
                 {analysis.biasAnalysis.emotionalBias.manipulativeWords?.length >
                   0 && (
                   <S.ManipulativeWords>
                     <S.ManipulativeWordsTitle>
-                      🎯 조작적 표현 탐지 (클릭하여 본문에서 찾기):
+                      조작적 표현 탐지 (클릭하여 본문에서 찾기):
                     </S.ManipulativeWordsTitle>
                     <S.WordsGrid>
                       {analysis.biasAnalysis.emotionalBias.manipulativeWords.map(
@@ -581,7 +576,7 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
                 analysis.biasAnalysis.clickbaitElements.length > 0 && (
                   <S.BiasSection>
                     <S.BiasSectionTitle>
-                      🎣 클릭베이트 요소 (클릭하여 본문에서 찾기)
+                      클릭베이트 요소 (클릭하여 본문에서 찾기)
                     </S.BiasSectionTitle>
                     <S.ClickbaitGrid>
                       {analysis.biasAnalysis.clickbaitElements.map(
@@ -625,7 +620,7 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
 
               {/* 정치적 편향 */}
               <S.BiasSection>
-                <S.BiasSectionTitle>🗳️ 정치적 편향</S.BiasSectionTitle>
+                <S.BiasSectionTitle>정치적 편향</S.BiasSectionTitle>
                 <S.PoliticalBias>
                   <S.PoliticalDirection>
                     <S.PoliticalBadge
@@ -674,7 +669,6 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
             analysis.logicalFallacies.length > 0 && (
               <ExpandableSection
                 title="논리적 오류"
-                icon="🧠"
                 isExpanded={expandedSections.logic}
                 onToggle={() => toggleSection("logic")}
                 badge={`${analysis.logicalFallacies.length}개`}
@@ -687,13 +681,6 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
                       <S.FallacyItem key={idx} severity={fallacy.severity}>
                         <S.FallacyHeader>
                           <S.FallacyType>
-                            <S.FallacyIcon>
-                              {fallacy.severity === "high"
-                                ? "🚨"
-                                : fallacy.severity === "medium"
-                                  ? "⚠️"
-                                  : "💡"}
-                            </S.FallacyIcon>
                             <S.FallacyName>{fallacy.type}</S.FallacyName>
                           </S.FallacyType>
                           <S.SeverityBadge severity={fallacy.severity}>
@@ -758,7 +745,6 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
           {analysis.advertisementAnalysis && (
             <ExpandableSection
               title="광고성 분석"
-              icon="🎯"
               isExpanded={expandedSections.advertisement}
               onToggle={() => toggleSection("advertisement")}
               badge={
@@ -875,7 +861,6 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
           {analysis.crossReference && (
             <ExpandableSection
               title="교차 검증"
-              icon="🔍"
               isExpanded={expandedSections.crossref}
               onToggle={() => toggleSection("crossref")}
               badge={
