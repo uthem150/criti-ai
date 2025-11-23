@@ -17,6 +17,7 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
+      "@/assets": ["./src/assets"],
       "@shared/*": ["../shared/src/*"]
     },
 
@@ -28,5 +29,5 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["src"]
+  "include": ["src", "src/**/*", "../shared/src/**/*", "custom.d.ts"]
 }

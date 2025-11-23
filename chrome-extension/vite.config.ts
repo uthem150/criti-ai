@@ -3,6 +3,7 @@ import react from "@vitejs/plugin-react";
 import { crx } from "@crxjs/vite-plugin";
 import manifest from "./public/manifest.json";
 import path from "path";
+import svgr from "vite-plugin-svgr";
 
 export default defineConfig(() => {
   return {
@@ -23,10 +24,12 @@ export default defineConfig(() => {
       crx({
         manifest,
       }),
+      svgr(),
     ],
     resolve: {
       alias: {
         "@": path.resolve(__dirname, "./src"),
+        "@/assets": path.resolve(__dirname, "./src/assets"),
         "@shared": path.resolve(__dirname, "../shared/src"),
       },
     },
