@@ -319,111 +319,96 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
       {analysis && (
         <S.ResultsSection>
           {/* 전체 점수 섹션 */}
-          <ExpandableSection
-            title="종합 분석 결과"
-            icon="📊"
-            isExpanded={expandedSections.overview}
-            onToggle={() => toggleSection("overview")}
-            sectionType="overview"
-          >
-            <S.OverviewContent>
-              <S.OverallScoreDisplay>
-                <S.ScoreCircle>
-                  <S.ScoreNumber>{analysis.overallScore}</S.ScoreNumber>
-                  <S.ScoreLabel>점</S.ScoreLabel>
-                </S.ScoreCircle>
-                <S.ScoreDescriptionText>
-                  {analysis.analysisSummary}
-                </S.ScoreDescriptionText>
-              </S.OverallScoreDisplay>
 
-              {analysis.detailedScores && (
-                <S.DetailedScores>
-                  <S.ChartContainer>
-                    <S.ChartColumn>
-                      <S.ChartBarVertical
-                        height={analysis.detailedScores.sourceScore}
-                        color={getScoreColor(
-                          analysis.detailedScores.sourceScore
-                        )}
-                      >
-                        <S.ChartValue
-                          score={analysis.detailedScores.sourceScore}
-                        >
-                          {analysis.detailedScores.sourceScore}
-                        </S.ChartValue>
-                      </S.ChartBarVertical>
-                      <S.ChartLabel>출처</S.ChartLabel>
-                    </S.ChartColumn>
+          <S.OverviewContent>
+            <S.OverallScoreDisplay>
+              <S.ScoreNumber score={analysis.overallScore}>
+                {analysis.overallScore}점
+              </S.ScoreNumber>
+              <S.ScoreDescriptionText>
+                {analysis.analysisSummary}
+              </S.ScoreDescriptionText>
+            </S.OverallScoreDisplay>
+          </S.OverviewContent>
 
-                    <S.ChartColumn>
-                      <S.ChartBarVertical
-                        height={analysis.detailedScores.objectivityScore}
-                        color={getScoreColor(
-                          analysis.detailedScores.objectivityScore
-                        )}
-                      >
-                        <S.ChartValue
-                          score={analysis.detailedScores.objectivityScore}
-                        >
-                          {analysis.detailedScores.objectivityScore}
-                        </S.ChartValue>
-                      </S.ChartBarVertical>
-                      <S.ChartLabel>객관성</S.ChartLabel>
-                    </S.ChartColumn>
+          {analysis.detailedScores && (
+            <S.DetailedScores>
+              {/* 1. 상단: 그래프 영역 (높이 15rem) */}
+              <S.ChartGraphBox>
+                {/* 출처 */}
+                <S.ChartGraphColumn>
+                  <S.ChartValue score={analysis.detailedScores.sourceScore}>
+                    {analysis.detailedScores.sourceScore}
+                  </S.ChartValue>
+                  <S.ChartBarVertical
+                    height={analysis.detailedScores.sourceScore}
+                    color={getScoreColor(analysis.detailedScores.sourceScore)}
+                  />
+                </S.ChartGraphColumn>
 
-                    <S.ChartColumn>
-                      <S.ChartBarVertical
-                        height={analysis.detailedScores.logicScore}
-                        color={getScoreColor(
-                          analysis.detailedScores.logicScore
-                        )}
-                      >
-                        <S.ChartValue
-                          score={analysis.detailedScores.logicScore}
-                        >
-                          {analysis.detailedScores.logicScore}
-                        </S.ChartValue>
-                      </S.ChartBarVertical>
-                      <S.ChartLabel>논리성</S.ChartLabel>
-                    </S.ChartColumn>
+                {/* 객관성 */}
+                <S.ChartGraphColumn>
+                  <S.ChartValue
+                    score={analysis.detailedScores.objectivityScore}
+                  >
+                    {analysis.detailedScores.objectivityScore}
+                  </S.ChartValue>
+                  <S.ChartBarVertical
+                    height={analysis.detailedScores.objectivityScore}
+                    color={getScoreColor(
+                      analysis.detailedScores.objectivityScore
+                    )}
+                  />
+                </S.ChartGraphColumn>
 
-                    <S.ChartColumn>
-                      <S.ChartBarVertical
-                        height={analysis.detailedScores.advertisementScore}
-                        color={getScoreColor(
-                          analysis.detailedScores.advertisementScore
-                        )}
-                      >
-                        <S.ChartValue
-                          score={analysis.detailedScores.advertisementScore}
-                        >
-                          {analysis.detailedScores.advertisementScore}
-                        </S.ChartValue>
-                      </S.ChartBarVertical>
-                      <S.ChartLabel>광고성</S.ChartLabel>
-                    </S.ChartColumn>
+                {/* 논리성 */}
+                <S.ChartGraphColumn>
+                  <S.ChartValue score={analysis.detailedScores.logicScore}>
+                    {analysis.detailedScores.logicScore}
+                  </S.ChartValue>
+                  <S.ChartBarVertical
+                    height={analysis.detailedScores.logicScore}
+                    color={getScoreColor(analysis.detailedScores.logicScore)}
+                  />
+                </S.ChartGraphColumn>
 
-                    <S.ChartColumn>
-                      <S.ChartBarVertical
-                        height={analysis.detailedScores.evidenceScore}
-                        color={getScoreColor(
-                          analysis.detailedScores.evidenceScore
-                        )}
-                      >
-                        <S.ChartValue
-                          score={analysis.detailedScores.evidenceScore}
-                        >
-                          {analysis.detailedScores.evidenceScore}
-                        </S.ChartValue>
-                      </S.ChartBarVertical>
-                      <S.ChartLabel>근거</S.ChartLabel>
-                    </S.ChartColumn>
-                  </S.ChartContainer>
-                </S.DetailedScores>
-              )}
-            </S.OverviewContent>
-          </ExpandableSection>
+                {/* 광고성 */}
+                <S.ChartGraphColumn>
+                  <S.ChartValue
+                    score={analysis.detailedScores.advertisementScore}
+                  >
+                    {analysis.detailedScores.advertisementScore}
+                  </S.ChartValue>
+                  <S.ChartBarVertical
+                    height={analysis.detailedScores.advertisementScore}
+                    color={getScoreColor(
+                      analysis.detailedScores.advertisementScore
+                    )}
+                  />
+                </S.ChartGraphColumn>
+
+                {/* 근거 */}
+                <S.ChartGraphColumn>
+                  <S.ChartValue score={analysis.detailedScores.evidenceScore}>
+                    {analysis.detailedScores.evidenceScore}
+                  </S.ChartValue>
+                  <S.ChartBarVertical
+                    height={analysis.detailedScores.evidenceScore}
+                    color={getScoreColor(analysis.detailedScores.evidenceScore)}
+                  />
+                </S.ChartGraphColumn>
+              </S.ChartGraphBox>
+
+              {/* 2. 하단: 텍스트 라벨 영역 */}
+              <S.ChartLabelsBox>
+                <S.ChartLabel>출처</S.ChartLabel>
+                <S.ChartLabel>객관성</S.ChartLabel>
+                <S.ChartLabel>논리성</S.ChartLabel>
+                <S.ChartLabel>비광고성</S.ChartLabel>{" "}
+                <S.ChartLabel>근거</S.ChartLabel>
+              </S.ChartLabelsBox>
+            </S.DetailedScores>
+          )}
 
           {/* 출처 신뢰도 섹션 */}
           <ExpandableSection

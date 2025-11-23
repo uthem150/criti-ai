@@ -1,6 +1,7 @@
 import styled from "@emotion/styled";
 import { css, keyframes } from "@emotion/react";
 import { colors, typography } from "@/styles/design";
+import { getScoreColor } from "@/utils/formatUtils";
 
 // Keyframes
 const spin = keyframes`
@@ -420,8 +421,8 @@ export const Step = styled.div<{ active?: boolean }>`
 
 // 결과 섹션
 export const ResultsSection = styled.div`
-  padding: 20px;
-  background: ${colors.light.grayscale[5]};
+  display: flex;
+  flex-direction: column;
   min-height: 90vh;
 `;
 
@@ -526,49 +527,58 @@ export const SectionContentTitleH5 = styled.h5`
 // 종합 분석 결과
 export const OverviewContent = styled.div`
   display: flex;
+  padding: 2rem 2rem 1.25rem 2rem;
   flex-direction: column;
-  gap: 24px;
+  align-items: flex-start;
+  gap: 1rem;
+  align-self: stretch;
 `;
 
 export const OverallScoreDisplay = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  padding: 20px;
-  background: ${colors.light.grayscale[0]};
-  border-radius: 12px;
-  border: 1px solid ${colors.light.brand.primary20};
 `;
 
-export const ScoreCircle = styled.div`
-  display: flex;
-  text-align: center;
-  align-items: center;
+export const ScoreNumber = styled.div<{ score: number }>`
+  ${typography.styles.headline2};
+  color: ${({ score }) => getScoreColor(score)};
 `;
-
-export const ScoreNumber = styled.div`
-  ${typography.styles.headline1};
-  color: ${colors.light.etc.mint};
-  line-height: 1;
-  font-weight: ${typography.fontWeight.bold};
-`;
-
-export const ScoreLabel = styled.div`
-  ${typography.styles.caption4};
-  color: ${colors.light.grayscale[70]};
-  margin-top: 4px;
-`;
-
-export const ScoreDescription = styled.div``;
 
 export const ScoreDescriptionText = styled.p`
   ${typography.styles.body3};
-  color: ${colors.light.grayscale[70]};
+  color: ${colors.light.grayscale[80]};
   margin: 0;
-  line-height: 1.6;
 `;
 
-export const DetailedScores = styled.div``;
+export const DetailedScores = styled.div`
+  display: flex;
+  padding: 1.25rem 2rem;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  align-self: stretch;
+`;
+
+// 그래프 영역 (높이 15rem 고정, 막대들이 들어가는 곳)
+export const ChartGraphBox = styled.div`
+  display: flex;
+  height: 15rem;
+  padding: 0 0.75rem;
+  align-items: flex-end;
+  gap: 1.25rem;
+  align-self: stretch;
+`;
+
+// 그래프 내부의 개별 막대 컬럼 (Value + Bar)
+export const ChartGraphColumn = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  flex: 1; /* 너비 균등하게 분배 */
+  height: 100%;
+  position: relative;
+`;
 
 export const DetailedScoresTitle = styled.h4`
   ${typography.styles.title4};
@@ -579,10 +589,10 @@ export const DetailedScoresTitle = styled.h4`
 // 세로 막대 그래프 컨테이너
 export const ChartContainer = styled.div`
   display: flex;
-  justify-content: space-around;
-  gap: 12px;
-  height: 180px;
-  padding: 0 8px;
+  height: 15rem;
+  padding: 0 0.75rem;
+  align-items: flex-end;
+  gap: 1.25rem;
   align-self: stretch;
 `;
 
@@ -597,37 +607,39 @@ export const ChartColumn = styled.div`
 
 export const ChartBarVertical = styled.div<{ height: number; color: string }>`
   width: 100%;
-
-  /* 점수(100)가 전체 높이의 100%가 아닌 70%를 차지하도록 하여 
-     상단 숫자와 하단 라벨이 들어갈 공간을 확보  */
-  height: ${(props) => props.height * 0.7}%;
-
+  /* 15rem 높이 기준 100% 비율로 계산 */
+  height: ${(props) => props.height}%;
   background: ${(props) => props.color};
-  border-radius: 6px 6px 0 0;
+
+  /* 상단만 둥글게 */
+  border-radius: 4px 4px 0 0;
   position: relative;
   transition: height 0.5s ease;
-  min-height: 20px; /* 점수가 낮아도 최소한의 막대는 보이도록 유지 */
+  min-height: 2px; /* 0점이어도 라인은 보이게 */
 `;
 
 export const ChartValue = styled.div<{ score: number }>`
-  position: absolute;
-  top: -24px;
-  left: 50%;
-  transform: translateX(-50%);
-  ${typography.styles.title5};
-
-  color: ${(props) => {
-    if (props.score >= 70) return colors.light.state.success;
-    if (props.score >= 50) return colors.light.etc.orange;
-    return colors.light.state.error;
-  }};
-  white-space: nowrap;
+  margin-bottom: 8px; /* 막대와의 간격 */
+  ${typography.styles.title5}
+  font-weight: ${typography.fontWeight.bold};
+  color: ${({ score }) => getScoreColor(score)};
 `;
 
+// 하단 라벨 영역 컨테이너
+export const ChartLabelsBox = styled.div`
+  display: flex;
+  padding: 0.62 0; /* 그래프와 간격(padding-top) */
+  align-items: center;
+  gap: 1.25rem;
+  align-self: stretch;
+`;
+
+// 라벨 텍스트
 export const ChartLabel = styled.div`
+  flex: 1; /* 그래프 컬럼과 동일한 너비 비율 유지 */
+  text-align: center;
   ${typography.styles.caption3};
   color: ${colors.light.grayscale[70]};
-  text-align: center;
 `;
 
 // 출처 신뢰도
