@@ -3,7 +3,32 @@ import type { TrustAnalysis } from "@shared/types";
 import { getScoreColor } from "@/utils/formatUtils";
 import { colors } from "@/styles/design";
 import * as S from "./Sidebar.style";
+import Magnifier from "@/assets/icons/magnifier.svg?react";
+import Logo from "@/assets/icons/CritiAI_Logo.svg?react";
 
+import styled from "@emotion/styled";
+
+const StyledMagnifier = styled(Magnifier)`
+  display: flex;
+  width: 4.5rem;
+  height: 4.5rem;
+  padding: 0.32975rem;
+  justify-content: center;
+  align-items: center;
+  aspect-ratio: 1/1;
+
+  animation: bounce 2s infinite;
+
+  @keyframes bounce {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+`;
 interface SidebarProps {
   analysis: TrustAnalysis | null;
   isAnalyzing: boolean;
@@ -196,16 +221,14 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
 
   return (
     <S.Container>
-      {/* <Global styles={S.globalStyles} /> */}
-      <S.CloseButtonContainer>
+      <S.HeaderSection>
+        <S.LogoWrapper>
+          <Logo />
+          <h2>Criti AI</h2>
+        </S.LogoWrapper>
         <S.CloseButton onClick={onClose} type="button" title="닫기">
           ✕
         </S.CloseButton>
-      </S.CloseButtonContainer>
-
-      <S.HeaderSection>
-        <S.HeaderTitle>🔍 Criti AI</S.HeaderTitle>
-        <S.HeaderSubtitle>콘텐츠 신뢰도 종합 분석</S.HeaderSubtitle>
       </S.HeaderSection>
 
       {error && (
@@ -238,10 +261,12 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
 
       {!analysis && !isAnalyzing && !error && (
         <S.WelcomeSection>
-          <S.WelcomeIcon>🎯</S.WelcomeIcon>
+          <StyledMagnifier />
           <S.WelcomeTitle>분석 시작하기</S.WelcomeTitle>
           <S.WelcomeText>
-            AI가 이 콘텐츠의 신뢰도, 편향성, 광고성을 종합적으로 분석해드립니다
+            AI가 이 콘텐츠의 신뢰도, 편향성, 광고성을
+            <br />
+            종합적으로 분석해드립니다
           </S.WelcomeText>
           <S.AnalyzeButton onClick={onAnalyze}>
             <S.ButtonIcon>🔍</S.ButtonIcon>이 글 분석하기
@@ -318,9 +343,13 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
                     <S.ChartColumn>
                       <S.ChartBarVertical
                         height={analysis.detailedScores.sourceScore}
-                        color={getScoreColor(analysis.detailedScores.sourceScore)}
+                        color={getScoreColor(
+                          analysis.detailedScores.sourceScore
+                        )}
                       >
-                        <S.ChartValue score={analysis.detailedScores.sourceScore}>
+                        <S.ChartValue
+                          score={analysis.detailedScores.sourceScore}
+                        >
                           {analysis.detailedScores.sourceScore}
                         </S.ChartValue>
                       </S.ChartBarVertical>
@@ -330,9 +359,13 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
                     <S.ChartColumn>
                       <S.ChartBarVertical
                         height={analysis.detailedScores.objectivityScore}
-                        color={getScoreColor(analysis.detailedScores.objectivityScore)}
+                        color={getScoreColor(
+                          analysis.detailedScores.objectivityScore
+                        )}
                       >
-                        <S.ChartValue score={analysis.detailedScores.objectivityScore}>
+                        <S.ChartValue
+                          score={analysis.detailedScores.objectivityScore}
+                        >
                           {analysis.detailedScores.objectivityScore}
                         </S.ChartValue>
                       </S.ChartBarVertical>
@@ -342,9 +375,13 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
                     <S.ChartColumn>
                       <S.ChartBarVertical
                         height={analysis.detailedScores.logicScore}
-                        color={getScoreColor(analysis.detailedScores.logicScore)}
+                        color={getScoreColor(
+                          analysis.detailedScores.logicScore
+                        )}
                       >
-                        <S.ChartValue score={analysis.detailedScores.logicScore}>
+                        <S.ChartValue
+                          score={analysis.detailedScores.logicScore}
+                        >
                           {analysis.detailedScores.logicScore}
                         </S.ChartValue>
                       </S.ChartBarVertical>
@@ -354,9 +391,13 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
                     <S.ChartColumn>
                       <S.ChartBarVertical
                         height={analysis.detailedScores.advertisementScore}
-                        color={getScoreColor(analysis.detailedScores.advertisementScore)}
+                        color={getScoreColor(
+                          analysis.detailedScores.advertisementScore
+                        )}
                       >
-                        <S.ChartValue score={analysis.detailedScores.advertisementScore}>
+                        <S.ChartValue
+                          score={analysis.detailedScores.advertisementScore}
+                        >
                           {analysis.detailedScores.advertisementScore}
                         </S.ChartValue>
                       </S.ChartBarVertical>
@@ -366,9 +407,13 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
                     <S.ChartColumn>
                       <S.ChartBarVertical
                         height={analysis.detailedScores.evidenceScore}
-                        color={getScoreColor(analysis.detailedScores.evidenceScore)}
+                        color={getScoreColor(
+                          analysis.detailedScores.evidenceScore
+                        )}
                       >
-                        <S.ChartValue score={analysis.detailedScores.evidenceScore}>
+                        <S.ChartValue
+                          score={analysis.detailedScores.evidenceScore}
+                        >
                           {analysis.detailedScores.evidenceScore}
                         </S.ChartValue>
                       </S.ChartBarVertical>

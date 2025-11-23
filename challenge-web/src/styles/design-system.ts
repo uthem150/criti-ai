@@ -59,7 +59,7 @@ export const colors = {
       },
     },
     brand: {
-      primary100: "#168AFF",
+      primary100: "#1AA7FF",
       primary80: "rgba(22, 138, 255, 0.8)", // JSON 원본 값 "80%"
       primary60: "rgba(22, 138, 255, 0.8)", // JSON 원본 값 "80%"
       primary40: "rgba(22, 138, 255, 0.4)",

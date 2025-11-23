@@ -33,27 +33,24 @@ export const Container = styled.div`
 `;
 
 // 닫기 버튼
-export const CloseButtonContainer = styled.div`
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  z-index: 10;
-`;
-
 export const CloseButton = styled.button`
   background: rgba(255, 255, 255, 0.9);
+  background: ${colors.light.grayscale[10]};
+  width: 1.5rem;
+  height: 1.5rem;
+
   border: none;
-  border-radius: 9999px;
-  width: 32px;
-  height: 32px;
-  font-size: ${typography.styles.body2.fontSize};
-  cursor: pointer;
-  color: ${colors.light.grayscale[60]};
-  transition: all "250ms ease-in-out";
+  border-radius: 100%;
+
+  font-size: 0.5rem;
+  font-weight: 800;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: inherit !important;
+  cursor: pointer;
+  color: ${colors.light.grayscale[60]};
+
+  transition: all "250ms ease-in-out";
   backdrop-filter: blur(10px);
   box-shadow: "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)";
 
@@ -66,52 +63,31 @@ export const CloseButton = styled.button`
 
 // 헤더
 export const HeaderSection = styled.div`
-  padding: 12px 8px;
-  background: linear-gradient(
-    135deg,
-    ${colors.light.brand.primary100} 0%,
-    ${colors.light.brand.primary100} 100%
-  );
-  color: ${colors.light.grayscale[0]};
-  position: relative;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  height: 10vh;
-  justify-content: center;
+  padding: 1.5rem 1rem;
 
-  &::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(
-      45deg,
-      rgba(255, 255, 255, 0.1) 25%,
-      transparent 25%,
-      transparent 50%,
-      rgba(255, 255, 255, 0.1) 50%,
-      rgba(255, 255, 255, 0.1) 75%,
-      transparent 75%
-    );
-    background-size: 20px 20px;
-    opacity: 0.3;
-  }
+  display: flex;
+  padding: 1.5rem 2rem;
+  justify-content: space-between;
+  align-items: center;
+  align-self: stretch;
+
+  height: 10vh;
 `;
 
-export const HeaderTitle = styled.h3`
-  margin: 0;
-  ${typography.styles.title1};
-  color: ${colors.light.grayscale[0]};
+export const LogoWrapper = styled.div`
   display: flex;
   align-items: center;
-  gap: 4px;
-  font-family: inherit !important;
-  position: relative;
-  z-index: 1;
+  gap: 0.26rem;
+
+  h2 {
+    margin: 0rem;
+    color: ${colors.light.grayscale[90]};
+    font-family: Poppins;
+    font-size: 1.5rem;
+    font-style: normal;
+    font-weight: 300;
+    line-height: normal;
+  }
 `;
 
 export const HeaderSubtitle = styled.p`
@@ -126,192 +102,246 @@ export const HeaderSubtitle = styled.p`
 
 // 에러 섹션
 export const ErrorSection = styled.div`
-  padding: 32px 24px;
+  padding: 60px 24px;
   text-align: center;
-  background: ${colors.light.grayscale[5]};
+  background: ${colors.light.grayscale[0]};
   min-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 `;
 
 export const ErrorIcon = styled.div`
-  font-size: ${typography.styles.headline1.fontSize};
-  margin-bottom: 16px;
+  font-size: 80px;
+  margin-bottom: 24px;
+  line-height: 1;
 `;
 
 export const ErrorTitle = styled.h3`
-  ${typography.styles.title2};
+  font-size: 28px;
+  font-weight: ${typography.fontWeight.bold};
   margin: 0 0 12px 0;
   color: ${colors.light.state.error};
+  letter-spacing: -0.5px;
 `;
 
 export const ErrorText = styled.p`
-  ${typography.styles.body3};
-  margin: 0 0 20px 0;
+  ${typography.styles.body2};
+  margin: 0 0 32px 0;
   color: ${colors.light.grayscale[70]};
+  line-height: 1.6;
+  max-width: 400px;
 `;
 
 export const ErrorSolutions = styled.div`
-  background: ${colors.light.grayscale[0]};
-  border: 1px solid ${colors.light.grayscale[30]};
-  border-radius: 8px;
-  padding: 16px;
-  margin: 16px 0;
+  background: ${colors.light.grayscale[5]};
+  border: 1px solid ${colors.light.grayscale[20]};
+  border-radius: 16px;
+  padding: 24px;
+  margin: 0 0 32px 0;
   text-align: left;
+  max-width: 420px;
+  width: 100%;
 `;
 
 export const ErrorSolutionsTitle = styled.h4`
   ${typography.styles.title5};
-  margin: 0 0 8px 0;
+  font-weight: ${typography.fontWeight.semibold};
+  margin: 0 0 16px 0;
   color: ${colors.light.grayscale[90]};
 `;
 
 export const ErrorSolutionsList = styled.ul`
   margin: 0;
-  padding-left: 16px;
+  padding-left: 20px;
   color: ${colors.light.grayscale[70]};
   list-style-type: disc;
 `;
 
 export const ErrorSolutionsItem = styled.li`
   ${typography.styles.body4};
-  margin-bottom: 4px;
+  margin-bottom: 8px;
+  line-height: 1.5;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
 `;
 
 export const ErrorActions = styled.div`
   display: flex;
-  gap: 8px;
+  gap: 12px;
   justify-content: center;
+  width: 100%;
+  max-width: 420px;
 `;
 
 export const ErrorButton = styled.button<{ primary?: boolean }>`
-  padding: 8px 20px;
+  padding: 16px 32px;
   border: none;
-  border-radius: 6px;
-  ${typography.styles.caption3};
+  border-radius: 12px;
+  font-size: 16px;
   font-weight: ${typography.fontWeight.semibold};
   cursor: pointer;
   transition: all 250ms ease-in-out;
   color: ${colors.light.grayscale[0]};
+  flex: 1;
 
   ${(props) =>
     props.primary
       ? css`
-          background: ${colors.light.state.error};
+          background: ${colors.light.brand.primary100};
+          box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+
+          &:hover {
+            box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3);
+            opacity: 0.95;
+          }
         `
       : css`
-          background: ${colors.light.etc.orange};
+          background: ${colors.light.grayscale[30]};
+
+          &:hover {
+            background: ${colors.light.grayscale[40]};
+          }
         `}
 
   &:hover {
     transform: translateY(-1px);
-    box-shadow:
-      0 4px 6px -1px rgb(0 0 0 / 0.1),
-      0 2px 4px -2px rgb(0 0 0 / 0.1);
+  }
+
+  &:active {
+    transform: translateY(0);
   }
 `;
 
 // 환영 섹션
 export const WelcomeSection = styled.div`
   min-height: 90vh;
-  padding: 32px 24px;
+  padding: 60px 24px 40px;
   text-align: center;
-  background: linear-gradient(
-    135deg,
-    ${colors.light.grayscale[5]} 0%,
-    ${colors.light.grayscale[10]} 100%
-  );
-`;
-
-export const WelcomeIcon = styled.div`
-  font-size: 56px;
-  margin-bottom: 16px;
-  display: block;
+  background: ${colors.light.grayscale[0]};
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 `;
 
 export const WelcomeTitle = styled.h3`
-  ${typography.styles.title1};
-  margin: 0 0 12px 0;
-  color: ${colors.light.grayscale[90]};
+  font-size: 28px;
+  font-weight: ${typography.fontWeight.bold};
+  margin: 0 0 16px 0;
+  color: ${colors.light.grayscale[100]};
+  line-height: 1.3;
+  letter-spacing: -0.5px;
 `;
 
 export const WelcomeText = styled.p`
-  ${typography.styles.body3};
-  margin: 0 0 24px 0;
-  color: ${colors.light.grayscale[70]};
+  ${typography.styles.body2};
+  margin: 0 0 32px 0;
+  color: ${colors.light.grayscale[60]};
+  max-width: 380px;
+  line-height: 1.6;
 `;
 
 export const AnalyzeButton = styled.button`
-  background: linear-gradient(
-    135deg,
-    ${colors.light.brand.primary100},
-    ${colors.light.brand.primary100}
-  );
+  background: ${colors.light.brand.primary100};
   color: ${colors.light.grayscale[0]};
   border: none;
-  padding: 16px 32px;
-  border-radius: 12px;
-  ${typography.styles.title4};
+  padding: 18px 48px;
+  border-radius: 16px;
+  font-size: 18px;
+  font-weight: ${typography.fontWeight.semibold};
   cursor: pointer;
-  margin-bottom: 24px;
-  transition: all 350ms ease-in-out;
-  box-shadow: 0 4px 16px ${colors.light.brand.primary20};
+  margin-bottom: 32px;
+  transition: all 250ms ease-in-out;
+  box-shadow: 0 2px 12px rgba(59, 130, 246, 0.2);
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 10px;
   width: fit-content;
-  margin: 0 auto 24px;
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 24px ${colors.light.brand.primary20};
+    box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
+    opacity: 0.95;
+  }
+
+  &:active {
+    transform: translateY(0);
   }
 `;
 
 export const ButtonIcon = styled.span`
-  font-size: ${typography.styles.title3.fontSize};
+  font-size: 22px;
+  display: flex;
+  align-items: center;
+  line-height: 1;
 `;
 
 export const AnalysisFeatures = styled.div`
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin-top: 24px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+  margin-top: 0;
+  width: 100%;
 `;
 
 export const FeatureItem = styled.div`
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 8px;
-  ${typography.styles.caption4};
-  color: ${colors.light.grayscale[70]};
+  justify-content: center;
+  gap: 12px;
+  padding: 24px 16px;
+  background: ${colors.light.grayscale[5]};
+  border: 1px solid ${colors.light.grayscale[20]};
+  border-radius: 16px;
+  transition: all 250ms ease-in-out;
+  cursor: pointer;
+
+  &:hover {
+    background: ${colors.light.grayscale[10]};
+    border-color: ${colors.light.brand.primary100};
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  }
 `;
 
 export const FeatureIcon = styled.span`
-  font-size: ${typography.styles.title4.fontSize};
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
 `;
 
 // 로딩 섹션
 export const LoadingSection = styled.div`
-  padding: 32px 24px;
+  padding: 60px 24px;
   text-align: center;
-  background: ${colors.light.grayscale[5]};
+  background: ${colors.light.grayscale[0]};
   min-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 `;
 
 export const LoadingAnimation = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 16px;
-  margin-bottom: 24px;
+  gap: 24px;
+  margin-bottom: 32px;
 `;
 
 export const Spinner = styled.div`
-  width: 48px;
-  height: 48px;
+  width: 64px;
+  height: 64px;
   border: 4px solid ${colors.light.grayscale[10]};
   border-top: 4px solid ${colors.light.brand.primary100};
-  border-radius: 9999px;
+  border-radius: 50%;
   animation: ${spin} 1s linear infinite;
   margin: 0 auto;
 `;
@@ -319,14 +349,14 @@ export const Spinner = styled.div`
 export const LoadingDots = styled.div`
   display: flex;
   justify-content: center;
-  gap: 4px;
+  gap: 8px;
 `;
 
 export const LoadingDot = styled.span`
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
   background: ${colors.light.brand.primary100};
-  border-radius: 9999px;
+  border-radius: 50%;
   animation: ${pulse} 1.4s ease-in-out infinite both;
 
   &:nth-of-type(1) {
@@ -341,31 +371,41 @@ export const LoadingDot = styled.span`
 `;
 
 export const LoadingTitle = styled.h3`
-  ${typography.styles.title2};
-  margin: 0 0 8px 0;
-  color: ${colors.light.grayscale[90]};
+  font-size: 28px;
+  font-weight: ${typography.fontWeight.bold};
+  margin: 0 0 12px 0;
+  color: ${colors.light.grayscale[100]};
+  letter-spacing: -0.5px;
 `;
 
 export const LoadingText = styled.p`
-  ${typography.styles.body3};
-  margin: 0 0 20px 0;
-  color: ${colors.light.grayscale[70]};
+  ${typography.styles.body2};
+  margin: 0 0 32px 0;
+  color: ${colors.light.grayscale[60]};
+  line-height: 1.6;
+  max-width: 400px;
 `;
 
 export const AnalysisSteps = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
   align-items: center;
+  width: 100%;
+  max-width: 360px;
 `;
 
 export const Step = styled.div<{ active?: boolean }>`
-  padding: 8px 16px;
-  background: ${colors.light.grayscale[10]};
-  border-radius: 9999px;
-  ${typography.styles.caption4};
-  color: ${colors.light.grayscale[70]};
+  padding: 16px 24px;
+  background: ${colors.light.grayscale[5]};
+  border: 1px solid ${colors.light.grayscale[20]};
+  border-radius: 12px;
+  ${typography.styles.body3};
+  font-weight: ${typography.fontWeight.regular};
+  color: ${colors.light.grayscale[60]};
   transition: all 250ms ease-in-out;
+  width: 100%;
+  text-align: left;
 
   ${(props) =>
     props.active &&
@@ -373,6 +413,8 @@ export const Step = styled.div<{ active?: boolean }>`
       background: ${colors.light.brand.primary100};
       color: ${colors.light.grayscale[0]};
       font-weight: ${typography.fontWeight.semibold};
+      border-color: ${colors.light.brand.primary100};
+      box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
     `}
 `;
 
@@ -499,7 +541,9 @@ export const OverallScoreDisplay = styled.div`
 `;
 
 export const ScoreCircle = styled.div`
+  display: flex;
   text-align: center;
+  align-items: center;
 `;
 
 export const ScoreNumber = styled.div`
@@ -553,12 +597,16 @@ export const ChartColumn = styled.div`
 
 export const ChartBarVertical = styled.div<{ height: number; color: string }>`
   width: 100%;
-  height: ${(props) => props.height}%;
+
+  /* 점수(100)가 전체 높이의 100%가 아닌 70%를 차지하도록 하여 
+     상단 숫자와 하단 라벨이 들어갈 공간을 확보  */
+  height: ${(props) => props.height * 0.7}%;
+
   background: ${(props) => props.color};
   border-radius: 6px 6px 0 0;
   position: relative;
   transition: height 0.5s ease;
-  min-height: 20px;
+  min-height: 20px; /* 점수가 낮아도 최소한의 막대는 보이도록 유지 */
 `;
 
 export const ChartValue = styled.div<{ score: number }>`
