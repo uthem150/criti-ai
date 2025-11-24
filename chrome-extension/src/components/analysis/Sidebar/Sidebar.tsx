@@ -745,7 +745,9 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
             >
               <S.AdvertisementContent>
                 <S.AdOverview>
-                  <S.AdStatus>
+                  <S.AdStatus
+                    isAdvertorial={analysis.advertisementAnalysis.isAdvertorial}
+                  >
                     <S.AdBadge
                       isAdvertorial={
                         analysis.advertisementAnalysis.isAdvertorial
@@ -781,7 +783,11 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
                     <S.AdScoreItem>
                       <S.AdScoreHeader>
                         <S.AdScoreLabel>상업적 의도</S.AdScoreLabel>
-                        <S.AdScoreValue>
+                        <S.AdScoreValue
+                          score={
+                            analysis.advertisementAnalysis.commercialIntentScore
+                          }
+                        >
                           {analysis.advertisementAnalysis.commercialIntentScore}
                         </S.AdScoreValue>
                       </S.AdScoreHeader>
@@ -800,7 +806,7 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
                   analysis.advertisementAnalysis.indicators.length > 0 && (
                     <S.AdIndicators>
                       <S.AdIndicatorsTitle>
-                        🔍 광고성 지표 탐지 (클릭하여 본문에서 찾기):
+                        🔍 광고성 지표 탐지 (클릭하여 본문에서 찾기)
                       </S.AdIndicatorsTitle>
                       <S.WordsGrid>
                         {analysis.advertisementAnalysis.indicators.map(
@@ -819,18 +825,19 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
                             return (
                               <S.WordItem key={idx}>
                                 <S.WordHeader>
-                                  <ClickableText
-                                    text={text}
-                                    type="advertisement"
-                                    onTextClick={handleTextClick}
-                                    className={`word-badge ${impact}`}
-                                  >
-                                    "{text}"
-                                  </ClickableText>
-
-                                  <S.WordCategory>
-                                    {getAdIndicatorText(indicator.type)}
-                                  </S.WordCategory>
+                                  <S.ClickableTextWrapper>
+                                    <ClickableText
+                                      text={text}
+                                      type="advertisement"
+                                      onTextClick={handleTextClick}
+                                      className={`word-badge ${impact}`}
+                                    >
+                                      "{text}"
+                                    </ClickableText>
+                                    <S.WordCategory>
+                                      {getAdIndicatorText(indicator.type)}
+                                    </S.WordCategory>
+                                  </S.ClickableTextWrapper>
                                 </S.WordHeader>
 
                                 {/* 광고성 표현에 대한 설명 */}
@@ -860,8 +867,10 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
             >
               <S.CrossRefContent>
                 {/* 상태 표시 박스 */}
-                <S.CrossRefStatus>
-                  <S.CrossRefStatusText>
+                <S.CrossRefStatus consensus={analysis.crossReference.consensus}>
+                  <S.CrossRefStatusText
+                    consensus={analysis.crossReference.consensus}
+                  >
                     {getConsensusStatusText(analysis.crossReference.consensus)}
                   </S.CrossRefStatusText>
                 </S.CrossRefStatus>

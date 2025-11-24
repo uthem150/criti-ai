@@ -353,7 +353,7 @@ ${request.content}
     🔎 제공된 Google 검색 도구를 활용하여 'sourceCredibility' (출처 신뢰도) 및 'keyClaims' (핵심 주장)의 팩트체크를 수행하세요.
     🔎 출처의 평판, 전문성, 과거 이력 등을 검색하여 \`sourceCredibility.reputation.description\`에 반영하세요.
     🔎 팩트체크가 필요한 주장에 대한 검증 결과를 \`crossReference\` 섹션에 반영하세요.
-    **🚨 \`crossReference.factCheckSources[].url\` 필드에는 Google 검색을 통해 실제로 조사된, 유효하고 접근 가능한 팩트체크 기사의 URL을 반드시 제공해야 합니다. 플레이스 홀더나 무효한 URL을 사용해서는 안 됩니다.**
+    **🚨 \`crossReference.factCheckSources[].url\` 필드에는 Google 검색을 통해 실제로 조사된, 유효하고 접근 가능한 팩트체크 기사의 URL을 반드시 제공해야 합니다. 플레이스 홀더나 무효한 URL을 사용해서는 안 됩니다. 또한, 신뢰할 수 있는 자료를 조사하고 제공해야합니다**
 `;
   }
 

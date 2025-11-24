@@ -2,6 +2,8 @@ import styled from "@emotion/styled";
 import { css, keyframes } from "@emotion/react";
 import { colors, typography } from "@/styles/design";
 import {
+  getAdScoreColor,
+  getConsensusBackgroundColor,
   getConsensusColor,
   getIntensityColor,
   getScoreColor,
@@ -806,6 +808,7 @@ export const WordHeader = styled.div`
   justify-content: space-between;
   align-items: center;
   margin-bottom: 0.5rem;
+  gap: 0.5rem;
 `;
 
 export const WordBadge = styled.span<{
@@ -840,6 +843,8 @@ export const WordCategory = styled.span`
   padding: 0.125rem 0.375rem;
   background: ${colors.light.grayscale[10]};
   border-radius: 0.25rem;
+
+  flex-shrink: 0; /* 절대 줄어들지 않음 */
 `;
 
 export const WordExplanation = styled.p`
@@ -1136,51 +1141,51 @@ export const AdvertisementContent = styled.div`
 `;
 
 export const AdOverview = styled.div`
-  background: ${colors.light.grayscale[5]};
-  border: 0.0625rem solid ${colors.light.grayscale[20]};
-  border-radius: 0.75rem;
-  padding: 1.25rem;
   display: flex;
   flex-direction: column;
+  align-items: stretch;
+  gap: 2.5rem;
+  align-self: stretch;
   gap: 1.5rem;
+  padding-bottom: 2rem;
 `;
 
-export const AdStatus = styled.div`
+export const AdStatus = styled.div<{ isAdvertorial?: boolean }>`
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
   padding: 1.25rem;
   background: ${colors.light.grayscale[0]};
   border-radius: 0.75rem;
-`;
-
-export const AdBadge = styled.div<{ isAdvertorial?: boolean }>`
-  padding: 0.75rem 1.5rem;
-  border-radius: 0.75rem;
-  ${typography.styles.title4};
-  font-weight: ${typography.fontWeight.semibold};
-  border: 0.125rem solid;
-  text-align: center;
-  background: ${colors.light.grayscale[5]};
 
   ${(props) =>
     props.isAdvertorial
       ? css`
-          color: ${colors.light.state.error};
-          border-color: ${colors.light.state.error};
+          background-color: ${colors.light.etc.redLight};
         `
       : css`
-          color: ${colors.light.brand.primary100};
-          border-color: ${colors.light.brand.primary100};
+          background-color: ${colors.light.etc.blueLight};
+        `}
+`;
+
+export const AdBadge = styled.div<{ isAdvertorial?: boolean }>`
+  ${typography.styles.title4};
+  text-align: center;
+
+  ${(props) =>
+    props.isAdvertorial
+      ? css`
+          color: ${colors.light.etc.red};
+        `
+      : css`
+          color: ${colors.light.etc.blue};
         `}
 `;
 
 export const AdConfidence = styled.span`
-  ${typography.styles.body3};
-  color: ${colors.light.grayscale[70]};
-  font-weight: ${typography.fontWeight.regular};
+  ${typography.styles.caption3};
+  color: ${colors.light.grayscale[60]};
 `;
 
 export const AdScores = styled.div`
@@ -1210,7 +1215,9 @@ export const AdScoreLabel = styled.span`
 export const AdScoreValue = styled.span<{ score?: number }>`
   ${typography.styles.title5};
   color: ${({ score }) =>
-    score !== undefined ? getScoreColor(score) : colors.light.brand.primary100};
+    score !== undefined
+      ? getAdScoreColor(score)
+      : colors.light.brand.primary100};
   font-weight: ${typography.fontWeight.bold};
 `;
 
@@ -1226,7 +1233,7 @@ export const AdScoreBar = styled.div`
 export const AdScoreBarFill = styled.div<{ score: number }>`
   height: 100%;
   width: ${(props) => props.score}%;
-  background: ${({ score }) => getScoreColor(score)};
+  background: ${({ score }) => getAdScoreColor(score)};
   border-radius: 0.25rem;
   transition: width 0.5s ease;
 `;
@@ -1246,7 +1253,7 @@ export const CrossRefContent = styled.div`
   gap: 1.25rem;
 `;
 
-export const CrossRefStatus = styled.div`
+export const CrossRefStatus = styled.div<{ consensus: string }>`
   display: flex;
   height: 3.375rem;
   padding: 1rem 0;
@@ -1256,12 +1263,13 @@ export const CrossRefStatus = styled.div`
   align-self: stretch;
   border-radius: 0.75rem;
 
-  background-color: ${colors.light.etc.yellowLight};
+  background-color: ${({ consensus }) =>
+    getConsensusBackgroundColor(consensus)};
 `;
 
-export const CrossRefStatusText = styled.div`
-  ${typography.styles.title4};
-  color: #d97706;
+export const CrossRefStatusText = styled.div<{ consensus: string }>`
+  ${typography.styles.title4}
+  color: ${({ consensus }) => getConsensusColor(consensus)};
   font-weight: ${typography.fontWeight.semibold};
 `;
 
@@ -1309,7 +1317,9 @@ export const SearchKeywordsTitle = styled(KeyClaimsTitle)`
   margin: 0;
   font-weight: ${typography.fontWeight.bold};
 `;
-export const FactCheckSourcesTitle = styled(KeyClaimsTitle)``;
+export const FactCheckSourcesTitle = styled(KeyClaimsTitle)`
+  border-radius: 0.7rem;
+`;
 export const ConsensusDisplayTitle = styled(SectionContentTitleH4)``;
 
 export const ClaimItem = styled.li`
@@ -1545,6 +1555,14 @@ export const CriticalThinkingButton = styled.button`
   }
 `;
 
+export const ClickableTextWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%; /* 부모 너비 가득 채우기 */
+  gap: 0.5rem; /* 텍스트와 카테고리 사이 간격 */
+`;
+
 // ClickableText 스타일
 export const ClickableTextStyled = styled.span<{
   type: TextType;
@@ -1560,6 +1578,8 @@ export const ClickableTextStyled = styled.span<{
   /* 유틸 함수를 사용하여 글자색 동적 적용 */
   color: ${({ type }) => getTextTypeColor(type)};
 
+  text-align: left;
+
   &:hover {
     background-color: ${colors.light.grayscale[10]};
   }
@@ -1571,6 +1591,10 @@ export const ClickableTextStyled = styled.span<{
     font-weight: ${typography.fontWeight.bold};
     border-bottom: none;
     background: ${colors.light.grayscale[10]};
+
+    /* badge 안에서도 말줄임표가 적용되도록 상속/유지 */
+    overflow: hidden;
+    text-overflow: ellipsis;
 
     &.low {
       color: ${getIntensityColor("low")}; /* 민트 */

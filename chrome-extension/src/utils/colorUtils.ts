@@ -196,3 +196,32 @@ export const getAdColor = (isAdvertorial: boolean): string => {
     ? colors.light.state.error
     : colors.light.brand.primary100;
 };
+
+/**
+ * 여론 합의(Consensus) 상태에 따른 배경 색상 반환
+ * (텍스트보다 연한 파스텔 톤)
+ */
+export const getConsensusBackgroundColor = (consensus: string): string => {
+  switch (consensus) {
+    case "agree":
+      return colors.light.etc.mintLight;
+    case "disagree":
+      return colors.light.state.errorLight;
+    case "mixed":
+      return colors.light.etc.yellowLight;
+    case "insufficient":
+    default:
+      return colors.light.grayscale[10]; // 연한 회색
+  }
+};
+
+/**
+ * 점수(0~100)에 따른 색상 코드를 반환.
+ */
+export const getAdScoreColor = (score: number): string => {
+  if (score > 80) return colors.light.etc.red;
+  if (score > 60) return colors.light.etc.orange;
+  if (score > 40) return colors.light.etc.yellow;
+  if (score > 20) return colors.light.etc.mint;
+  return colors.light.etc.blue;
+};
