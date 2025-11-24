@@ -31,7 +31,7 @@ const slideDown = keyframes`
   }
   to {
     opacity: 1;
-    max-height: 1000px;
+    max-height: 62.5rem;
   }
 `;
 
@@ -61,9 +61,11 @@ export const CloseButton = styled.button`
   cursor: pointer;
   color: ${colors.light.grayscale[60]};
 
-  transition: all "250ms ease-in-out";
-  backdrop-filter: blur(10px);
-  box-shadow: "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)";
+  transition: all 250ms ease-in-out;
+  backdrop-filter: blur(0.625rem);
+  box-shadow:
+    0 0.25rem 0.375rem -0.0625rem rgb(0 0 0 / 0.1),
+    0 0.125rem 0.25rem -0.125rem rgb(0 0 0 / 0.1);
 
   &:hover {
     background: ${colors.light.grayscale[5]};
@@ -113,7 +115,7 @@ export const HeaderSubtitle = styled.p`
 
 // 에러 섹션
 export const ErrorSection = styled.div`
-  padding: 60px 24px;
+  padding: 3.75rem 1.5rem;
   text-align: center;
   background: ${colors.light.grayscale[0]};
   min-height: 90vh;
@@ -124,55 +126,55 @@ export const ErrorSection = styled.div`
 `;
 
 export const ErrorIcon = styled.div`
-  font-size: 80px;
-  margin-bottom: 24px;
+  font-size: 5rem;
+  margin-bottom: 1.5rem;
   line-height: 1;
 `;
 
 export const ErrorTitle = styled.h3`
-  font-size: 28px;
+  font-size: 1.75rem;
   font-weight: ${typography.fontWeight.bold};
-  margin: 0 0 12px 0;
+  margin: 0 0 0.75rem 0;
   color: ${colors.light.state.error};
-  letter-spacing: -0.5px;
+  letter-spacing: -0.03125rem;
 `;
 
 export const ErrorText = styled.p`
   ${typography.styles.body2};
-  margin: 0 0 32px 0;
+  margin: 0 0 2rem 0;
   color: ${colors.light.grayscale[70]};
   line-height: 1.6;
-  max-width: 400px;
+  max-width: 25rem;
 `;
 
 export const ErrorSolutions = styled.div`
   background: ${colors.light.grayscale[5]};
-  border: 1px solid ${colors.light.grayscale[20]};
-  border-radius: 16px;
-  padding: 24px;
-  margin: 0 0 32px 0;
+  border: 0.0625rem solid ${colors.light.grayscale[20]};
+  border-radius: 1rem;
+  padding: 1.5rem;
+  margin: 0 0 2rem 0;
   text-align: left;
-  max-width: 420px;
+  max-width: 26.25rem;
   width: 100%;
 `;
 
 export const ErrorSolutionsTitle = styled.h4`
   ${typography.styles.title5};
   font-weight: ${typography.fontWeight.semibold};
-  margin: 0 0 16px 0;
+  margin: 0 0 1rem 0;
   color: ${colors.light.grayscale[90]};
 `;
 
 export const ErrorSolutionsList = styled.ul`
   margin: 0;
-  padding-left: 20px;
+  padding-left: 1.25rem;
   color: ${colors.light.grayscale[70]};
   list-style-type: disc;
 `;
 
 export const ErrorSolutionsItem = styled.li`
   ${typography.styles.body4};
-  margin-bottom: 8px;
+  margin-bottom: 0.5rem;
   line-height: 1.5;
 
   &:last-child {
@@ -182,17 +184,17 @@ export const ErrorSolutionsItem = styled.li`
 
 export const ErrorActions = styled.div`
   display: flex;
-  gap: 12px;
+  gap: 0.75rem;
   justify-content: center;
   width: 100%;
-  max-width: 420px;
+  max-width: 26.25rem;
 `;
 
 export const ErrorButton = styled.button<{ primary?: boolean }>`
-  padding: 16px 32px;
+  padding: 1rem 2rem;
   border: none;
-  border-radius: 12px;
-  font-size: 16px;
+  border-radius: 0.75rem;
+  font-size: 1rem;
   font-weight: ${typography.fontWeight.semibold};
   cursor: pointer;
   transition: all 250ms ease-in-out;
@@ -203,10 +205,10 @@ export const ErrorButton = styled.button<{ primary?: boolean }>`
     props.primary
       ? css`
           background: ${colors.light.brand.primary100};
-          box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+          box-shadow: 0 0.125rem 0.5rem rgba(59, 130, 246, 0.2);
 
           &:hover {
-            box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3);
+            box-shadow: 0 0.25rem 1rem rgba(59, 130, 246, 0.3);
             opacity: 0.95;
           }
         `
@@ -219,7 +221,7 @@ export const ErrorButton = styled.button<{ primary?: boolean }>`
         `}
 
   &:hover {
-    transform: translateY(-1px);
+    transform: translateY(-0.0625rem);
   }
 
   &:active {
@@ -230,7 +232,7 @@ export const ErrorButton = styled.button<{ primary?: boolean }>`
 // 환영 섹션
 export const WelcomeSection = styled.div`
   min-height: 90vh;
-  padding: 60px 24px 40px;
+  padding: 3.75rem 1.5rem 2.5rem;
   text-align: center;
   background: ${colors.light.grayscale[0]};
   display: flex;
@@ -240,19 +242,19 @@ export const WelcomeSection = styled.div`
 `;
 
 export const WelcomeTitle = styled.h3`
-  font-size: 28px;
+  font-size: 1.75rem;
   font-weight: ${typography.fontWeight.bold};
-  margin: 0 0 16px 0;
+  margin: 0 0 1rem 0;
   color: ${colors.light.grayscale[100]};
   line-height: 1.3;
-  letter-spacing: -0.5px;
+  letter-spacing: -0.03125rem;
 `;
 
 export const WelcomeText = styled.p`
   ${typography.styles.body2};
-  margin: 0 0 32px 0;
+  margin: 0 0 2rem 0;
   color: ${colors.light.grayscale[60]};
-  max-width: 380px;
+  max-width: 23.75rem;
   line-height: 1.6;
 `;
 
@@ -260,23 +262,23 @@ export const AnalyzeButton = styled.button`
   background: ${colors.light.brand.primary100};
   color: ${colors.light.grayscale[0]};
   border: none;
-  padding: 18px 48px;
-  border-radius: 16px;
-  font-size: 18px;
+  padding: 1.125rem 3rem;
+  border-radius: 1rem;
+  font-size: 1.125rem;
   font-weight: ${typography.fontWeight.semibold};
   cursor: pointer;
-  margin-bottom: 32px;
+  margin-bottom: 2rem;
   transition: all 250ms ease-in-out;
-  box-shadow: 0 2px 12px rgba(59, 130, 246, 0.2);
+  box-shadow: 0 0.125rem 0.75rem rgba(59, 130, 246, 0.2);
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 0.625rem;
   width: fit-content;
 
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
+    transform: translateY(-0.125rem);
+    box-shadow: 0 0.25rem 1.25rem rgba(59, 130, 246, 0.3);
     opacity: 0.95;
   }
 
@@ -286,7 +288,7 @@ export const AnalyzeButton = styled.button`
 `;
 
 export const ButtonIcon = styled.span`
-  font-size: 22px;
+  font-size: 1.375rem;
   display: flex;
   align-items: center;
   line-height: 1;
@@ -305,19 +307,19 @@ export const FeatureItem = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  padding: 24px 16px;
+  gap: 0.75rem;
+  padding: 1.5rem 1rem;
   background: ${colors.light.grayscale[5]};
-  border: 1px solid ${colors.light.grayscale[20]};
-  border-radius: 16px;
+  border: 0.0625rem solid ${colors.light.grayscale[20]};
+  border-radius: 1rem;
   transition: all 250ms ease-in-out;
   cursor: pointer;
 
   &:hover {
     background: ${colors.light.grayscale[10]};
     border-color: ${colors.light.brand.primary100};
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transform: translateY(-0.125rem);
+    box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.08);
   }
 `;
 
@@ -329,7 +331,7 @@ export const FeatureIcon = styled.span`
 
 // 로딩 섹션
 export const LoadingSection = styled.div`
-  padding: 60px 24px;
+  padding: 3.75rem 1.5rem;
   text-align: center;
   background: ${colors.light.grayscale[0]};
   min-height: 90vh;
@@ -343,15 +345,15 @@ export const LoadingAnimation = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 24px;
-  margin-bottom: 32px;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
 `;
 
 export const Spinner = styled.div`
-  width: 64px;
-  height: 64px;
-  border: 4px solid ${colors.light.grayscale[10]};
-  border-top: 4px solid ${colors.light.brand.primary100};
+  width: 4rem;
+  height: 4rem;
+  border: 0.25rem solid ${colors.light.grayscale[10]};
+  border-top: 0.25rem solid ${colors.light.brand.primary100};
   border-radius: 50%;
   animation: ${spin} 1s linear infinite;
   margin: 0 auto;
@@ -360,12 +362,12 @@ export const Spinner = styled.div`
 export const LoadingDots = styled.div`
   display: flex;
   justify-content: center;
-  gap: 8px;
+  gap: 0.5rem;
 `;
 
 export const LoadingDot = styled.span`
-  width: 10px;
-  height: 10px;
+  width: 0.625rem;
+  height: 0.625rem;
   background: ${colors.light.brand.primary100};
   border-radius: 50%;
   animation: ${pulse} 1.4s ease-in-out infinite both;
@@ -382,35 +384,35 @@ export const LoadingDot = styled.span`
 `;
 
 export const LoadingTitle = styled.h3`
-  font-size: 28px;
+  font-size: 1.75rem;
   font-weight: ${typography.fontWeight.bold};
-  margin: 0 0 12px 0;
+  margin: 0 0 0.75rem 0;
   color: ${colors.light.grayscale[100]};
-  letter-spacing: -0.5px;
+  letter-spacing: -0.03125rem;
 `;
 
 export const LoadingText = styled.p`
   ${typography.styles.body2};
-  margin: 0 0 32px 0;
+  margin: 0 0 2rem 0;
   color: ${colors.light.grayscale[60]};
   line-height: 1.6;
-  max-width: 400px;
+  max-width: 25rem;
 `;
 
 export const AnalysisSteps = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 0.75rem;
   align-items: center;
   width: 100%;
-  max-width: 360px;
+  max-width: 22.5rem;
 `;
 
 export const Step = styled.div<{ active?: boolean }>`
-  padding: 16px 24px;
+  padding: 1rem 1.5rem;
   background: ${colors.light.grayscale[5]};
-  border: 1px solid ${colors.light.grayscale[20]};
-  border-radius: 12px;
+  border: 0.0625rem solid ${colors.light.grayscale[20]};
+  border-radius: 0.75rem;
   ${typography.styles.body3};
   font-weight: ${typography.fontWeight.regular};
   color: ${colors.light.grayscale[60]};
@@ -425,7 +427,7 @@ export const Step = styled.div<{ active?: boolean }>`
       color: ${colors.light.grayscale[0]};
       font-weight: ${typography.fontWeight.semibold};
       border-color: ${colors.light.brand.primary100};
-      box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+      box-shadow: 0 0.125rem 0.5rem rgba(59, 130, 246, 0.2);
     `}
 `;
 
@@ -441,8 +443,6 @@ export const ExpandableSectionContainer = styled.div`
   background: ${colors.light.grayscale[5]};
   overflow: hidden;
   transition: all 250ms ease-in-out;
-
-  cursor: pointer;
 `;
 
 export const SectionHeader = styled.button`
@@ -469,7 +469,7 @@ export const SectionHeader = styled.button`
 export const HeaderLeft = styled.div`
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 0.75rem;
 `;
 
 export const SectionTitle = styled.span`
@@ -517,14 +517,14 @@ export const SectionContent = styled.div`
 export const SectionContentTitleH4 = styled.h4`
   ${typography.styles.title5};
   color: ${colors.light.grayscale[90]};
-  margin: 0 0 12px 0;
+  margin: 0 0 0.75rem 0;
 `;
 
 export const SectionContentTitleH5 = styled.h5`
   ${typography.styles.caption4};
   font-weight: ${typography.fontWeight.semibold};
   color: ${colors.light.grayscale[70]};
-  margin: 0 0 8px 0;
+  margin: 0 0 0.5rem 0;
 `;
 
 // 종합 분석 결과
@@ -571,7 +571,7 @@ export const ChartGraphBox = styled.div`
   gap: 1.25rem;
   align-self: stretch;
 
-  border-bottom: 1px solid ${colors.light.grayscale[20]};
+  border-bottom: 0.0625rem solid ${colors.light.grayscale[20]};
 `;
 
 // 그래프 내부의 개별 막대 컬럼 (Value + Bar)
@@ -588,7 +588,7 @@ export const ChartGraphColumn = styled.div`
 export const DetailedScoresTitle = styled.h4`
   ${typography.styles.title4};
   color: ${colors.light.grayscale[90]};
-  margin: 0 0 16px 0;
+  margin: 0 0 1rem 0;
 `;
 
 // 세로 막대 그래프 컨테이너
@@ -606,7 +606,7 @@ export const ChartColumn = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: flex-end;
-  gap: 8px;
+  gap: 0.5rem;
   flex: 1;
 `;
 
@@ -614,17 +614,16 @@ export const ChartBarVertical = styled.div<{ height: number; color: string }>`
   width: 100%;
   /* 15rem 높이 기준 100% 비율로 계산 */
   height: ${(props) => props.height}%;
-  background: ${(props) => props.color};
-
+  background: ${(props) => props.color || getScoreColor(props.height)};
   /* 상단만 둥글게 */
-  border-radius: 4px 4px 0 0;
+  border-radius: 0.25rem 0.25rem 0 0;
   position: relative;
   transition: height 0.5s ease;
-  min-height: 2px; /* 0점이어도 라인은 보이게 */
+  min-height: 0.125rem; /* 0점이어도 라인은 보이게 */
 `;
 
 export const ChartValue = styled.div<{ score: number }>`
-  margin-bottom: 8px; /* 막대와의 간격 */
+  margin-bottom: 0.5rem; /* 막대와의 간격 */
   ${typography.styles.title5}
   font-weight: ${typography.fontWeight.bold};
   color: ${({ score }) => getScoreColor(score)};
@@ -651,7 +650,7 @@ export const ChartLabel = styled.div`
 export const SourceContent = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 1rem;
 `;
 
 export const TrustLevel = styled.div`
@@ -662,13 +661,13 @@ export const TrustLevel = styled.div`
 export const TrustBadge = styled.span<{
   level: "trusted" | "neutral" | "caution" | "unreliable";
 }>`
-  padding: 8px 16px;
-  border-radius: 9999px;
+  padding: 0.5rem 1rem;
+  border-radius: 624.9375rem;
   ${typography.styles.title5};
 
   /* 모든 케이스 공통 스타일 */
   background: ${colors.light.grayscale[5]};
-  border: 1px solid;
+  border: 0.0625rem solid;
 
   color: ${({ level }) => getTrustColor(level)};
   border-color: ${({ level }) => getTrustColor(level)};
@@ -679,13 +678,13 @@ export const SourceDetails = styled.div``;
 export const SourceDetailsTitle = styled.h4`
   ${typography.styles.title4};
   color: ${colors.light.grayscale[90]};
-  margin: 0 0 8px 0;
+  margin: 0 0 0.5rem 0;
 `;
 
 export const SourceDescriptionText = styled.p`
   ${typography.styles.body3};
   color: ${colors.light.grayscale[70]};
-  margin: 0 0 16px 0;
+  margin: 0 0 1rem 0;
 `;
 
 export const ReputationFactors = styled.div``;
@@ -694,35 +693,35 @@ export const ReputationFactorsTitle = styled.h5`
   ${typography.styles.caption3};
   font-weight: ${typography.fontWeight.semibold};
   color: ${colors.light.grayscale[70]};
-  margin: 0 0 8px 0;
+  margin: 0 0 0.5rem 0;
 `;
 
 export const FactorTags = styled.div`
   display: flex;
   flex-wrap: wrap;
-  gap: 4px;
+  gap: 0.25rem;
 `;
 
 export const FactorTag = styled.span`
   background: ${colors.light.grayscale[10]};
   color: ${colors.light.grayscale[60]};
-  padding: 4px 8px;
-  border-radius: 6px;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.375rem;
   ${typography.styles.caption4};
 `;
 
 export const HistoricalData = styled.div`
   background: ${colors.light.grayscale[5]};
-  padding: 12px;
-  border-radius: 8px;
-  border: 1px solid ${colors.light.grayscale[20]};
-  margin-top: 16px;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  border: 0.0625rem solid ${colors.light.grayscale[20]};
+  margin-top: 1rem;
 `;
 
 export const HistoricalItem = styled.div`
   display: flex;
   justify-content: space-between;
-  margin-bottom: 4px;
+  margin-bottom: 0.25rem;
 
   &:last-child {
     margin-bottom: 0;
@@ -744,20 +743,20 @@ export const HistoricalValue = styled.span`
 export const BiasContent = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 1.25rem;
 `;
 
 export const BiasSection = styled.div`
-  border: 1px solid ${colors.light.grayscale[20]};
-  border-radius: 8px;
-  padding: 16px;
+  border: 0.0625rem solid ${colors.light.grayscale[20]};
+  border-radius: 0.5rem;
+  padding: 1rem;
   background: ${colors.light.grayscale[5]};
 `;
 
 export const BiasSectionTitle = styled.h4`
   ${typography.styles.title5};
   color: ${colors.light.grayscale[90]};
-  margin: 0 0 12px 0;
+  margin: 0 0 0.75rem 0;
 `;
 
 export const BiasSectionHeader = styled.div`
@@ -775,7 +774,7 @@ export const IntensityBadge = styled.span<{
   ${typography.styles.caption4};
   font-weight: ${typography.fontWeight.semibold};
   background: ${colors.light.grayscale[0]};
-  border: 1px solid;
+  border: 0.0625rem solid;
 
   color: ${({ intensity }) => getIntensityColor(intensity)};
   border-color: ${({ intensity }) => getIntensityColor(intensity)};
@@ -787,33 +786,33 @@ export const ManipulativeWordsTitle = styled.h5`
   ${typography.styles.caption3};
   font-weight: ${typography.fontWeight.semibold};
   color: ${colors.light.grayscale[70]};
-  margin: 0 0 12px 0;
+  margin: 0 0 0.75rem 0;
 `;
 
 export const WordsGrid = styled.div`
   display: grid;
-  gap: 12px;
+  gap: 0.75rem;
 `;
 
 export const WordItem = styled.div`
   background: ${colors.light.grayscale[0]};
-  border: 1px solid ${colors.light.grayscale[20]};
-  border-radius: 8px;
-  padding: 12px;
+  border: 0.0625rem solid ${colors.light.grayscale[20]};
+  border-radius: 0.5rem;
+  padding: 0.75rem;
 `;
 
 export const WordHeader = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
+  margin-bottom: 0.5rem;
 `;
 
 export const WordBadge = styled.span<{
   impact: "low" | "medium" | "high";
 }>`
-  padding: 4px 8px;
-  border-radius: 6px;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.375rem;
   ${typography.styles.caption4};
   font-weight: ${typography.fontWeight.bold};
   background: ${colors.light.grayscale[10]};
@@ -838,9 +837,9 @@ export const WordBadge = styled.span<{
 export const WordCategory = styled.span`
   ${typography.styles.caption4};
   color: ${colors.light.grayscale[60]};
-  padding: 2px 6px;
+  padding: 0.125rem 0.375rem;
   background: ${colors.light.grayscale[10]};
-  border-radius: 4px;
+  border-radius: 0.25rem;
 `;
 
 export const WordExplanation = styled.p`
@@ -853,16 +852,16 @@ export const WordExplanation = styled.p`
 // 클릭베이트
 export const ClickbaitGrid = styled.div`
   display: grid;
-  gap: 12px;
+  gap: 0.75rem;
 `;
 
 export const ClickbaitItem = styled.div<{
   severity: "low" | "medium" | "high";
 }>`
   background: ${colors.light.grayscale[0]};
-  border: 1px solid ${colors.light.grayscale[20]};
-  border-radius: 8px;
-  padding: 12px;
+  border: 0.0625rem solid ${colors.light.grayscale[20]};
+  border-radius: 0.5rem;
+  padding: 0.75rem;
 
   ${(props) =>
     props.severity === "high" &&
@@ -882,7 +881,7 @@ export const ClickbaitHeader = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
+  margin-bottom: 0.5rem;
 `;
 
 export const ClickbaitType = styled.span`
@@ -894,8 +893,8 @@ export const ClickbaitType = styled.span`
 export const SeverityIndicator = styled.span<{
   severity: "low" | "medium" | "high";
 }>`
-  padding: 2px 6px;
-  border-radius: 4px;
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
   ${typography.styles.caption4};
   font-weight: ${typography.fontWeight.semibold};
 
@@ -922,11 +921,11 @@ export const SeverityIndicator = styled.span<{
 export const ClickbaitText = styled.div`
   ${typography.styles.body4};
   color: ${colors.light.grayscale[70]};
-  margin: 4px 0 8px 0;
+  margin: 0.25rem 0 0.5rem 0;
   font-style: italic;
-  padding: 4px 8px;
+  padding: 0.25rem 0.5rem;
   background: ${colors.light.grayscale[10]};
-  border-radius: 4px;
+  border-radius: 0.25rem;
 `;
 
 export const ClickbaitExplanation = styled.p`
@@ -939,23 +938,23 @@ export const ClickbaitExplanation = styled.p`
 // 정치적 편향
 export const PoliticalBias = styled.div`
   background: ${colors.light.grayscale[0]};
-  border: 1px solid ${colors.light.grayscale[20]};
-  border-radius: 8px;
-  padding: 12px;
+  border: 0.0625rem solid ${colors.light.grayscale[20]};
+  border-radius: 0.5rem;
+  padding: 0.75rem;
 `;
 
 export const PoliticalDirection = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
+  margin-bottom: 0.75rem;
 `;
 
 export const PoliticalBadge = styled.span<{
   direction: "left" | "right" | "center" | "neutral";
 }>`
-  padding: 4px 12px;
-  border-radius: 9999px;
+  padding: 0.25rem 0.75rem;
+  border-radius: 624.9375rem;
   ${typography.styles.caption4};
   font-weight: ${typography.fontWeight.semibold};
   background: ${colors.light.grayscale[10]};
@@ -988,26 +987,26 @@ export const PoliticalIndicatorsTitle = styled.h5`
   ${typography.styles.caption4};
   font-weight: ${typography.fontWeight.semibold};
   color: ${colors.light.grayscale[70]};
-  margin: 0 0 8px 0;
+  margin: 0 0 0.5rem 0;
 `;
 
 export const PoliticalIndicatorsList = styled.ul`
   margin: 0;
-  padding-left: 16px;
+  padding-left: 1rem;
   list-style-type: none;
 `;
 
 export const PoliticalIndicatorsItem = styled.li`
   ${typography.styles.body4};
   color: ${colors.light.grayscale[70]};
-  margin-bottom: 4px;
+  margin-bottom: 0.25rem;
   position: relative;
 
   &::before {
     content: "•";
     color: ${colors.light.grayscale[40]};
     position: absolute;
-    left: -12px;
+    left: -0.75rem;
   }
 `;
 
@@ -1015,27 +1014,27 @@ export const PoliticalIndicatorsItem = styled.li`
 export const LogicContent = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 1rem;
 `;
 
 export const FallaciesGrid = styled.div`
   display: grid;
-  gap: 16px;
+  gap: 1rem;
 `;
 
 export const FallacyItem = styled.div<{
   severity: "low" | "medium" | "high";
 }>`
   background: ${colors.light.grayscale[0]};
-  border: 1px solid ${colors.light.grayscale[20]};
-  border-radius: 12px;
-  padding: 16px;
+  border: 0.0625rem solid ${colors.light.grayscale[20]};
+  border-radius: 0.75rem;
+  padding: 1rem;
   transition: all 250ms ease-in-out;
 
   &:hover {
     box-shadow:
-      0 4px 6px -1px rgb(0 0 0 / 0.1),
-      0 2px 4px -2px rgb(0 0 0 / 0.1);
+      0 0.25rem 0.375rem -0.0625rem rgb(0 0 0 / 0.1),
+      0 0.125rem 0.25rem -0.125rem rgb(0 0 0 / 0.1);
   }
 
   border-color: ${({ severity }) => getIntensityColor(severity)};
@@ -1046,13 +1045,13 @@ export const FallacyHeader = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
+  margin-bottom: 0.75rem;
 `;
 
 export const FallacyType = styled.div`
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 0.5rem;
 `;
 
 export const FallacyName = styled.span`
@@ -1063,8 +1062,8 @@ export const FallacyName = styled.span`
 export const SeverityBadge = styled.span<{
   severity: "low" | "medium" | "high";
 }>`
-  padding: 4px 8px;
-  border-radius: 12px;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.75rem;
   ${typography.styles.caption4};
   font-weight: ${typography.fontWeight.semibold};
   background: ${colors.light.grayscale[10]};
@@ -1075,7 +1074,7 @@ export const SeverityBadge = styled.span<{
 export const FallacyContent = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 0.75rem;
 `;
 
 export const FallacyDescription = styled.p`
@@ -1094,10 +1093,10 @@ export const FallacyExamplesTitle = styled(SectionContentTitleH5)``;
 
 export const AffectedTextQuote = styled.blockquote`
   margin: 0;
-  padding: 8px 12px;
+  padding: 0.5rem 0.75rem;
   background: ${colors.light.grayscale[10]};
-  border-left: 3px solid ${colors.light.grayscale[40]};
-  border-radius: 4px;
+  border-left: 0.1875rem solid ${colors.light.grayscale[40]};
+  border-radius: 0.25rem;
   ${typography.styles.body4};
   color: ${colors.light.grayscale[70]};
   font-style: italic;
@@ -1111,21 +1110,21 @@ export const FallacyExplanationText = styled.p`
 
 export const FallacyExamplesList = styled.ul`
   margin: 0;
-  padding-left: 16px;
+  padding-left: 1rem;
   list-style-type: none;
 `;
 
 export const FallacyExamplesItem = styled.li`
   ${typography.styles.body4};
   color: ${colors.light.grayscale[60]};
-  margin-bottom: 4px;
+  margin-bottom: 0.25rem;
   position: relative;
 
   &::before {
     content: "•";
     color: ${colors.light.grayscale[40]};
     position: absolute;
-    left: -12px;
+    left: -0.75rem;
   }
 `;
 
@@ -1133,70 +1132,103 @@ export const FallacyExamplesItem = styled.li`
 export const AdvertisementContent = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 1.25rem;
 `;
 
 export const AdOverview = styled.div`
   background: ${colors.light.grayscale[5]};
-  border: 1px solid ${colors.light.grayscale[20]};
-  border-radius: 12px;
-  padding: 16px;
+  border: 0.0625rem solid ${colors.light.grayscale[20]};
+  border-radius: 0.75rem;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
 `;
 
 export const AdStatus = styled.div`
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
   align-items: center;
-  margin-bottom: 16px;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1.25rem;
+  background: ${colors.light.grayscale[0]};
+  border-radius: 0.75rem;
 `;
 
-export const AdBadge = styled.span<{ isAdvertorial?: boolean }>`
-  padding: 8px 12px;
-  border-radius: 9999px;
-  ${typography.styles.caption3};
+export const AdBadge = styled.div<{ isAdvertorial?: boolean }>`
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.75rem;
+  ${typography.styles.title4};
   font-weight: ${typography.fontWeight.semibold};
-  border: 1px solid;
+  border: 0.125rem solid;
+  text-align: center;
+  background: ${colors.light.grayscale[5]};
 
   ${(props) =>
     props.isAdvertorial
       ? css`
-          background: ${colors.light.grayscale[5]};
-          color: ${colors.light.etc.mint};
-          border-color: ${colors.light.etc.mint};
+          color: ${colors.light.state.error};
+          border-color: ${colors.light.state.error};
         `
       : css`
-          background: ${colors.light.grayscale[5]};
-          color: ${colors.light.etc.mint};
-          border-color: ${colors.light.etc.mint};
+          color: ${colors.light.brand.primary100};
+          border-color: ${colors.light.brand.primary100};
         `}
 `;
 
 export const AdConfidence = styled.span`
-  ${typography.styles.caption4};
-  color: ${colors.light.grayscale[60]};
+  ${typography.styles.body3};
+  color: ${colors.light.grayscale[70]};
+  font-weight: ${typography.fontWeight.regular};
 `;
 
 export const AdScores = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 1.25rem;
 `;
 
 export const AdScoreItem = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+`;
+
+export const AdScoreHeader = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
 `;
 
 export const AdScoreLabel = styled.span`
-  ${typography.styles.body4};
+  ${typography.styles.body3};
   color: ${colors.light.grayscale[70]};
+  font-weight: ${typography.fontWeight.regular};
 `;
 
-export const AdScoreValue = styled.span`
-  ${typography.styles.body4};
-  color: ${colors.light.grayscale[90]};
-  font-weight: ${typography.fontWeight.semibold};
+export const AdScoreValue = styled.span<{ score?: number }>`
+  ${typography.styles.title5};
+  color: ${({ score }) =>
+    score !== undefined ? getScoreColor(score) : colors.light.brand.primary100};
+  font-weight: ${typography.fontWeight.bold};
+`;
+
+export const AdScoreBar = styled.div`
+  width: 100%;
+  height: 0.5rem;
+  background: ${colors.light.grayscale[20]};
+  border-radius: 0.25rem;
+  overflow: hidden;
+  position: relative;
+`;
+
+export const AdScoreBarFill = styled.div<{ score: number }>`
+  height: 100%;
+  width: ${(props) => props.score}%;
+  background: ${({ score }) => getScoreColor(score)};
+  border-radius: 0.25rem;
+  transition: width 0.5s ease;
 `;
 
 export const AdIndicators = styled.div``;
@@ -1204,51 +1236,142 @@ export const AdIndicators = styled.div``;
 export const AdIndicatorsTitle = styled.h4`
   ${typography.styles.title5};
   color: ${colors.light.grayscale[90]};
-  margin: 0 0 16px 0;
+  margin: 0 0 1rem 0;
 `;
 
 // 교차 검증
 export const CrossRefContent = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 1.25rem;
 `;
 
-export const KeyClaims = styled.div``;
-export const SearchKeywords = styled.div``;
+export const CrossRefStatus = styled.div`
+  display: flex;
+  height: 3.375rem;
+  padding: 1rem 0;
+  justify-content: center;
+  align-items: center;
+  gap: 0.375rem;
+  align-self: stretch;
+  border-radius: 0.75rem;
+
+  background-color: ${colors.light.etc.yellowLight};
+`;
+
+export const CrossRefStatusText = styled.div`
+  ${typography.styles.title4};
+  color: #d97706;
+  font-weight: ${typography.fontWeight.semibold};
+`;
+
+export const KeyClaims = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
+  align-self: stretch;
+  background-color: ${colors.light.grayscale[5]};
+  border-radius: 0.75rem;
+  overflow: hidden;
+`;
+export const SearchKeywords = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  align-self: stretch;
+  background-color: ${colors.light.grayscale[5]};
+  border-radius: 0.75rem;
+  overflow: hidden;
+`;
 export const FactCheckSources = styled.div``;
 export const ConsensusDisplay = styled.div``;
 
-export const KeyClaimsTitle = styled(SectionContentTitleH4)``;
-export const SearchKeywordsTitle = styled(SectionContentTitleH4)``;
-export const FactCheckSourcesTitle = styled(SectionContentTitleH4)``;
-export const ConsensusDisplayTitle = styled(SectionContentTitleH4)``;
+export const KeyClaimsTitle = styled.h4`
+  ${typography.styles.title4};
+  color: ${colors.light.grayscale[100]};
+  background: ${colors.light.grayscale[10]};
 
-export const ClaimsList = styled.ul`
-  margin: 0;
-  padding-left: 16px;
-  list-style-type: none;
+  display: flex;
+  padding: 0.75rem 1.25rem;
+  justify-content: center;
+  align-items: center;
+  gap: 0.625rem;
+  align-self: stretch;
 `;
+
+export const SearchKeywordsTitle = styled(KeyClaimsTitle)`
+  ${typography.styles.title4};
+  color: ${colors.light.grayscale[100]};
+  background: ${colors.light.grayscale[10]};
+  padding: 0.75rem 1.25rem;
+  text-align: center;
+  margin: 0;
+  font-weight: ${typography.fontWeight.bold};
+`;
+export const FactCheckSourcesTitle = styled(KeyClaimsTitle)``;
+export const ConsensusDisplayTitle = styled(SectionContentTitleH4)``;
 
 export const ClaimItem = styled.li`
   ${typography.styles.body3};
   color: ${colors.light.grayscale[70]};
-  margin-bottom: 8px;
-  position: relative;
-  padding-left: 4px;
 
+  display: flex;
+  align-items: flex-start; /* 텍스트가 여러 줄일 때 위쪽 정렬 */
+  gap: 0.5rem; /* 마커와 텍스트 사이 간격 */
+
+  /* 기본 마커 제거 */
+  list-style: none;
+
+  /* 커스텀 마커 생성 */
   &::before {
-    content: "🎯";
-    position: absolute;
-    left: -16px;
+    content: "•";
+    color: ${colors.light.grayscale[70]};
+    flex-shrink: 0; /* 마커가 찌그러지지 않도록 고정 */
   }
+`;
+
+export const ClaimsList = styled.ul`
+  display: flex;
+  padding: 1.25rem;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.75rem;
+  align-self: stretch;
+  background: ${colors.light.grayscale[5]};
+  list-style: none; /* 기본 스타일 제거 */
+`;
+
+export const KeywordsContainer = styled.div`
+  background: ${colors.light.grayscale[5]};
+  padding: 1rem 1.25rem;
+`;
+
+export const KeywordTagsWrapper = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+`;
+
+export const KeywordTag = styled.span`
+  ${typography.styles.caption4};
+  color: ${colors.light.transparency.black[80]};
+
+  display: flex;
+  height: 1.5rem;
+  padding: 0.5625rem 0.5rem;
+  justify-content: center;
+  align-items: center;
+  gap: 0.625rem;
+  border-radius: 0.375rem;
+  background: ${colors.light.transparency.black[5]};
 `;
 
 export const KeywordsBox = styled.div`
   background: ${colors.light.grayscale[10]};
-  border: 1px solid ${colors.light.grayscale[30]};
-  border-radius: 8px;
-  padding: 12px;
+  border: 0.0625rem solid ${colors.light.grayscale[30]};
+  border-radius: 0.5rem;
+  padding: 0.75rem;
   ${typography.styles.body3};
   color: ${colors.light.grayscale[70]};
   font-weight: ${typography.fontWeight.semibold};
@@ -1256,22 +1379,22 @@ export const KeywordsBox = styled.div`
 
 export const SourcesGrid = styled.div`
   display: grid;
-  gap: 12px;
+  gap: 0.75rem;
 `;
 
 export const FactCheckItem = styled.div<{
   verdict: "true" | "false" | "mixed" | "unverified";
 }>`
   background: ${colors.light.grayscale[0]};
-  border: 1px solid ${colors.light.grayscale[20]};
-  border-radius: 8px;
-  padding: 12px;
+  border: 0.0625rem solid ${colors.light.grayscale[20]};
+  border-radius: 0.5rem;
+  padding: 0.75rem;
   transition: all 250ms ease-in-out;
 
   &:hover {
     box-shadow:
-      0 4px 6px -1px rgb(0 0 0 / 0.1),
-      0 2px 4px -2px rgb(0 0 0 / 0.1);
+      0 0.25rem 0.375rem -0.0625rem rgb(0 0 0 / 0.1),
+      0 0.125rem 0.25rem -0.125rem rgb(0 0 0 / 0.1);
   }
 
   ${(props) =>
@@ -1298,7 +1421,7 @@ export const SourceHeader = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
+  margin-bottom: 0.5rem;
 `;
 
 export const SourceOrg = styled.span`
@@ -1310,8 +1433,8 @@ export const SourceOrg = styled.span`
 export const VerdictBadge = styled.span<{
   verdict: VerdictType;
 }>`
-  padding: 4px 8px;
-  border-radius: 12px;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.75rem;
   ${typography.styles.caption4};
   font-weight: ${typography.fontWeight.semibold};
   background: ${colors.light.grayscale[10]};
@@ -1322,7 +1445,7 @@ export const VerdictBadge = styled.span<{
 export const SourceSummary = styled.p`
   ${typography.styles.body4};
   color: ${colors.light.grayscale[70]};
-  margin: 0 0 8px 0;
+  margin: 0 0 0.5rem 0;
 `;
 
 export const SourceLink = styled.a`
@@ -1339,79 +1462,82 @@ export const SourceLink = styled.a`
 export const ConsensusBadge = styled.div<{
   consensus: ConsensusType;
 }>`
-  padding: 12px 16px;
-  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
   ${typography.styles.title5};
   text-align: center;
-  border: 2px solid;
+  border: 0.125rem solid;
   background: ${colors.light.grayscale[5]};
 
-  /* 👇 유틸 함수를 사용하여 글자색과 테두리 색상 동적 적용 */
   color: ${({ consensus }) => getConsensusColor(consensus)};
   border-color: ${({ consensus }) => getConsensusColor(consensus)};
 `;
 
 // 분석 팁
 export const AnalysisTips = styled.div`
-  margin-top: 24px;
-  padding: 20px;
-  background: ${colors.light.grayscale[5]};
-  border: 1px solid ${colors.light.etc.yellow};
-  border-radius: 12px;
+  display: flex;
+  padding: 2rem;
+  flex-direction: column;
+  align-items: center;
+  align-self: stretch;
 `;
 
 export const AnalysisTipsTitle = styled.h4`
-  ${typography.styles.title4};
-  color: ${colors.light.grayscale[90]};
-  margin: 0 0 16px 0;
-  text-align: center;
+  color: ${colors.light.grayscale[100]};
+  font-size: 1rem;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+  letter-spacing: -0.02rem;
+  padding-bottom: 1rem;
 `;
 
-export const TipsGrid = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
+export const TipsList = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+  align-self: stretch;
+  padding-bottom: 1.25rem;
 `;
 
 export const TipItem = styled.div`
   display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  padding: 8px;
-  background: ${colors.light.grayscale[0]};
-  border-radius: 8px;
+  align-items: center;
+  gap: 0.5rem;
 `;
 
-export const TipIcon = styled.span`
-  font-size: ${typography.styles.title4.fontSize};
+export const TipCheckIcon = styled.span`
+  color: ${colors.light.brand.primary100};
+  font-size: 1.5rem;
   flex-shrink: 0;
-  margin-top: 2px;
+  line-height: 1;
+  margin-top: 0.125rem;
 `;
 
 export const TipText = styled.p`
-  margin: 0;
-  ${typography.styles.body4};
+  ${typography.styles.caption3};
   color: ${colors.light.grayscale[70]};
 `;
 
 // 비판적 사고 훈련 버튼
 export const CriticalThinkingButton = styled.button`
   width: 100%;
-  padding: 14px 20px;
+  padding: 0.875rem 1.25rem;
   background: ${colors.light.brand.primary100};
   color: ${colors.light.grayscale[0]};
   border: none;
-  border-radius: 12px;
+  border-radius: 0.75rem;
   ${typography.styles.title5};
   font-weight: ${typography.fontWeight.semibold};
   cursor: pointer;
   transition: all 250ms ease-in-out;
-  margin-top: 16px;
+  margin-top: 1rem;
 
   &:hover {
     background: ${colors.light.brand.primary100};
     opacity: 0.9;
-    transform: translateY(-1px);
+    transform: translateY(-0.0625rem);
   }
 
   &:active {
@@ -1424,8 +1550,8 @@ export const ClickableTextStyled = styled.span<{
   type: TextType;
 }>`
   cursor: pointer;
-  padding: 2px 4px;
-  border-radius: 2px;
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.125rem;
   transition: 150ms ease-in-out;
 
   /* 공통 스타일: 모든 타입이 semibold를 사용하므로 여기서 한 번만 선언 */
@@ -1439,21 +1565,21 @@ export const ClickableTextStyled = styled.span<{
   }
 
   &.word-badge {
-    padding: 4px 8px;
-    border-radius: 6px;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.375rem;
     ${typography.styles.caption4};
     font-weight: ${typography.fontWeight.bold};
     border-bottom: none;
     background: ${colors.light.grayscale[10]};
 
     &.low {
-      color: ${colors.light.etc.yellow};
+      color: ${getIntensityColor("low")}; /* 민트 */
     }
     &.medium {
-      color: ${colors.light.etc.orange};
+      color: ${getIntensityColor("medium")}; /* 노랑 */
     }
     &.high {
-      color: ${colors.light.etc.red};
+      color: ${getIntensityColor("high")}; /* 빨강 */
     }
   }
 `;

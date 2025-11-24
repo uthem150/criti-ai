@@ -256,7 +256,7 @@ ${request.content}
     "isAdvertorial": "true/false. 광고성 콘텐츠 여부",
     "confidence": 0-100 사이의 정수. 광고성 판단 확신도,
     "nativeAdScore": 0-100 사이의 정수. 네이티브 광고 점수 (높을수록 광고적),
-    "commercialIntentScore": 0-100 사이의 정수. 상업적 의도 점수,
+    "commercialIntentScore": 0-100 사이의 정수. 상업적 의도 점수 (높을수록 광고적),
     "indicators": [
       {
         "type": "'product_mention' | 'affiliate_link' | 'sponsored_content' | 'promotional_language' | 'call_to_action' | 'brand_focus'",
@@ -1696,8 +1696,8 @@ ${transcript.fullText.substring(0, 5000)}${transcript.fullText.length > 5000 ? "
   "advertisementAnalysis": {
     "isAdvertorial": true,
     "confidence": 85,
-    "nativeAdScore": 70,
-    "commercialIntentScore": 80,
+    "nativeAdScore": 70 네이티브 광고 점수 (높을수록 광고적),
+    "commercialIntentScore": 80 상업적 의도 점수 (높을수록 광고적),
     "indicators": [
       {
         "type": "product_mention | affiliate_link | sponsored_content | promotional_language | call_to_action | brand_focus",
@@ -2093,8 +2093,8 @@ ${transcript.fullText.substring(0, 5000)}${transcript.fullText.length > 5000 ? "
   "advertisementAnalysis": {
     "isAdvertorial": true,
     "confidence": 0-100 사이의 정수,
-    "nativeAdScore": 0-100 사이의 정수,
-    "commercialIntentScore": 0-100 사이의 정수,
+    "nativeAdScore": 0-100 사이의 정수 네이티브 광고 점수 (높을수록 광고적),
+    "commercialIntentScore": 0-100 사이의 정수 상업적 의도 점수 (높을수록 광고적),
     "indicators": [
       {
         "type": "product_mention | affiliate_link | sponsored_content | promotional_language | call_to_action | brand_focus",

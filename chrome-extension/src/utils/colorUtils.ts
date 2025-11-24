@@ -131,3 +131,68 @@ export const getTextTypeColor = (type: TextType | string): string => {
       return colors.light.grayscale[90];
   }
 };
+
+/**
+ * 광고성 여부에 따른 뱃지 정보 반환
+ */
+export const getAdBadgeInfo = (isAdvertorial: boolean) => {
+  if (isAdvertorial) {
+    return {
+      text: "광고성",
+      color: colors.light.state.error, // 또는 getVerdictColor("false")
+    };
+  }
+  return {
+    text: "비광고성",
+    color: colors.light.brand.primary100, // 또는 getVerdictColor("true")
+  };
+};
+
+/**
+ * 교차 검증(Consensus) 상태에 따른 뱃지 정보 반환
+ */
+export const getConsensusBadgeInfo = (consensus: ConsensusType | string) => {
+  switch (consensus) {
+    case "agree":
+      return { text: "일치", color: colors.light.state.success };
+    case "disagree":
+      return { text: "불일치", color: colors.light.state.error };
+    case "mixed":
+      return { text: "혼재", color: colors.light.etc.yellow };
+    case "insufficient":
+    default:
+      return { text: "불충분", color: colors.light.grayscale[60] };
+  }
+};
+
+/**
+ * 논리적 오류 개수에 따른 뱃지 색상 반환
+ * - 1개 이상: Error (Red)
+ * - 0개: Mint (Safe)
+ */
+export const getFallacyColor = (count: number): string => {
+  return count > 0 ? colors.light.state.error : colors.light.etc.mint;
+};
+
+/**
+ * 정치적 성향 색상 (Left: Blue, Right: Red, Center: Gray)
+ */
+export const getPoliticalColor = (direction: string): string => {
+  switch (direction) {
+    case "left":
+      return colors.light.brand.primary100;
+    case "right":
+      return colors.light.state.error;
+    default:
+      return colors.light.grayscale[60];
+  }
+};
+
+/**
+ * 광고성 여부 색상 (Advertorial: Red, Normal: Blue)
+ */
+export const getAdColor = (isAdvertorial: boolean): string => {
+  return isAdvertorial
+    ? colors.light.state.error
+    : colors.light.brand.primary100;
+};

@@ -6,7 +6,23 @@ import Magnifier from "@/assets/icons/magnifier.svg?react";
 import Logo from "@/assets/icons/CritiAI_Logo.svg?react";
 
 import styled from "@emotion/styled";
-import { getScoreColor } from "@/utils/colorUtils";
+import {
+  getAdColor,
+  getConsensusColor,
+  getFallacyColor,
+  getScoreColor,
+} from "@/utils/colorUtils";
+import {
+  getAdIndicatorText,
+  getClickbaitTypeText,
+  getConsensusBadgeText,
+  getConsensusStatusText,
+  getIntensityText,
+  getManipulativeCategoryText,
+  getPoliticalDirectionText,
+  getTrustLevelText,
+  getVerdictText,
+} from "@/utils/textUtils";
 
 const StyledMagnifier = styled(Magnifier)`
   display: flex;
@@ -25,7 +41,7 @@ const StyledMagnifier = styled(Magnifier)`
       transform: translateY(0);
     }
     50% {
-      transform: translateY(-10px);
+      transform: translateY(-0.625rem);
     }
   }
 `;
@@ -413,19 +429,13 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
             isExpanded={expandedSections.source}
             onToggle={() => toggleSection("source")}
             badge={`${analysis.sourceCredibility.score}점`}
-            badgeColor={colors.light.brand.primary100}
+            badgeColor={getScoreColor(analysis.sourceCredibility.score)}
             sectionType="source"
           >
             <S.SourceContent>
               <S.TrustLevel>
                 <S.TrustBadge level={analysis.sourceCredibility.level}>
-                  {analysis.sourceCredibility.level === "trusted"
-                    ? "✅ 신뢰할 만함"
-                    : analysis.sourceCredibility.level === "neutral"
-                      ? "⚖️ 중립적"
-                      : analysis.sourceCredibility.level === "caution"
-                        ? "⚠️ 주의 필요"
-                        : "🚨 신뢰하기 어려움"}
+                  {getTrustLevelText(analysis.sourceCredibility.level)}
                 </S.TrustBadge>
               </S.TrustLevel>
 
@@ -485,7 +495,9 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
             isExpanded={expandedSections.bias}
             onToggle={() => toggleSection("bias")}
             badge={`${analysis.biasAnalysis.emotionalBias.score}점`}
-            badgeColor={colors.light.etc.orange}
+            badgeColor={getScoreColor(
+              analysis.biasAnalysis.emotionalBias.score
+            )}
             sectionType="bias"
           >
             <S.BiasContent>
@@ -496,15 +508,9 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
                   <S.IntensityBadge
                     intensity={analysis.biasAnalysis.emotionalBias.intensity}
                   >
-                    {analysis.biasAnalysis.emotionalBias.intensity === "high"
-                      ? "🔴 매우 높음"
-                      : analysis.biasAnalysis.emotionalBias.intensity ===
-                          "medium"
-                        ? "🟡 보통"
-                        : analysis.biasAnalysis.emotionalBias.intensity ===
-                            "low"
-                          ? "🟢 낮음"
-                          : "✅ 거의 없음"}
+                    {getIntensityText(
+                      analysis.biasAnalysis.emotionalBias.intensity
+                    )}
                   </S.IntensityBadge>
                 </S.BiasSectionHeader>
 
@@ -543,17 +549,9 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
                                 </ClickableText>
                                 {typeof wordObj !== "string" && (
                                   <S.WordCategory>
-                                    {wordObj.category === "emotional"
-                                      ? "😭 감정적"
-                                      : wordObj.category === "exaggeration"
-                                        ? "📈 과장"
-                                        : wordObj.category === "urgency"
-                                          ? "⏰ 긴급"
-                                          : wordObj.category === "authority"
-                                            ? "👑 권위"
-                                            : wordObj.category === "fear"
-                                              ? "😰 공포"
-                                              : "⚠️ 기타"}
+                                    {getManipulativeCategoryText(
+                                      wordObj.category
+                                    )}
                                   </S.WordCategory>
                                 )}
                               </S.WordHeader>
@@ -587,13 +585,7 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
                           >
                             <S.ClickbaitHeader>
                               <S.ClickbaitType>
-                                {element.type === "curiosity_gap"
-                                  ? "🔍 호기심 갭"
-                                  : element.type === "emotional_trigger"
-                                    ? "💥 감정 트리거"
-                                    : element.type === "urgency"
-                                      ? "⚡ 긴급성"
-                                      : "⭐ 최상급"}
+                                {getClickbaitTypeText(element.type)}
                               </S.ClickbaitType>
                               <S.SeverityIndicator severity={element.severity}>
                                 {element.severity}
@@ -626,15 +618,9 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
                     <S.PoliticalBadge
                       direction={analysis.biasAnalysis.politicalBias.direction}
                     >
-                      {analysis.biasAnalysis.politicalBias.direction === "left"
-                        ? "⬅️ 진보적"
-                        : analysis.biasAnalysis.politicalBias.direction ===
-                            "right"
-                          ? "➡️ 보수적"
-                          : analysis.biasAnalysis.politicalBias.direction ===
-                              "center"
-                            ? "🎯 중도"
-                            : "⚖️ 중립적"}
+                      {getPoliticalDirectionText(
+                        analysis.biasAnalysis.politicalBias.direction
+                      )}
                     </S.PoliticalBadge>
                     <S.Confidence>
                       확신도: {analysis.biasAnalysis.politicalBias.confidence}%
@@ -672,7 +658,7 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
                 isExpanded={expandedSections.logic}
                 onToggle={() => toggleSection("logic")}
                 badge={`${analysis.logicalFallacies.length}개`}
-                badgeColor={colors.light.state.error}
+                badgeColor={getFallacyColor(analysis.logicalFallacies.length)}
                 sectionType="logic"
               >
                 <S.LogicContent>
@@ -752,11 +738,9 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
                   ? "광고성"
                   : "비광고성"
               }
-              badgeColor={
+              badgeColor={getAdColor(
                 analysis.advertisementAnalysis.isAdvertorial
-                  ? colors.light.state.error
-                  : colors.light.brand.primary100
-              }
+              )}
               sectionType="advertisement"
             >
               <S.AdvertisementContent>
@@ -768,27 +752,46 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
                       }
                     >
                       {analysis.advertisementAnalysis.isAdvertorial
-                        ? "🚨 광고성 콘텐츠"
-                        : "✅ 일반 콘텐츠"}
+                        ? "광고성 콘텐츠"
+                        : "일반 콘텐츠"}
                     </S.AdBadge>
                     <S.AdConfidence>
                       확신도: {analysis.advertisementAnalysis.confidence}%
                     </S.AdConfidence>
                   </S.AdStatus>
 
+                  {/* 프로그레스 바 형태 점수 표시 */}
                   <S.AdScores>
                     <S.AdScoreItem>
-                      <S.AdScoreLabel>네이티브 광고:</S.AdScoreLabel>
-                      <S.AdScoreValue>
-                        {analysis.advertisementAnalysis.nativeAdScore}/100
-                      </S.AdScoreValue>
+                      <S.AdScoreHeader>
+                        <S.AdScoreLabel>네이티브 광고</S.AdScoreLabel>
+                        <S.AdScoreValue
+                          score={analysis.advertisementAnalysis.nativeAdScore}
+                        >
+                          {analysis.advertisementAnalysis.nativeAdScore}
+                        </S.AdScoreValue>
+                      </S.AdScoreHeader>
+                      <S.AdScoreBar>
+                        <S.AdScoreBarFill
+                          score={analysis.advertisementAnalysis.nativeAdScore}
+                        />
+                      </S.AdScoreBar>
                     </S.AdScoreItem>
+
                     <S.AdScoreItem>
-                      <S.AdScoreLabel>상업적 의도:</S.AdScoreLabel>
-                      <S.AdScoreValue>
-                        {analysis.advertisementAnalysis.commercialIntentScore}
-                        /100
-                      </S.AdScoreValue>
+                      <S.AdScoreHeader>
+                        <S.AdScoreLabel>상업적 의도</S.AdScoreLabel>
+                        <S.AdScoreValue>
+                          {analysis.advertisementAnalysis.commercialIntentScore}
+                        </S.AdScoreValue>
+                      </S.AdScoreHeader>
+                      <S.AdScoreBar>
+                        <S.AdScoreBarFill
+                          score={
+                            analysis.advertisementAnalysis.commercialIntentScore
+                          }
+                        />
+                      </S.AdScoreBar>
                     </S.AdScoreItem>
                   </S.AdScores>
                 </S.AdOverview>
@@ -826,19 +829,7 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
                                   </ClickableText>
 
                                   <S.WordCategory>
-                                    {indicator.type === "product_mention"
-                                      ? "🛍️ 제품 언급"
-                                      : indicator.type ===
-                                          "promotional_language"
-                                        ? "📢 홍보 언어"
-                                        : indicator.type === "call_to_action"
-                                          ? "👆 행동 유도"
-                                          : indicator.type === "brand_focus"
-                                            ? "🏷️ 브랜드 중심"
-                                            : indicator.type ===
-                                                "affiliate_link"
-                                              ? "🔗 제휴 링크"
-                                              : "📝 후원 콘텐츠"}
+                                    {getAdIndicatorText(indicator.type)}
                                   </S.WordCategory>
                                 </S.WordHeader>
 
@@ -863,61 +854,58 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
               title="교차 검증"
               isExpanded={expandedSections.crossref}
               onToggle={() => toggleSection("crossref")}
-              badge={
-                analysis.crossReference.consensus === "agree"
-                  ? "일치"
-                  : analysis.crossReference.consensus === "disagree"
-                    ? "불일치"
-                    : analysis.crossReference.consensus === "mixed"
-                      ? "혼재"
-                      : "불충분"
-              }
-              badgeColor={
-                analysis.crossReference.consensus === "agree"
-                  ? colors.light.state.success
-                  : analysis.crossReference.consensus === "disagree"
-                    ? colors.light.state.error
-                    : colors.light.etc.yellow
-              }
+              badge={getConsensusBadgeText(analysis.crossReference.consensus)}
+              badgeColor={getConsensusColor(analysis.crossReference.consensus)}
               sectionType="crossref"
             >
               <S.CrossRefContent>
+                {/* 상태 표시 박스 */}
+                <S.CrossRefStatus>
+                  <S.CrossRefStatusText>
+                    {getConsensusStatusText(analysis.crossReference.consensus)}
+                  </S.CrossRefStatusText>
+                </S.CrossRefStatus>
+
+                {/* 핵심 주장 */}
                 {analysis.crossReference.keyClaims &&
                   analysis.crossReference.keyClaims.length > 0 && (
                     <S.KeyClaims>
-                      <S.KeyClaimsTitle>🎯 핵심 주장</S.KeyClaimsTitle>
+                      <S.KeyClaimsTitle>핵심 주장</S.KeyClaimsTitle>
                       <S.ClaimsList>
                         {analysis.crossReference.keyClaims.map((claim, idx) => (
-                          <S.ClaimItem key={idx}>
-                            <ClickableText
-                              text={claim}
-                              type="claim"
-                              onTextClick={handleTextClick}
-                            >
-                              {claim}
-                            </ClickableText>
-                          </S.ClaimItem>
+                          <S.ClaimItem key={idx}>{claim}</S.ClaimItem>
                         ))}
                       </S.ClaimsList>
                     </S.KeyClaims>
                   )}
 
+                {/* 추천 검색 키워드 */}
                 {analysis.crossReference.relatedArticleKeywords && (
                   <S.SearchKeywords>
                     <S.SearchKeywordsTitle>
-                      🔎 추천 검색 키워드
+                      추천 검색 키워드
                     </S.SearchKeywordsTitle>
-                    <S.KeywordsBox>
-                      {analysis.crossReference.relatedArticleKeywords}
-                    </S.KeywordsBox>
+                    <S.KeywordsContainer>
+                      <S.KeywordTagsWrapper>
+                        {analysis.crossReference.relatedArticleKeywords
+                          .split(/[,\s]+/)
+                          .filter((keyword) => keyword.trim())
+                          .map((keyword, idx) => (
+                            <S.KeywordTag key={idx}>
+                              {keyword.trim()}
+                            </S.KeywordTag>
+                          ))}
+                      </S.KeywordTagsWrapper>
+                    </S.KeywordsContainer>
                   </S.SearchKeywords>
                 )}
 
+                {/* 팩트체크 소스 */}
                 {analysis.crossReference.factCheckSources &&
                   analysis.crossReference.factCheckSources.length > 0 && (
                     <S.FactCheckSources>
                       <S.FactCheckSourcesTitle>
-                        ✅ 팩트체크 소스
+                        팩트체크 소스
                       </S.FactCheckSourcesTitle>
                       <S.SourcesGrid>
                         {analysis.crossReference.factCheckSources.map(
@@ -926,13 +914,7 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
                               <S.SourceHeader>
                                 <S.SourceOrg>{source.organization}</S.SourceOrg>
                                 <S.VerdictBadge verdict={source.verdict}>
-                                  {source.verdict === "true"
-                                    ? "✅ 사실"
-                                    : source.verdict === "false"
-                                      ? "❌ 거짓"
-                                      : source.verdict === "mixed"
-                                        ? "🔄 부분적"
-                                        : "❓ 미확인"}
+                                  {getVerdictText(source.verdict)}
                                 </S.VerdictBadge>
                               </S.SourceHeader>
                               <S.SourceSummary>
@@ -953,54 +935,37 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
                       </S.SourcesGrid>
                     </S.FactCheckSources>
                   )}
-
-                <S.ConsensusDisplay>
-                  <S.ConsensusDisplayTitle>
-                    📊 전체적 합의
-                  </S.ConsensusDisplayTitle>
-                  <S.ConsensusBadge
-                    consensus={analysis.crossReference.consensus}
-                  >
-                    {analysis.crossReference.consensus === "agree"
-                      ? "✅ 대체로 일치함"
-                      : analysis.crossReference.consensus === "disagree"
-                        ? "❌ 대체로 불일치함"
-                        : analysis.crossReference.consensus === "mixed"
-                          ? "🔄 의견이 혼재됨"
-                          : "❓ 검증 정보 부족"}
-                  </S.ConsensusBadge>
-                </S.ConsensusDisplay>
               </S.CrossRefContent>
             </ExpandableSection>
           )}
 
           {/* 분석 팁 */}
           <S.AnalysisTips>
-            <S.AnalysisTipsTitle>💡 비판적 사고 팁</S.AnalysisTipsTitle>
-            <S.TipsGrid>
+            <S.AnalysisTipsTitle>비판적 사고 Tips</S.AnalysisTipsTitle>
+            <S.TipsList>
               <S.TipItem>
-                <S.TipIcon>🔍</S.TipIcon>
+                <S.TipCheckIcon>✓</S.TipCheckIcon>
                 <S.TipText>여러 출처에서 정보를 교차 확인하세요</S.TipText>
               </S.TipItem>
               <S.TipItem>
-                <S.TipIcon>⚖️</S.TipIcon>
+                <S.TipCheckIcon>✓</S.TipCheckIcon>
                 <S.TipText>
                   감정적 언어에 휩쓸리지 말고 객관적으로 판단하세요
                 </S.TipText>
               </S.TipItem>
               <S.TipItem>
-                <S.TipIcon>🎯</S.TipIcon>
+                <S.TipCheckIcon>✓</S.TipCheckIcon>
                 <S.TipText>
                   광고성 콘텐츠는 상업적 목적을 염두에 두고 읽으세요
                 </S.TipText>
               </S.TipItem>
               <S.TipItem>
-                <S.TipIcon>🧠</S.TipIcon>
+                <S.TipCheckIcon>✓</S.TipCheckIcon>
                 <S.TipText>
                   논리적 근거가 충분한지 스스로 판단해보세요
                 </S.TipText>
               </S.TipItem>
-            </S.TipsGrid>
+            </S.TipsList>
             <S.CriticalThinkingButton>
               비판적 사고 훈련하기
             </S.CriticalThinkingButton>
