@@ -162,7 +162,7 @@ EOF
     # Docker Compose 설치
     show_progress 3 3
     if ! command -v docker-compose &> /dev/null; then
-        sudo curl -L "https://github.com/docker/compose/releases/download/v2.20.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose >/dev/null 2>&1
+        sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose >/dev/null 2>&1
         sudo chmod +x /usr/local/bin/docker-compose
         print_success "Docker Compose 설치 완료"
     fi
@@ -263,7 +263,7 @@ build_and_start() {
     # 이미지 빌드
     show_progress 2 6
     echo -e "\n${BLUE}Docker 이미지 빌드 중... (5-10분 소요)${NC}"
-    docker-compose -f ./config/docker/docker-compose.home.yml build >/dev/null 2>&1
+    COMPOSE_PARALLEL_LIMIT=1 docker-compose -f ./config/docker/docker-compose.micro.yml build
     
     # 데이터베이스 스키마 적용
     show_progress 3 6
