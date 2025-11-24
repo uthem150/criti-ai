@@ -560,7 +560,7 @@ export const ScoreDescriptionText = styled.p`
 
 export const DetailedScores = styled.div`
   display: flex;
-  padding: 1.25rem 2rem;
+  padding: 1.5rem 2rem 1.25rem 2rem;
   flex-direction: column;
   justify-content: flex-end;
   align-items: center;
@@ -617,7 +617,7 @@ export const ChartColumn = styled.div`
 
 export const ChartBarVertical = styled.div<{ height: number; color: string }>`
   width: 100%;
-  /* 15rem 높이 기준 100% 비율로 계산 */
+  /* 13rem 높이 기준 100% 비율로 계산 */
   height: ${(props) => props.height}%;
   background: ${(props) => props.color || getScoreColor(props.height)};
   /* 상단만 둥글게 */
@@ -628,10 +628,25 @@ export const ChartBarVertical = styled.div<{ height: number; color: string }>`
 `;
 
 export const ChartValue = styled.div<{ score: number }>`
-  margin-bottom: 0.5rem; /* 막대와의 간격 */
+  /* 절대 위치로 변경하여 막대 영역을 침범하지 않게 함 */
+  position: absolute;
+
+  /* 막대 높이(score%)만큼 바닥에서 띄움 */
+  bottom: ${({ score }) => score}%;
+
+  /* 가로 중앙 정렬을 위해 너비와 정렬 설정 */
+  width: 100%;
+  text-align: center;
+
+  /* 막대와 텍스트 사이의 간격 */
+  margin-bottom: 0.5rem;
+
   ${typography.styles.title5}
   font-weight: ${typography.fontWeight.bold};
   color: ${({ score }) => getScoreColor(score)};
+
+  /* (선택 사항) 애니메이션이 있다면 텍스트도 같이 움직이도록 트랜지션 추가 */
+  transition: bottom 0.5s ease;
 `;
 
 // 하단 라벨 영역 컨테이너

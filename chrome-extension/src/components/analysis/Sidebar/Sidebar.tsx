@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import type { TrustAnalysis } from "@shared/types";
-import { colors } from "@/styles/design";
 import * as S from "./Sidebar.style";
 import Magnifier from "@/assets/icons/magnifier.svg?react";
 import Logo from "@/assets/icons/CritiAI_Logo.svg?react";
