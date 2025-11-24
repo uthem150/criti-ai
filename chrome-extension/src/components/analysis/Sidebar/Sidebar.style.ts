@@ -2,10 +2,13 @@ import styled from "@emotion/styled";
 import { css, keyframes } from "@emotion/react";
 import { colors, typography } from "@/styles/design";
 import {
+  getAdBackgroundColor,
+  getAdColor,
   getAdScoreColor,
   getConsensusBackgroundColor,
   getConsensusColor,
   getIntensityColor,
+  getPoliticalColor,
   getScoreColor,
   getTextTypeColor,
   getTrustColor,
@@ -820,21 +823,7 @@ export const WordBadge = styled.span<{
   font-weight: ${typography.fontWeight.bold};
   background: ${colors.light.grayscale[10]};
 
-  ${(props) =>
-    props.impact === "low" &&
-    css`
-      color: ${colors.light.etc.yellow};
-    `}
-  ${(props) =>
-    props.impact === "medium" &&
-    css`
-      color: ${colors.light.etc.orange};
-    `}
-  ${(props) =>
-    props.impact === "high" &&
-    css`
-      color: ${colors.light.etc.red};
-    `}
+  color: ${({ impact }) => getIntensityColor(impact)};
 `;
 
 export const WordCategory = styled.span`
@@ -863,23 +852,12 @@ export const ClickbaitGrid = styled.div`
 export const ClickbaitItem = styled.div<{
   severity: "low" | "medium" | "high";
 }>`
-  background: ${colors.light.grayscale[0]};
   border: 0.0625rem solid ${colors.light.grayscale[20]};
   border-radius: 0.5rem;
   padding: 0.75rem;
+  background: ${colors.light.grayscale[5]};
 
-  ${(props) =>
-    props.severity === "high" &&
-    css`
-      border-color: ${colors.light.etc.red};
-      background: ${colors.light.grayscale[5]};
-    `}
-  ${(props) =>
-    props.severity === "medium" &&
-    css`
-      border-color: ${colors.light.etc.yellow};
-      background: ${colors.light.grayscale[5]};
-    `}
+  border-color: ${({ severity }) => getIntensityColor(severity)};
 `;
 
 export const ClickbaitHeader = styled.div`
@@ -902,25 +880,9 @@ export const SeverityIndicator = styled.span<{
   border-radius: 0.25rem;
   ${typography.styles.caption4};
   font-weight: ${typography.fontWeight.semibold};
+  background: ${colors.light.grayscale[10]};
 
-  ${(props) =>
-    props.severity === "high" &&
-    css`
-      background: ${colors.light.grayscale[10]};
-      color: ${colors.light.etc.red};
-    `}
-  ${(props) =>
-    props.severity === "medium" &&
-    css`
-      background: ${colors.light.grayscale[10]};
-      color: ${colors.light.etc.yellow};
-    `}
-  ${(props) =>
-    props.severity === "low" &&
-    css`
-      background: ${colors.light.grayscale[10]};
-      color: ${colors.light.etc.mint};
-    `}
+  color: ${({ severity }) => getIntensityColor(severity)};
 `;
 
 export const ClickbaitText = styled.div`
@@ -964,21 +926,7 @@ export const PoliticalBadge = styled.span<{
   font-weight: ${typography.fontWeight.semibold};
   background: ${colors.light.grayscale[10]};
 
-  ${(props) =>
-    props.direction === "left" &&
-    css`
-      color: ${colors.light.brand.primary100};
-    `}
-  ${(props) =>
-    props.direction === "right" &&
-    css`
-      color: ${colors.light.state.error};
-    `}
-  ${(props) =>
-    (props.direction === "center" || props.direction === "neutral") &&
-    css`
-      color: ${colors.light.grayscale[60]};
-    `}
+  color: ${({ direction }) => getPoliticalColor(direction)};
 `;
 
 export const Confidence = styled.span`
@@ -1031,7 +979,7 @@ export const FallacyItem = styled.div<{
   severity: "low" | "medium" | "high";
 }>`
   background: ${colors.light.grayscale[0]};
-  border: 0.0625rem solid ${colors.light.grayscale[20]};
+  border: 0.0625rem solid;
   border-radius: 0.75rem;
   padding: 1rem;
   transition: all 250ms ease-in-out;
@@ -1159,28 +1107,15 @@ export const AdStatus = styled.div<{ isAdvertorial?: boolean }>`
   background: ${colors.light.grayscale[0]};
   border-radius: 0.75rem;
 
-  ${(props) =>
-    props.isAdvertorial
-      ? css`
-          background-color: ${colors.light.etc.redLight};
-        `
-      : css`
-          background-color: ${colors.light.etc.blueLight};
-        `}
+  background-color: ${({ isAdvertorial }) =>
+    getAdBackgroundColor(isAdvertorial)};
 `;
 
 export const AdBadge = styled.div<{ isAdvertorial?: boolean }>`
   ${typography.styles.title4};
   text-align: center;
 
-  ${(props) =>
-    props.isAdvertorial
-      ? css`
-          color: ${colors.light.etc.red};
-        `
-      : css`
-          color: ${colors.light.etc.blue};
-        `}
+  color: ${({ isAdvertorial }) => getAdColor(!!isAdvertorial)};
 `;
 
 export const AdConfidence = styled.span`
@@ -1319,6 +1254,7 @@ export const SearchKeywordsTitle = styled(KeyClaimsTitle)`
 `;
 export const FactCheckSourcesTitle = styled(KeyClaimsTitle)`
   border-radius: 0.7rem;
+  margin-bottom: 1rem;
 `;
 export const ConsensusDisplayTitle = styled(SectionContentTitleH4)``;
 
@@ -1395,7 +1331,7 @@ export const SourcesGrid = styled.div`
 export const FactCheckItem = styled.div<{
   verdict: "true" | "false" | "mixed" | "unverified";
 }>`
-  background: ${colors.light.grayscale[0]};
+  background: ${colors.light.grayscale[5]};
   border: 0.0625rem solid ${colors.light.grayscale[20]};
   border-radius: 0.5rem;
   padding: 0.75rem;
@@ -1407,24 +1343,7 @@ export const FactCheckItem = styled.div<{
       0 0.125rem 0.25rem -0.125rem rgb(0 0 0 / 0.1);
   }
 
-  ${(props) =>
-    props.verdict === "true" &&
-    css`
-      border-color: ${colors.light.etc.mint};
-      background: ${colors.light.grayscale[5]};
-    `}
-  ${(props) =>
-    props.verdict === "false" &&
-    css`
-      border-color: ${colors.light.state.error};
-      background: ${colors.light.grayscale[5]};
-    `}
-  ${(props) =>
-    props.verdict === "mixed" &&
-    css`
-      border-color: ${colors.light.etc.yellow};
-      background: ${colors.light.grayscale[5]};
-    `}
+  border-color: ${({ verdict }) => getVerdictColor(verdict)};
 `;
 
 export const SourceHeader = styled.div`

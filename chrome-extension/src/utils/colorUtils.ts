@@ -23,7 +23,7 @@ export type IntensityLevel = "none" | "low" | "medium" | "high";
 export const getIntensityColor = (
   intensity: IntensityLevel | string
 ): string => {
-  if (intensity === "high") return colors.light.state.error;
+  if (intensity === "high") return colors.light.etc.red;
   if (intensity === "medium") return colors.light.etc.yellow;
 
   // "none", "low" 또는 그 외의 경우
@@ -180,9 +180,9 @@ export const getFallacyColor = (count: number): string => {
 export const getPoliticalColor = (direction: string): string => {
   switch (direction) {
     case "left":
-      return colors.light.brand.primary100;
+      return colors.light.etc.blue;
     case "right":
-      return colors.light.state.error;
+      return colors.light.etc.red;
     default:
       return colors.light.grayscale[60];
   }
@@ -224,4 +224,9 @@ export const getAdScoreColor = (score: number): string => {
   if (score > 40) return colors.light.etc.yellow;
   if (score > 20) return colors.light.etc.mint;
   return colors.light.etc.blue;
+};
+
+// 광고성 여부 배경색
+export const getAdBackgroundColor = (isAdvertorial?: boolean): string => {
+  return isAdvertorial ? colors.light.etc.redLight : colors.light.etc.blueLight;
 };
