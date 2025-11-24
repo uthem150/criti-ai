@@ -452,9 +452,12 @@ const extractPageContent = async (): Promise<{
 
   // 제목 찾기 위한 여러 선택자 목록
   const titleSelectors = [
+    ".art_title",
+    ".article_title",
+    ".news_title",
+    ".tit_view",
     "h1",
     ".article-title",
-    ".news-title",
     ".post-title",
     ".entry-title",
     "[data-testid='headline']",
@@ -466,9 +469,6 @@ const extractPageContent = async (): Promise<{
     ".main-title",
     ".page-title",
     ".story-title",
-    ".article_title",
-    ".news_title",
-    ".tit_view",
     "#articleTitle",
     ".title_text",
   ];
@@ -478,117 +478,178 @@ const extractPageContent = async (): Promise<{
   // 여러 선택자 순회하며 유효한 제목을 찾음
   for (const selector of titleSelectors) {
     const element = clonedBody.querySelector(selector);
-    // 요소가 존재하고 텍스트 길이가 5자 이상이면 제목으로 설정하고 반복 중단
-    if (element?.textContent?.trim() && element.textContent.trim().length > 5) {
-      title = element.textContent.trim();
-      console.log("제목 발견:", title.substring(0, 50));
+    if (element?.textContent?.trim()) {
+      const text = element.textContent.trim();
+      if (text.length > 5 && text.length < 200) {
+        title = text;
+        console.log(`✅ 제목 발견 (${selector}):`, title.substring(0, 50));
+        break;
+      }
+    }
+  }
+
+  // 본문 추출 - 우선순위 그룹별로 처리
+  const priorityGroups = [
+    {
+      name: "우선순위 1 (구체적인 본문)",
+      minLength: 800, // 이 그룹에서는 800자 이상이면 충분
+      selectors: [
+        ".news_txt",
+        ".article_txt",
+        ".article-content",
+        ".news-content",
+        ".post-content",
+        ".entry-content",
+        "#article-view-content-div",
+        ".article_view",
+        ".article-body",
+        ".post-body",
+        ".content-body",
+        ".article-text",
+        ".news-body",
+        ".story-body",
+      ],
+    },
+    {
+      name: "우선순위 2 (일반 본문)",
+      minLength: 1500, // 이 그룹은 더 긴 것만 선택 (노이즈 가능성)
+      selectors: [
+        ".content",
+        ".main-content",
+        "[role='main']",
+        "main",
+        ".detail-content",
+        ".view-content",
+        ".read-content",
+      ],
+    },
+    {
+      name: "우선순위 3 (넓은 범위)",
+      minLength: 2000, // 가장 넓은 범위는 훨씬 긴 것만
+      selectors: ["article"],
+    },
+  ];
+
+  let content = "";
+  let selectedInfo = { selector: "", length: 0, group: "" };
+
+  // 각 우선순위 그룹을 순회
+  for (const group of priorityGroups) {
+    let groupMaxLength = 0;
+    let groupContent = "";
+    let groupSelector = "";
+
+    // 그룹 내에서 가장 긴 콘텐츠 찾기
+    for (const selector of group.selectors) {
+      const element = clonedBody.querySelector(selector);
+      if (element?.textContent?.trim()) {
+        const text = cleanText(element.textContent);
+        const textLength = text.length;
+
+        if (textLength > groupMaxLength) {
+          groupMaxLength = textLength;
+          groupContent = text;
+          groupSelector = selector;
+          console.log(
+            `📝 ${group.name} 후보 (${selector}):`,
+            textLength,
+            "글자"
+          );
+        }
+      }
+    }
+
+    // 이 그룹에서 충분한 길이를 찾았으면 선택하고 종료
+    if (groupMaxLength >= group.minLength) {
+      content = groupContent;
+      selectedInfo = {
+        selector: groupSelector,
+        length: groupMaxLength,
+        group: group.name,
+      };
+      console.log(
+        `✅ ${group.name}에서 선택:`,
+        groupSelector,
+        groupMaxLength,
+        "글자"
+      );
       break;
     }
   }
 
-  // 본문 찾기 위한 여러 선택자 목록
-  const contentSelectors = [
-    "article",
-    ".article-content",
-    ".news-content",
-    ".post-content",
-    ".entry-content",
-    ".content",
-    ".main-content",
-    "[role='main']",
-    "main",
-    ".article-body",
-    ".story-body",
-    ".post-body",
-    ".content-body",
-    ".article-text",
-    ".news-body",
-    ".detail-content",
-    ".view-content",
-    ".read-content",
-    ".article_content",
-    ".news_content",
-  ];
-
-  let content = "";
-  let maxTextLength = 0;
-
-  // 각 본문 선택자 순회하며 가장 긴 텍스트를 가진 요소를 찾음
-  for (const selector of contentSelectors) {
-    const element = clonedBody.querySelector(selector);
-    if (element?.textContent?.trim()) {
-      const textLength = element.textContent.trim().length;
-      // 현재까지 찾은 가장 긴 텍스트보다 길고, 100자 이상이면 콘텐츠로 선택
-      if (textLength > maxTextLength && textLength > 100) {
-        maxTextLength = textLength;
-        content = element.textContent.trim();
-        console.log("콘텐츠 후보:", selector, textLength, "글자");
-      }
-    }
-  }
-
-  // 본문 길이가 200자 미만이면 "추가 추출" 시도
-  // -> 일반적인 선택자로 본문을 찾지 못했을 때 대비책
-  if (content.length < 200) {
-    console.log("Intelligent 콘텐츠 추출 시도");
-
-    // 잠재적인 본문 요소들(p, div 등)을 모두 가져옴
-    const potentialElements = clonedBody.querySelectorAll(
-      "p, div, section, article, span"
+  // 모든 그룹에서 충분한 길이를 못 찾았지만 뭔가는 있으면 사용
+  if (content.length < 200 && selectedInfo.length > 0) {
+    console.log(
+      `⚠️ 충분하지 않지만 최선의 선택:`,
+      selectedInfo.selector,
+      selectedInfo.length,
+      "글자"
     );
-    const bestElements: Element[] = [];
-
-    // 각 요소를 순회하며 텍스트 밀도 기준으로 필터링
-    Array.from(potentialElements).forEach((element) => {
-      const text = element.textContent?.trim() || "";
-      const textLength = text.length;
-      const childElementsCount = element.children.length;
-
-      // 텍스트 밀도 계산: (텍스트 길이) / (자식 요소 수 + 1)
-      const density =
-        childElementsCount > 0
-          ? textLength / (childElementsCount + 1)
-          : textLength;
-      const hasParent = element.parentElement;
-      // 스크립트나 스타일 태그는 제외
-      const isNotScript = !element.tagName
-        .toLowerCase()
-        .match(/script|style|noscript/);
-
-      // 텍스트 길이가 50자 이상이고, 텍스트 밀도가 높으며, 부모가 있고, 스크립트/스타일이 아니면 후보로 선정
-      if (textLength > 50 && density > 30 && hasParent && isNotScript) {
-        bestElements.push(element);
-      }
-    });
-
-    if (bestElements.length > 0) {
-      // 후보 요소들을 텍스트 길이를 기준으로 내림차순 정렬
-      bestElements.sort(
-        (a, b) => (b.textContent?.length || 0) - (a.textContent?.length || 0)
-      );
-
-      // 상위 8개 요소를 선택하여 텍스트를 추출하고 합침
-      content = bestElements
-        .slice(0, 8)
-        .map((el) => el.textContent?.trim())
-        .filter((text) => text && text.length > 30) // 다시 한번 짧은 텍스트 필터링
-        .join("\n\n");
-
-      console.log("Intelligent 추출 성공:", content.length, "글자");
-    }
   }
 
-  // 최종 콘텐츠 길이를 4000자로 제한
+  // 여전히 부족하면 Intelligent 추출
+  if (content.length < 200) {
+    console.log("🤖 Intelligent 콘텐츠 추출 시도");
+    content = intelligentExtract(clonedBody);
+  }
+
   const finalContent = content.substring(0, 4000);
 
-  console.log("최종 콘텐츠 추출 완료:", {
+  console.log("📤 최종 콘텐츠:", {
     title: title.substring(0, 50),
+    selectedSelector: selectedInfo.selector,
     contentLength: finalContent.length,
-    domain: window.location.hostname,
-    success: finalContent.length >= 50, // 최종 콘텐츠가 50자 이상인지 확인
+    preview: finalContent.substring(0, 150).replace(/\s+/g, " "),
   });
 
   return { title, content: finalContent };
+};
+
+/**
+ * 텍스트 정제 - 과도한 공백/줄바꿈 제거
+ */
+const cleanText = (text: string): string => {
+  return text
+    .replace(/[\r\n]+/g, "\n") // 줄바꿈 통일
+    .replace(/[ \t]+/g, " ") // 공백 통일
+    .replace(/\n\s+/g, "\n") // 줄바꿈 후 공백 제거
+    .replace(/\s+\n/g, "\n") // 줄바꿈 전 공백 제거
+    .replace(/\n{3,}/g, "\n\n") // 연속 줄바꿈 최대 2개
+    .trim();
+};
+
+const intelligentExtract = (container: Element): string => {
+  const potentialElements = container.querySelectorAll(
+    "p, div, section, article"
+  );
+  const candidates: Array<{ element: Element; score: number }> = [];
+
+  Array.from(potentialElements).forEach((element) => {
+    const text = element.textContent?.trim() || "";
+    const textLength = text.length;
+    const childCount = element.children.length;
+
+    const density = childCount > 0 ? textLength / (childCount + 1) : textLength;
+
+    if (element.tagName.match(/script|style|noscript/i)) return;
+
+    if (textLength > 100 && density > 40) {
+      candidates.push({ element, score: textLength * density });
+    }
+  });
+
+  if (candidates.length === 0) return "";
+
+  candidates.sort((a, b) => b.score - a.score);
+
+  const extracted = candidates
+    .slice(0, 5)
+    .map(({ element }) => cleanText(element.textContent || ""))
+    .filter((text) => text.length > 50)
+    .join("\n\n");
+
+  console.log("✅ Intelligent 추출 성공:", extracted.length, "글자");
+  return extracted;
 };
 
 // ============================================================================
