@@ -966,7 +966,15 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
                 </S.TipText>
               </S.TipItem>
             </S.TipsList>
-            <S.CriticalThinkingButton>
+            <S.CriticalThinkingButton
+              onClick={() =>
+                window.open(
+                  "https://criti-ai-web.vercel.app/",
+                  "_blank",
+                  "noopener,noreferrer"
+                )
+              }
+            >
               비판적 사고 훈련하기
             </S.CriticalThinkingButton>
           </S.AnalysisTips>

@@ -177,7 +177,7 @@ export const PopupApp: React.FC = () => {
     // Challenge 웹 페이지로 이동 (개발 환경)
     const challengeUrl =
       process.env.NODE_ENV === "production"
-        ? "https://criti-ai-challenge.vercel.app"
+        ? "https://criti-ai-web.vercel.app"
         : "http://localhost:3000/challenge";
 
     chrome.tabs.create({ url: challengeUrl });
