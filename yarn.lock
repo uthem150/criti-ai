@@ -230,9 +230,6 @@
     "@babel/helper-string-parser" "^7.27.1"
     "@babel/helper-validator-identifier" "^7.28.5"
 
-"@criti-ai/shared@file:shared":
-  version "1.0.0"
-
 "@crxjs/vite-plugin@^2.2.0":
   version "2.2.0"
   resolved "https://registry.npmjs.org/@crxjs/vite-plugin/-/vite-plugin-2.2.0.tgz"

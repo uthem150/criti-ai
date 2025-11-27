@@ -9,10 +9,11 @@
     "build:extension": "tsc -b && vite build --mode production",
     "lint": "eslint .",
     "type-check": "tsc --noEmit",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "clean": "rimraf dist"
   },
   "dependencies": {
-    "@criti-ai/shared": "file:../shared",
+    "@criti-ai/shared": "1.0.0",
     "@emotion/css": "^11.13.5",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
@@ -36,6 +37,7 @@
     "eslint-plugin-react-refresh": "^0.4.20",
     "globals": "^16.3.0",
     "prettier": "^3.6.2",
+    "rimraf": "^5.0.5",
     "typescript": "~5.8.3",
     "typescript-eslint": "^8.39.1",
     "vite": "^7.1.2"

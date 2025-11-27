@@ -3,38 +3,45 @@
   "version": "1.0.0",
   "private": true,
   "description": "AI 기반 뉴스 신뢰도 분석 및 비판적 사고 훈련 플랫폼",
+  "workspaces": {
+    "packages": [
+      "shared",
+      "challenge-web",
+      "backend",
+      "chrome-extension"
+    ],
+    "nohoist": [
+      "**/@criti-ai/shared",
+      "**/@criti-ai/shared/**"
+    ]
+  },
   "scripts": {
-    "install:all": "cd backend && npm install && cd ../chrome-extension && npm install && cd ../challenge-web && npm install && cd ../shared && npm install",
-    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:chrome-extension\"",
-    "dev:backend": "cd backend && npm run dev",
-    "dev:chrome-extension": "cd chrome-extension && npm run dev",
-    "dev:challenge": "cd challenge-web && npm run dev",
-    "dev:full": "concurrently \"npm run dev:backend\" \"npm run dev:chrome-extension\" \"npm run dev:challenge\"",
-    "build": "cd shared && npm run build && cd ../chrome-extension && npm run build && cd ../challenge-web && npm run build && cd ../backend && npm run build",
-    "build:chrome-extension": "cd shared && npm run build && cd ../chrome-extension && npm run build",
-    "build:challenge": "cd shared && npm run build && cd ../challenge-web && npm run build",
-    "build:backend": "cd backend && npm run build",
-    "start": "cd backend && npm start",
-    "lint": "cd chrome-extension && npm run lint && cd ../challenge-web && npm run lint && cd ../backend && npm run lint",
-    "clean": "rimraf --glob **/dist **/node_modules/.cache",
+    "install:all": "yarn install",
+    "dev": "concurrently \"yarn workspace backend dev\" \"yarn workspace challenge-web dev\"",
+    "dev:backend": "yarn workspace backend dev",
+    "dev:challenge": "yarn workspace challenge-web dev",
+    "dev:extension": "yarn workspace chrome-extension dev",
+    "dev:full": "concurrently \"yarn workspace backend dev\" \"yarn workspace challenge-web dev\" \"yarn workspace chrome-extension dev\"",
+    "build": "yarn workspace @criti-ai/shared build && yarn workspace challenge-web build && yarn workspace chrome-extension build && yarn workspace backend build",
+    "build:challenge": "yarn workspace @criti-ai/shared build && yarn workspace challenge-web build",
+    "build:extension": "yarn workspace @criti-ai/shared build && yarn workspace chrome-extension build",
+    "build:backend": "yarn workspace backend build",
+    "build:shared": "yarn workspace @criti-ai/shared build",
+    "start": "yarn workspace backend start",
+    "lint": "yarn workspaces run lint",
+    "clean": "yarn workspaces run clean && rimraf **/node_modules/.cache",
     "docker:dev": "docker-compose -f config/docker/docker-compose.yml up -d",
     "docker:logs": "docker-compose -f config/docker/docker-compose.yml logs -f",
     "docker:stop": "docker-compose -f config/docker/docker-compose.yml down",
     "docker:micro": "docker-compose -f config/docker/docker-compose.micro.yml up -d",
     "docker:micro:logs": "docker-compose -f config/docker/docker-compose.micro.yml logs -f",
     "docker:micro:stop": "docker-compose -f config/docker/docker-compose.micro.yml down",
-    "db:studio": "cd backend && npm run db:studio"
+    "db:studio": "yarn workspace backend db:studio"
   },
   "devDependencies": {
     "concurrently": "^8.2.2",
     "rimraf": "^5.0.5"
   },
-  "workspaces": [
-    "chrome-extension",
-    "challenge-web",
-    "backend",
-    "shared"
-  ],
   "keywords": [
     "ai",
     "news-analysis",
