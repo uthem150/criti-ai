@@ -27,28 +27,52 @@ export const getIntensityColor = (
   if (intensity === "medium") return colors.light.etc.yellow;
 
   // "none", "low" 또는 그 외의 경우
-  return colors.light.etc.mint;
+  return colors.light.etc.blue;
+};
+
+export const getIntensityBgColor = (
+  intensity: IntensityLevel | string
+): string => {
+  if (intensity === "high") return colors.light.etc.redLight;
+  if (intensity === "medium") return colors.light.etc.yellowLight;
+
+  // "none", "low" 또는 그 외의 경우
+  return colors.light.etc.blueLight;
 };
 
 export type TrustLevel = "trusted" | "neutral" | "caution" | "unreliable";
 /**
  * 신뢰도 레벨에 따른 색상 코드를 반환
- * - trusted: 민트
+ * - trusted: 파랑
  * - neutral: 회색
- * - caution: 노랑
+ * - caution: 주황
  * - unreliable: 빨강
  */
 export const getTrustColor = (level: TrustLevel | string): string => {
   switch (level) {
     case "trusted":
-      return colors.light.etc.mint;
+      return colors.light.etc.blue;
     case "caution":
-      return colors.light.etc.yellow;
+      return colors.light.etc.orange;
     case "unreliable":
-      return colors.light.state.error;
+      return colors.light.etc.red;
     case "neutral":
     default:
       return colors.light.grayscale[60];
+  }
+};
+
+export const getTrustBgColor = (level: TrustLevel | string): string => {
+  switch (level) {
+    case "trusted":
+      return colors.light.etc.blueLight;
+    case "caution":
+      return colors.light.etc.orangeLight;
+    case "unreliable":
+      return colors.light.etc.redLight;
+    case "neutral":
+    default:
+      return colors.light.grayscale[20];
   }
 };
 

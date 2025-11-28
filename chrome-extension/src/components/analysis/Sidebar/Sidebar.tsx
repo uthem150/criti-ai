@@ -440,7 +440,7 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
 
               <S.SourceDetails>
                 <S.SourceDetailsTitle>
-                  📰 {analysis.sourceCredibility.domain}
+                  {analysis.sourceCredibility.domain}
                 </S.SourceDetailsTitle>
                 <S.SourceDescriptionText>
                   {analysis.sourceCredibility.reputation.description}
@@ -663,14 +663,11 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
                 <S.LogicContent>
                   <S.FallaciesGrid>
                     {analysis.logicalFallacies.map((fallacy, idx) => (
-                      <S.FallacyItem key={idx} severity={fallacy.severity}>
+                      <S.FallacyItem key={idx}>
                         <S.FallacyHeader>
                           <S.FallacyType>
                             <S.FallacyName>{fallacy.type}</S.FallacyName>
                           </S.FallacyType>
-                          <S.SeverityBadge severity={fallacy.severity}>
-                            {fallacy.severity}
-                          </S.SeverityBadge>
                         </S.FallacyHeader>
 
                         <S.FallacyContent>
@@ -681,41 +678,43 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
                           {fallacy.affectedText && (
                             <S.AffectedText>
                               <S.AffectedTextTitle>
-                                🎯 문제가 된 부분 (클릭하여 본문에서 찾기):
+                                문제가 된 부분
                               </S.AffectedTextTitle>
-                              <S.AffectedTextQuote>
-                                <ClickableText
-                                  text={fallacy.affectedText}
-                                  type="fallacy"
-                                  onTextClick={handleTextClick}
-                                >
-                                  "{fallacy.affectedText}"
-                                </ClickableText>
-                              </S.AffectedTextQuote>
+                              <S.FallacyDescriptionWrapper>
+                                <S.SeverityBadge severity={fallacy.severity}>
+                                  {fallacy.severity}
+                                </S.SeverityBadge>
+                                <S.AffectedTextQuote>
+                                  <ClickableText
+                                    text={fallacy.affectedText}
+                                    type="fallacy"
+                                    onTextClick={handleTextClick}
+                                  >
+                                    "{fallacy.affectedText}"
+                                  </ClickableText>
+                                </S.AffectedTextQuote>
+
+                                <S.FallacyExplanationText>
+                                  {fallacy.explanation}
+                                </S.FallacyExplanationText>
+                              </S.FallacyDescriptionWrapper>
                             </S.AffectedText>
                           )}
-
-                          <S.FallacyExplanation>
-                            <S.FallacyExplanationTitle>
-                              💡 쉬운 설명:
-                            </S.FallacyExplanationTitle>
-                            <S.FallacyExplanationText>
-                              {fallacy.explanation}
-                            </S.FallacyExplanationText>
-                          </S.FallacyExplanation>
 
                           {fallacy.examples && fallacy.examples.length > 0 && (
                             <S.FallacyExamples>
                               <S.FallacyExamplesTitle>
-                                📚 비슷한 예시:
+                                비슷한 예시
                               </S.FallacyExamplesTitle>
-                              <S.FallacyExamplesList>
-                                {fallacy.examples.map((example, exIdx) => (
-                                  <S.FallacyExamplesItem key={exIdx}>
-                                    {example}
-                                  </S.FallacyExamplesItem>
-                                ))}
-                              </S.FallacyExamplesList>
+                              <S.FallacyDescriptionWrapper>
+                                <S.FallacyExamplesList>
+                                  {fallacy.examples.map((example, exIdx) => (
+                                    <S.FallacyExamplesItem key={exIdx}>
+                                      {example}
+                                    </S.FallacyExamplesItem>
+                                  ))}
+                                </S.FallacyExamplesList>
+                              </S.FallacyDescriptionWrapper>
                             </S.FallacyExamples>
                           )}
                         </S.FallacyContent>
@@ -725,7 +724,6 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
                 </S.LogicContent>
               </ExpandableSection>
             )}
-
           {/* 광고성 분석 섹션 */}
           {analysis.advertisementAnalysis && (
             <ExpandableSection
@@ -881,7 +879,15 @@ export const AnalysisSidebar: React.FC<SidebarProps> = ({
                       <S.KeyClaimsTitle>핵심 주장</S.KeyClaimsTitle>
                       <S.ClaimsList>
                         {analysis.crossReference.keyClaims.map((claim, idx) => (
-                          <S.ClaimItem key={idx}>{claim}</S.ClaimItem>
+                          <S.ClaimItem key={idx}>
+                            <ClickableText
+                              text={claim}
+                              type="claim"
+                              onTextClick={handleTextClick}
+                            >
+                              {claim}
+                            </ClickableText>
+                          </S.ClaimItem>
                         ))}
                       </S.ClaimsList>
                     </S.KeyClaims>

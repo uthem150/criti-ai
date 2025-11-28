@@ -6,13 +6,13 @@
 export const getTrustLevelText = (level: string) => {
   switch (level) {
     case "trusted":
-      return "✅ 신뢰할 만함";
+      return "신뢰할 만함";
     case "neutral":
-      return "⚖️ 중립적";
+      return "중립적";
     case "caution":
-      return "⚠️ 주의 필요";
+      return "주의 필요";
     case "unreliable":
-      return "🚨 신뢰하기 어려움";
+      return "신뢰하기 어려움";
     default:
       return "미확인";
   }

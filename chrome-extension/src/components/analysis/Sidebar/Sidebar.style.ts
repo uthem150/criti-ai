@@ -7,10 +7,11 @@ import {
   getAdScoreColor,
   getConsensusBackgroundColor,
   getConsensusColor,
+  getIntensityBgColor,
   getIntensityColor,
   getPoliticalColor,
   getScoreColor,
-  getTextTypeColor,
+  getTrustBgColor,
   getTrustColor,
   getVerdictColor,
   type ConsensusType,
@@ -681,16 +682,24 @@ export const TrustLevel = styled.div`
 export const TrustBadge = styled.span<{
   level: "trusted" | "neutral" | "caution" | "unreliable";
 }>`
-  padding: 0.5rem 1rem;
-  border-radius: 624.9375rem;
   ${typography.styles.title5};
+
+  border-radius: 0.75rem;
+  display: flex;
+  height: 3.375rem;
+  padding: 1rem 0;
+  justify-content: center;
+  align-items: center;
+  gap: 0.375rem;
+  align-self: stretch;
+  flex: 1;
+  border: none;
 
   /* 모든 케이스 공통 스타일 */
   background: ${colors.light.grayscale[5]};
-  border: 0.0625rem solid;
 
   color: ${({ level }) => getTrustColor(level)};
-  border-color: ${({ level }) => getTrustColor(level)};
+  background-color: ${({ level }) => getTrustBgColor(level)};
 `;
 
 export const SourceDetails = styled.div``;
@@ -825,7 +834,7 @@ export const WordHeader = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.8rem;
   gap: 0.5rem;
 `;
 
@@ -852,7 +861,9 @@ export const WordCategory = styled.span`
 `;
 
 export const WordExplanation = styled.p`
-  ${typography.styles.body4};
+  ${typography.styles.body3};
+  font-size: 0.8rem;
+  line-height: 1.7;
   color: ${colors.light.grayscale[70]};
   line-height: 1.4;
   margin: 0;
@@ -987,112 +998,131 @@ export const LogicContent = styled.div`
 
 export const FallaciesGrid = styled.div`
   display: grid;
-  gap: 1rem;
+  gap: 2.5rem;
 `;
 
-export const FallacyItem = styled.div<{
-  severity: "low" | "medium" | "high";
-}>`
+export const FallacyItem = styled.div`
   background: ${colors.light.grayscale[0]};
-  border: 0.0625rem solid;
-  border-radius: 0.75rem;
-  padding: 1rem;
-  transition: all 250ms ease-in-out;
-
-  &:hover {
-    box-shadow:
-      0 0.25rem 0.375rem -0.0625rem rgb(0 0 0 / 0.1),
-      0 0.125rem 0.25rem -0.125rem rgb(0 0 0 / 0.1);
-  }
-
-  border-color: ${({ severity }) => getIntensityColor(severity)};
-  background: ${colors.light.grayscale[5]};
 `;
 
 export const FallacyHeader = styled.div`
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
   margin-bottom: 0.75rem;
 `;
 
 export const FallacyType = styled.div`
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  justify-content: space-between;
 `;
 
-export const FallacyName = styled.span`
-  ${typography.styles.title5};
-  color: ${colors.light.grayscale[90]};
+export const FallacyName = styled.h3`
+  color: ${colors.light.grayscale[100]};
+  font-size: 1.15rem;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+  letter-spacing: -0.025rem;
+`;
+
+export const FallacyDescriptionWrapper = styled.div`
+  display: flex;
+  padding: 1.25rem;
+  flex-direction: column;
+  align-items: flex-start;
+  align-self: stretch;
 `;
 
 export const SeverityBadge = styled.span<{
   severity: "low" | "medium" | "high";
 }>`
-  padding: 0.25rem 0.5rem;
-  border-radius: 0.75rem;
-  ${typography.styles.caption4};
-  font-weight: ${typography.fontWeight.semibold};
-  background: ${colors.light.grayscale[10]};
+  ${typography.styles.caption4}
+  display: flex;
+  height: 1.5rem;
+  padding: 0.5625rem 0.5rem;
+  justify-content: center;
+  align-items: center;
+  gap: 0.625rem;
+  border-radius: 0.375rem;
 
+  background: ${({ severity }) => getIntensityBgColor(severity)};
   color: ${({ severity }) => getIntensityColor(severity)};
+
+  margin-bottom: 0.75rem;
 `;
 
 export const FallacyContent = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 1rem;
 `;
 
 export const FallacyDescription = styled.p`
   ${typography.styles.body3};
   color: ${colors.light.grayscale[70]};
   margin: 0;
+  line-height: 1.6;
 `;
 
-export const AffectedText = styled.div``;
-export const FallacyExplanation = styled.div``;
-export const FallacyExamples = styled.div``;
+export const AffectedText = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
+  align-self: stretch;
+  background-color: ${colors.light.grayscale[5]};
+  border-radius: 0.75rem;
+  overflow: hidden;
+`;
 
-export const AffectedTextTitle = styled(SectionContentTitleH5)``;
-export const FallacyExplanationTitle = styled(SectionContentTitleH5)``;
-export const FallacyExamplesTitle = styled(SectionContentTitleH5)``;
+export const FallacyExamples = styled(AffectedText)``;
+
+export const AffectedTextTitle = styled.h4`
+  ${typography.styles.title4};
+  color: ${colors.light.grayscale[100]};
+  background: ${colors.light.grayscale[10]};
+
+  display: flex;
+  padding: 0.75rem 1.25rem;
+  justify-content: center;
+  align-items: center;
+  gap: 0.625rem;
+  align-self: stretch;
+`;
+
+export const FallacyExamplesTitle = styled(AffectedTextTitle)``;
 
 export const AffectedTextQuote = styled.blockquote`
-  margin: 0;
-  padding: 0.5rem 0.75rem;
-  background: ${colors.light.grayscale[10]};
-  border-left: 0.1875rem solid ${colors.light.grayscale[40]};
-  border-radius: 0.25rem;
-  ${typography.styles.body4};
-  color: ${colors.light.grayscale[70]};
-  font-style: italic;
+  ${typography.styles.title4};
+  margin-bottom: 0.7rem;
 `;
 
 export const FallacyExplanationText = styled.p`
-  margin: 0;
-  ${typography.styles.body4};
+  ${typography.styles.body3};
+  font-size: 0.8rem;
+  line-height: 1.7;
   color: ${colors.light.grayscale[70]};
 `;
 
 export const FallacyExamplesList = styled.ul`
   margin: 0;
   padding-left: 1rem;
-  list-style-type: none;
+  list-style-type: disc;
 `;
 
 export const FallacyExamplesItem = styled.li`
-  ${typography.styles.body4};
-  color: ${colors.light.grayscale[60]};
+  ${typography.styles.body3};
+  font-size: 0.8rem;
+  color: ${colors.light.grayscale[70]};
   margin-bottom: 0.25rem;
-  position: relative;
 
-  &::before {
-    content: "•";
-    color: ${colors.light.grayscale[40]};
-    position: absolute;
-    left: -0.75rem;
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  &::marker {
+    color: ${colors.light.grayscale[50]};
   }
 `;
 
@@ -1233,6 +1263,7 @@ export const KeyClaims = styled.div`
   border-radius: 0.75rem;
   overflow: hidden;
 `;
+
 export const SearchKeywords = styled.div`
   display: flex;
   flex-direction: column;
@@ -1279,7 +1310,7 @@ export const ClaimItem = styled.li`
 
   display: flex;
   align-items: flex-start; /* 텍스트가 여러 줄일 때 위쪽 정렬 */
-  gap: 0.5rem; /* 마커와 텍스트 사이 간격 */
+  gap: 0.2rem;
 
   /* 기본 마커 제거 */
   list-style: none;
@@ -1297,7 +1328,7 @@ export const ClaimsList = styled.ul`
   padding: 1.25rem;
   flex-direction: column;
   align-items: flex-start;
-  gap: 0.75rem;
+  gap: 0.25rem;
   align-self: stretch;
   background: ${colors.light.grayscale[5]};
   list-style: none; /* 기본 스타일 제거 */
@@ -1508,9 +1539,6 @@ export const ClickableTextStyled = styled.span<{
 
   /* 공통 스타일: 모든 타입이 semibold를 사용하므로 여기서 한 번만 선언 */
   font-weight: ${typography.fontWeight.semibold};
-
-  /* 유틸 함수를 사용하여 글자색 동적 적용 */
-  color: ${({ type }) => getTextTypeColor(type)};
 
   text-align: left;
 
