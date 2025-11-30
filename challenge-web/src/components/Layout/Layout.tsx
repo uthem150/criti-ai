@@ -6,6 +6,7 @@ import * as S from "./Layout.style";
 // 아이콘
 import Chart from "@/assets/icons/chart-bar.svg?react";
 import Seeding from "@/assets/icons/seeding.svg?react";
+import Badge from "@/assets/icons/Badge.svg?react";
 import Menu from "@/assets/icons/menu.svg?react";
 import Close from "@/assets/icons/chevron-up.svg?react";
 
@@ -57,7 +58,7 @@ const Layout: React.FC = () => {
       path: ROUTES.HOME,
     },
     {
-      icon: () => <div style={{ fontSize: "1.5rem" }}>🏆</div>,
+      icon: Badge,
       label: "내 뱃지",
       path: ROUTES.BADGES,
     },

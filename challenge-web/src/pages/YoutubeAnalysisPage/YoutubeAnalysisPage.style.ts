@@ -1,5 +1,6 @@
 import styled from "@emotion/styled";
 import { colors, typography } from "../../styles/design-system";
+import { getScoreColor } from "@/utils";
 
 // 전체 컨테이너
 export const Container = styled.div`
@@ -64,6 +65,14 @@ export const MiddleWrapper = styled.div`
   flex-direction: column;
   align-items: center;
   gap: 1.25rem;
+  width: 100%; /* 전체 너비 사용 */
+  max-width: 700px; /* 최대 너비 제한 */
+  padding: 0 1.25rem; /* 좌우 여백 추가 */
+  box-sizing: border-box;
+
+  @media (max-width: 640px) {
+    padding: 0 1rem; /* 모바일에서 패딩 조정 */
+  }
 `;
 
 export const TitleAndDescriptionWrapper = styled.div`
@@ -90,6 +99,7 @@ export const InputGroup = styled.div`
   display: flex;
   flex-direction: row;
   width: 100%;
+  max-width: 700px; /* 최대 너비 제한 추가 */
   box-sizing: border-box;
   height: 3rem;
   padding: 1rem 1.25rem;
@@ -102,17 +112,17 @@ export const InputGroup = styled.div`
   background: ${colors.light.grayscale[0]};
   box-shadow: 0 0 20px 0 ${colors.light.brand.primary20};
 
-  /* 2. 모바일 스타일 (세로 배치 덮어쓰기) */
+  /* 모바일 스타일 (세로 배치) */
   @media (max-width: 640px) {
     flex-direction: column;
     gap: 0.625rem;
+    height: auto; /* 높이 자동 조정 */
 
     /* 모바일에서는 그룹의 테두리/그림자 제거 */
     border: none;
     background: transparent;
     box-shadow: none;
     padding: 0;
-    min-height: auto;
   }
 `;
 
@@ -150,6 +160,7 @@ export const Input = styled.input`
     height: 3rem;
     text-align: center;
     flex: none;
+    padding: 0.875rem 1.25rem; /* 좌우 패딩 추가 */
 
     /* 모바일에서는 인풋에 직접 스타일 적용 */
     border-radius: 0.75rem;
@@ -185,13 +196,12 @@ export const SubmitButton = styled.button<{ disabled?: boolean }>`
 
   /* 모바일 스타일 */
   @media (max-width: 640px) {
-    width: 100%;
-    min-height: 2rem;
-    border-radius: 0.75rem; /* 인풋과 동일하게 */
-    opacity: 1; /* 불투명하게 */
-    flex-shrink: 1; /* 초기화 */
+    width: 100%; /* 전체 너비 */
+    height: 3rem; /* Input과 동일한 높이 */
+    border-radius: 0.75rem;
+    opacity: 1;
+    flex-shrink: 0; /* 줄어들지 않도록 */
 
-    /* 모바일용 hover */
     &:hover:not(:disabled) {
       opacity: 0.9;
       transform: none;
@@ -478,16 +488,18 @@ export const ChartCard = styled.div`
 export const ChartTitle = styled.h3`
   ${typography.styles.title4};
   color: ${colors.light.grayscale[90]};
-  margin: 0 0 1.5rem 0;
+  margin: 0 0 1rem 0;
 `;
 
+// 그래프 영역 (높이 고정, 막대들이 들어가는 곳)
 export const ChartContainer = styled.div`
   display: flex;
-  justify-content: space-around;
-  gap: 1.25rem;
-  height: 15rem;
+  height: 13rem;
   padding: 0 0.75rem;
+  align-items: flex-end;
+  gap: 1.25rem;
   align-self: stretch;
+  border-bottom: 0.0625rem solid ${colors.light.grayscale[20]};
 `;
 
 export const ChartColumn = styled.div`
@@ -495,39 +507,59 @@ export const ChartColumn = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: flex-end;
-  gap: 0.5rem;
   flex: 1;
+  height: 100%;
+  position: relative;
 `;
 
 export const ChartBarVertical = styled.div<{ height: number; color: string }>`
   width: 100%;
+  /* 13rem 높이 기준 100% 비율로 계산 */
   height: ${(props) => props.height}%;
-  background: ${(props) => props.color};
+  background: ${(props) => props.color || getScoreColor(props.height)};
+  /* 상단만 둥글게 */
   border-radius: 0.375rem 0.375rem 0 0;
   position: relative;
   transition: height 0.5s ease;
-  min-height: 20px;
+  min-height: 0.125rem; /* 0점이어도 라인은 보이게 */
 `;
 
 export const ChartValue = styled.div<{ score: number }>`
+  /* 절대 위치로 변경하여 막대 영역을 침범하지 않게 함 */
   position: absolute;
-  top: -1.5rem;
-  left: 50%;
-  transform: translateX(-50%);
-  ${typography.styles.title5};
 
-  color: ${(props) => {
-    if (props.score >= 70) return colors.light.state.success;
-    if (props.score >= 50) return colors.light.etc.orange;
-    return colors.light.state.error;
-  }};
-  white-space: nowrap;
+  /* 막대 높이(score%)만큼 바닥에서 띄움 */
+  bottom: ${({ score }) => score}%;
+
+  /* 가로 중앙 정렬을 위해 너비와 정렬 설정 */
+  width: 100%;
+  text-align: center;
+
+  /* 막대와 텍스트 사이의 간격 */
+  margin-bottom: 0.5rem;
+
+  ${typography.styles.title5}
+  font-weight: ${typography.fontWeight.bold};
+  color: ${({ score }) => getScoreColor(score)};
+
+  /* 애니메이션이 있다면 텍스트도 같이 움직이도록 트랜지션 추가 */
+  transition: bottom 0.5s ease;
+`;
+
+// 하단 라벨 영역 컨테이너
+export const ChartLabelsBox = styled.div`
+  display: flex;
+  padding: 0.625rem 0.75rem;
+  align-items: center;
+  gap: 1.25rem;
+  align-self: stretch;
 `;
 
 export const ChartLabel = styled.div`
+  flex: 1;
+  text-align: center;
   ${typography.styles.caption3};
   color: ${colors.light.grayscale[70]};
-  text-align: center;
 `;
 
 // Collapsible 섹션

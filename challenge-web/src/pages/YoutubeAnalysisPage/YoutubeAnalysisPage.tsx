@@ -295,87 +295,90 @@ const YoutubeAnalysisPage = () => {
 
                 {/* 세로 막대 그래프 */}
                 <S.ChartCard>
+                  {/* 그래프 영역 */}
                   <S.ChartContainer>
+                    {/* 출처 */}
                     <S.ChartColumn>
+                      <S.ChartValue
+                        score={analysis.detailedScores.channelScore}
+                      >
+                        {analysis.detailedScores.channelScore}
+                      </S.ChartValue>
                       <S.ChartBarVertical
                         height={analysis.detailedScores.channelScore}
                         color={getScoreColor(
                           analysis.detailedScores.channelScore
                         )}
-                      >
-                        <S.ChartValue
-                          score={analysis.detailedScores.channelScore}
-                        >
-                          {analysis.detailedScores.channelScore}
-                        </S.ChartValue>
-                      </S.ChartBarVertical>
-                      <S.ChartLabel>출처</S.ChartLabel>
+                      />
                     </S.ChartColumn>
 
+                    {/* 객관성 */}
                     <S.ChartColumn>
+                      <S.ChartValue
+                        score={analysis.detailedScores.objectivityScore}
+                      >
+                        {analysis.detailedScores.objectivityScore}
+                      </S.ChartValue>
                       <S.ChartBarVertical
                         height={analysis.detailedScores.objectivityScore}
                         color={getScoreColor(
                           analysis.detailedScores.objectivityScore
                         )}
-                      >
-                        <S.ChartValue
-                          score={analysis.detailedScores.objectivityScore}
-                        >
-                          {analysis.detailedScores.objectivityScore}
-                        </S.ChartValue>
-                      </S.ChartBarVertical>
-                      <S.ChartLabel>객관성</S.ChartLabel>
+                      />
                     </S.ChartColumn>
 
+                    {/* 논리성 */}
                     <S.ChartColumn>
+                      <S.ChartValue score={analysis.detailedScores.logicScore}>
+                        {analysis.detailedScores.logicScore}
+                      </S.ChartValue>
                       <S.ChartBarVertical
                         height={analysis.detailedScores.logicScore}
                         color={getScoreColor(
                           analysis.detailedScores.logicScore
                         )}
-                      >
-                        <S.ChartValue
-                          score={analysis.detailedScores.logicScore}
-                        >
-                          {analysis.detailedScores.logicScore}
-                        </S.ChartValue>
-                      </S.ChartBarVertical>
-                      <S.ChartLabel>논리성</S.ChartLabel>
+                      />
                     </S.ChartColumn>
 
+                    {/* 광고성 */}
                     <S.ChartColumn>
+                      <S.ChartValue
+                        score={analysis.detailedScores.advertisementScore}
+                      >
+                        {analysis.detailedScores.advertisementScore}
+                      </S.ChartValue>
                       <S.ChartBarVertical
                         height={analysis.detailedScores.advertisementScore}
                         color={getScoreColor(
                           analysis.detailedScores.advertisementScore
                         )}
-                      >
-                        <S.ChartValue
-                          score={analysis.detailedScores.advertisementScore}
-                        >
-                          {analysis.detailedScores.advertisementScore}
-                        </S.ChartValue>
-                      </S.ChartBarVertical>
-                      <S.ChartLabel>광고성</S.ChartLabel>
+                      />
                     </S.ChartColumn>
 
+                    {/* 근거 */}
                     <S.ChartColumn>
+                      <S.ChartValue
+                        score={analysis.detailedScores.evidenceScore}
+                      >
+                        {analysis.detailedScores.evidenceScore}
+                      </S.ChartValue>
                       <S.ChartBarVertical
                         height={analysis.detailedScores.evidenceScore}
                         color={getScoreColor(
                           analysis.detailedScores.evidenceScore
                         )}
-                      >
-                        <S.ChartValue
-                          score={analysis.detailedScores.evidenceScore}
-                        >
-                          {analysis.detailedScores.evidenceScore}
-                        </S.ChartValue>
-                      </S.ChartBarVertical>
-                      <S.ChartLabel>근거</S.ChartLabel>
+                      />
                     </S.ChartColumn>
                   </S.ChartContainer>
+
+                  {/* 라벨 영역 */}
+                  <S.ChartLabelsBox>
+                    <S.ChartLabel>출처</S.ChartLabel>
+                    <S.ChartLabel>객관성</S.ChartLabel>
+                    <S.ChartLabel>논리성</S.ChartLabel>
+                    <S.ChartLabel>광고성</S.ChartLabel>
+                    <S.ChartLabel>근거</S.ChartLabel>
+                  </S.ChartLabelsBox>
                 </S.ChartCard>
 
                 {/* 출처 신뢰도 (Collapsible) */}
